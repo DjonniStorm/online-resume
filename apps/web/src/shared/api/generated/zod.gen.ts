@@ -316,6 +316,13 @@ export const zResumeDeletionNoticeDto = z.object({
     deleteAfter: z.iso.datetime()
 });
 
+export const zResumeOverviewDto = z.object({
+    total: z.number(),
+    publishedCount: z.number(),
+    templateCount: z.number(),
+    latestResume: zResumeSummaryDto.nullable()
+});
+
 export const zUpdateResumeSectionDto = z.object({
     type: z.enum([
         'PROFILE',
@@ -409,6 +416,13 @@ export const zResumePublicationDto = z.object({
     publicSlug: z.string()
 });
 
+export const zTemplateListDto = z.object({
+    items: z.array(zTemplateDto),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number()
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -442,6 +456,8 @@ export const zResumeCreateResponse = zResumeDto;
 export const zResumeDeletionNoticesResponse = z.array(zResumeDeletionNoticeDto);
 
 export const zResumeDeletionNoticesDismissResponse = z.void();
+
+export const zResumeOverviewResponse = zResumeOverviewDto;
 
 export const zResumeDeletePath = z.object({
     id: z.string()
@@ -517,7 +533,13 @@ export const zPublicResumePhotoGetPath = z.object({
 
 export const zPublicResumePhotoGetResponse = z.string();
 
-export const zTemplateListResponse = z.array(zTemplateDto);
+export const zTemplateListQuery = z.object({
+    page: z.number().gte(1).optional().default(1),
+    limit: z.number().gte(1).lte(50).optional().default(4),
+    search: z.string().max(100).optional()
+});
+
+export const zTemplateListResponse = zTemplateListDto;
 
 export const zTemplateGetPath = z.object({
     slug: z.string()

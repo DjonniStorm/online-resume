@@ -36,6 +36,33 @@ const resumeDetailInclude = {
   certificates: { orderBy: { sortOrder: 'asc' } },
 } satisfies Prisma.ResumeInclude;
 
+const resumeSummarySelect = {
+  id: true,
+  title: true,
+  firstName: true,
+  lastName: true,
+  headline: true,
+  isPublished: true,
+  createdAt: true,
+  updatedAt: true,
+  template: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      layout: true,
+      theme: {
+        select: {
+          primaryColor: true,
+          pageColor: true,
+          headerColor: true,
+          sidebarColor: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ResumeSelect;
+
 @Injectable()
 export class ResumesService {
   private readonly logger = new Logger(ResumesService.name);
@@ -105,42 +132,33 @@ export class ResumesService {
           }
         : {}),
     };
-    const [total, items] = await this.prisma.$transaction([
-      this.prisma.resume.count({ where }),
-      this.prisma.resume.findMany({
+    return this.prisma.$transaction(async (transaction) => {
+      const total = await transaction.resume.count({ where });
+      const currentPage = Math.min(page, Math.max(1, Math.ceil(total / limit)));
+      const items = await transaction.resume.findMany({
         where,
         orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
-        skip: (page - 1) * limit,
+        skip: (currentPage - 1) * limit,
         take: limit,
-        select: {
-          id: true,
-          title: true,
-          firstName: true,
-          lastName: true,
-          headline: true,
-          isPublished: true,
-          createdAt: true,
-          updatedAt: true,
-          template: {
-            select: {
-              id: true,
-              slug: true,
-              name: true,
-              layout: true,
-              theme: {
-                select: {
-                  primaryColor: true,
-                  pageColor: true,
-                  headerColor: true,
-                  sidebarColor: true,
-                },
-              },
-            },
-          },
-        },
+        select: resumeSummarySelect,
+      });
+      return { items, total, page: currentPage, limit };
+    });
+  }
+
+  async overview(ownerId: string) {
+    const where: Prisma.ResumeWhereInput = { ownerId, deletedAt: null };
+    const [total, publishedCount, templates, latestResume] = await this.prisma.$transaction([
+      this.prisma.resume.count({ where }),
+      this.prisma.resume.count({ where: { ...where, isPublished: true } }),
+      this.prisma.resume.groupBy({ by: ['templateId'], where }),
+      this.prisma.resume.findFirst({
+        where,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        select: resumeSummarySelect,
       }),
     ]);
-    return { items, total, page, limit };
+    return { total, publishedCount, templateCount: templates.length, latestResume };
   }
 
   async findOne(ownerId: string, id: string) {

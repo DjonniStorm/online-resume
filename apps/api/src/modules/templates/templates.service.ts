@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { TemplateStatus } from '../../generated/prisma/enums';
+import { TemplateListQueryDto } from './dto/template-list-query.dto';
 
 const templateInclude = {
   theme: true,
@@ -14,11 +15,28 @@ const templateInclude = {
 export class TemplatesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.resumeTemplate.findMany({
-      where: { status: TemplateStatus.ACTIVE },
-      orderBy: { createdAt: 'asc' },
-      include: templateInclude,
+  async findAll({ page, limit, search }: TemplateListQueryDto) {
+    const term = search?.trim();
+    const where: Prisma.ResumeTemplateWhereInput = {
+      status: TemplateStatus.ACTIVE,
+      ...(term && {
+        OR: [
+          { name: { contains: term, mode: 'insensitive' } },
+          { description: { contains: term, mode: 'insensitive' } },
+        ],
+      }),
+    };
+    return this.prisma.$transaction(async (transaction) => {
+      const total = await transaction.resumeTemplate.count({ where });
+      const currentPage = Math.min(page, Math.max(1, Math.ceil(total / limit)));
+      const items = await transaction.resumeTemplate.findMany({
+        where,
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        skip: (currentPage - 1) * limit,
+        take: limit,
+        include: templateInclude,
+      });
+      return { items, total, page: currentPage, limit };
     });
   }
 

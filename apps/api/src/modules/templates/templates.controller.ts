@@ -1,6 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { TemplateListQueryDto } from './dto/template-list-query.dto';
+import { TemplateListDto } from './dto/template-list.dto';
 import { TemplateDto } from './dto/template.dto';
 import { TemplatesService } from './templates.service';
 
@@ -11,9 +13,9 @@ export class TemplatesController {
 
   @Get()
   @ApiOperation({ operationId: 'templateList' })
-  @ApiOkResponse({ type: [TemplateDto] })
-  findAll() {
-    return this.templates.findAll();
+  @ApiOkResponse({ type: TemplateListDto })
+  findAll(@Query() query: TemplateListQueryDto) {
+    return this.templates.findAll(query);
   }
 
   @Get(':slug')

@@ -8,10 +8,12 @@ import {
   Group,
   Loader,
   Modal,
+  Pagination,
   Paper,
   SimpleGrid,
   Stack,
   Text,
+  TextInput,
   Title,
   Tooltip,
 } from '@mantine/core';
@@ -58,6 +60,7 @@ export const ResumeEditPage = observer(() => {
   >([]);
   const [templateModalOpened, setTemplateModalOpened] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
+  const [templateSearch, setTemplateSearch] = useState('');
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const photoUrl = useResumePhotoUrl(resumes, id ?? '', resume?.photoPath ?? null);
 
@@ -76,8 +79,7 @@ export const ResumeEditPage = observer(() => {
       setPreviewData(value ? resumeToPreviewData(value) : null);
       setPreviewSections(value ? resumeToEditorValues(value).sections : []);
     });
-    void templates.load();
-  }, [id, navigate, resumes, session.ready, session.user, templates]);
+  }, [id, navigate, resumes, session.ready, session.user]);
 
   const onValuesChange = useCallback((values: ResumeEditorValues) => {
     setPreviewData(editorValuesToPreviewData(values));
@@ -129,8 +131,9 @@ export const ResumeEditPage = observer(() => {
 
   const openTemplateModal = () => {
     setSelectedTemplate(resume?.template ?? null);
+    setTemplateSearch('');
     setTemplateModalOpened(true);
-    void templates.load();
+    void templates.openSelection();
   };
 
   const closeTemplateModal = () => {
@@ -317,6 +320,20 @@ export const ResumeEditPage = observer(() => {
             При применении другого шаблона несохранённые изменения формы будут потеряны. Сначала
             сохраните резюме, если хотите их оставить.
           </Alert>
+          <Group align="flex-end">
+            <TextInput
+              aria-label="Поиск шаблонов"
+              placeholder="Поиск шаблонов"
+              value={templateSearch}
+              onChange={(event) => setTemplateSearch(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') void templates.searchFor(templateSearch.trim());
+              }}
+            />
+            <Button variant="light" onClick={() => void templates.searchFor(templateSearch.trim())}>
+              Найти
+            </Button>
+          </Group>
           {requests.latest('templates.list')?.status === 'pending' ? (
             <Group justify="center">
               <Loader size="sm" />
@@ -327,7 +344,11 @@ export const ResumeEditPage = observer(() => {
               Попробуйте закрыть окно и открыть его снова.
             </Alert>
           ) : null}
-          {templates.templates.length > 0 ? (
+          {requests.latest('templates.list')?.status === 'success' && templates.total === 0 ? (
+            <Alert title="Ничего не найдено">Попробуйте другой запрос.</Alert>
+          ) : null}
+          {requests.latest('templates.list')?.status === 'success' &&
+          templates.templates.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
               {templates.templates.map((template) => (
                 <TemplateCard
@@ -348,6 +369,14 @@ export const ResumeEditPage = observer(() => {
                 />
               ))}
             </SimpleGrid>
+          ) : null}
+          {requests.latest('templates.list')?.status === 'success' &&
+          templates.total > templates.limit ? (
+            <Pagination
+              total={Math.ceil(templates.total / templates.limit)}
+              value={templates.page}
+              onChange={(page) => void templates.load(page)}
+            />
           ) : null}
           {errors.forOperation('resumes.changeTemplate') ? (
             <Alert color="red" title="Не удалось изменить шаблон">
