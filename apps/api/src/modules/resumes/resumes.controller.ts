@@ -35,6 +35,7 @@ import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { MAX_PHOTO_SIZE, type UploadedPhoto } from './common/photo';
 import { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
+import { ResumeDeletionNoticeDto } from './dto/resume-deletion-notice.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import { ResumePublicationDto } from './dto/resume-publication.dto';
@@ -63,6 +64,21 @@ export class ResumesController {
   @ApiOkResponse({ type: ResumeListDto })
   findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: ResumeListQueryDto) {
     return this.resumes.findAll(user.id, query);
+  }
+
+  @Get('deletions/notices')
+  @ApiOperation({ operationId: 'resumeDeletionNotices' })
+  @ApiOkResponse({ type: [ResumeDeletionNoticeDto] })
+  deletionNotices(@CurrentUser() user: AuthenticatedUser) {
+    return this.resumes.deletionNotices(user.id);
+  }
+
+  @Post('deletions/notices/dismiss')
+  @HttpCode(204)
+  @ApiOperation({ operationId: 'resumeDeletionNoticesDismiss' })
+  @ApiNoContentResponse()
+  dismissDeletionNotices(@CurrentUser() user: AuthenticatedUser) {
+    return this.resumes.dismissDeletionNotices(user.id);
   }
 
   @Get(':id')

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 
 import { StoreKey, useStore } from '@/app/store';
+import { ResumeDeletionNotice } from '@/features/resume-deletion-notice';
 
 import styles from './AppShell.module.css';
 
@@ -72,6 +73,7 @@ export const AppShell = observer(() => {
           </Alert>
         </Container>
       ) : null}
+      <ResumeDeletionNotice />
       <Outlet />
     </div>
   );

@@ -222,6 +222,7 @@ export type ResumeSummaryDto = {
     title: string;
     firstName: string;
     lastName: string;
+    isPublished: boolean;
     template: ResumeTemplateSummaryDto;
     createdAt: string;
     updatedAt: string;
@@ -232,6 +233,12 @@ export type ResumeListDto = {
     total: number;
     page: number;
     limit: number;
+};
+
+export type ResumeDeletionNoticeDto = {
+    resumeId: string;
+    title: string;
+    deleteAfter: string;
 };
 
 export type UpdateResumeSectionDto = {
@@ -495,6 +502,40 @@ export type ResumeCreateResponses = {
 };
 
 export type ResumeCreateResponse = ResumeCreateResponses[keyof ResumeCreateResponses];
+
+export type ResumeDeletionNoticesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/resumes/deletions/notices';
+};
+
+export type ResumeDeletionNoticesErrors = {
+    401: unknown;
+};
+
+export type ResumeDeletionNoticesResponses = {
+    200: Array<ResumeDeletionNoticeDto>;
+};
+
+export type ResumeDeletionNoticesResponse = ResumeDeletionNoticesResponses[keyof ResumeDeletionNoticesResponses];
+
+export type ResumeDeletionNoticesDismissData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/resumes/deletions/notices/dismiss';
+};
+
+export type ResumeDeletionNoticesDismissErrors = {
+    401: unknown;
+};
+
+export type ResumeDeletionNoticesDismissResponses = {
+    204: void;
+};
+
+export type ResumeDeletionNoticesDismissResponse = ResumeDeletionNoticesDismissResponses[keyof ResumeDeletionNoticesDismissResponses];
 
 export type ResumeDeleteData = {
     body?: never;

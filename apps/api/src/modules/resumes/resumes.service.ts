@@ -11,6 +11,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { ResumeSectionType, TemplateFieldType, TemplateStatus } from '../../generated/prisma/enums';
+import { resumeDeleteAfter } from './common/deletion';
 import type { UploadedPhoto } from './common/photo';
 import type { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -116,6 +117,7 @@ export class ResumesService {
           title: true,
           firstName: true,
           lastName: true,
+          isPublished: true,
           createdAt: true,
           updatedAt: true,
           template: {
@@ -247,7 +249,7 @@ export class ResumesService {
       await this.prisma.resume.updateMany({
         where: { id, ownerId, deletedAt: null, isPublished: false },
         data: {
-          publicSlug: randomBytes(18).toString('base64url'),
+          publicSlug: current.publicSlug ?? randomBytes(18).toString('base64url'),
           isPublished: true,
           publishedAt: new Date(),
         },
@@ -266,7 +268,7 @@ export class ResumesService {
   async unpublish(ownerId: string, id: string): Promise<void> {
     const result = await this.prisma.resume.updateMany({
       where: { id, ownerId, deletedAt: null },
-      data: { publicSlug: null, isPublished: false, publishedAt: null },
+      data: { isPublished: false, publishedAt: null },
     });
     if (result.count !== 1) {
       throw new NotFoundException('Резюме не найдено');
@@ -441,18 +443,68 @@ export class ResumesService {
   }
 
   async remove(ownerId: string, id: string): Promise<void> {
-    const result = await this.prisma.resume.updateMany({
-      where: { id, ownerId, deletedAt: null },
-      data: {
-        deletedAt: new Date(),
-        isPublished: false,
-        publishedAt: null,
-        publicSlug: null,
-      },
+    const now = new Date();
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const resume = await transaction.resume.findFirst({
+        where: { id, ownerId, deletedAt: null },
+        select: { isPublished: true },
+      });
+      if (!resume) {
+        return false;
+      }
+      const updated = await transaction.resume.updateMany({
+        where: { id, ownerId, deletedAt: null },
+        data: {
+          deletedAt: now,
+          isPublished: false,
+          publishedAt: null,
+          publicSlug: null,
+        },
+      });
+      if (updated.count !== 1) {
+        return false;
+      }
+      await transaction.resumeDeletion.create({
+        data: {
+          resumeId: id,
+          deleteAfter: resumeDeleteAfter(now),
+          wasPublished: resume.isPublished,
+        },
+      });
+      return true;
     });
-    if (result.count !== 1) {
+    if (!result) {
       throw new NotFoundException('Резюме не найдено');
     }
+  }
+
+  async deletionNotices(ownerId: string) {
+    const items = await this.prisma.resumeDeletion.findMany({
+      where: {
+        wasPublished: true,
+        noticeDismissedAt: null,
+        deleteAfter: { gt: new Date() },
+        resume: { ownerId, deletedAt: { not: null } },
+      },
+      select: { resumeId: true, deleteAfter: true, resume: { select: { title: true } } },
+      orderBy: { deleteAfter: 'asc' },
+    });
+    return items.map((item) => ({
+      resumeId: item.resumeId,
+      title: item.resume.title,
+      deleteAfter: item.deleteAfter,
+    }));
+  }
+
+  async dismissDeletionNotices(ownerId: string): Promise<void> {
+    await this.prisma.resumeDeletion.updateMany({
+      where: {
+        wasPublished: true,
+        noticeDismissedAt: null,
+        resume: { ownerId, deletedAt: { not: null } },
+      },
+      data: { noticeDismissedAt: new Date() },
+    });
   }
 }
 
