@@ -2,14 +2,10 @@ import { Alert, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
 
-import {
-  type ResumeEditorValues,
-  editorValuesToUpdateInput,
-  resumeToEditorValues,
-} from '@/entities/resume';
-import type { ResumeDto } from '@/shared/api/generated/types.gen';
+import { type ResumeEditorValues, resumeToEditorValues } from '@/entities/resume';
+import type { ResumeDto, UpdateResumeDto } from '@/shared/api/generated/types.gen';
 
-import { validateValues } from '../model';
+import { type SaveState, useResumeAutosave } from '../model';
 import { BasicInformationFields } from './BasicInformationFields';
 import styles from './ResumeEditorForm.module.css';
 import { ResumeSections } from './ResumeSections';
@@ -17,17 +13,20 @@ import { ResumeSections } from './ResumeSections';
 type ResumeEditorFormProps = {
   resume: ResumeDto;
   saveError: { status?: number } | undefined;
-  onSave: (
-    input: ReturnType<typeof editorValuesToUpdateInput>,
-    openPreview: boolean,
-  ) => Promise<boolean>;
+  paused: boolean;
+  onSave: (input: UpdateResumeDto) => Promise<ResumeDto | null>;
+  onOpenPreview: () => void;
+  onSaveStateChange: (state: SaveState) => void;
   onValuesChange: (values: ResumeEditorValues) => void;
 };
 
 export function ResumeEditorForm({
   resume,
   saveError,
+  paused,
   onSave,
+  onOpenPreview,
+  onSaveStateChange,
   onValuesChange,
 }: ResumeEditorFormProps) {
   const form = useForm<ResumeEditorValues>({
@@ -36,21 +35,17 @@ export function ResumeEditorForm({
   });
 
   useEffect(() => {
-    form.setValues(resumeToEditorValues(resume));
-  }, [resume.id, resume.revision]);
-
-  useEffect(() => {
     onValuesChange(form.values);
   }, [form.values, onValuesChange]);
 
-  const submit = async (openPreview: boolean) => {
-    const errors = validateValues(form.values);
-    form.setErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    await onSave(editorValuesToUpdateInput(form.values, resume.revision), openPreview);
-  };
+  const saveLatest = useResumeAutosave({
+    form,
+    resume,
+    saveError,
+    paused,
+    onSave,
+    onSaveStateChange,
+  });
 
   return (
     <form
@@ -58,9 +53,13 @@ export function ResumeEditorForm({
       className={styles.form}
       onSubmit={(event) => {
         event.preventDefault();
-        void submit(
-          (event.nativeEvent as SubmitEvent).submitter?.getAttribute('data-intent') === 'preview',
-        );
+        const openPreview =
+          (event.nativeEvent as SubmitEvent).submitter?.getAttribute('data-intent') === 'preview';
+        void saveLatest(openPreview).then((saved) => {
+          if (saved && openPreview) {
+            onOpenPreview();
+          }
+        });
       }}
     >
       <Stack gap="lg">
