@@ -1,0 +1,41 @@
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+.status {
+  justify-self: start;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.link svg {
+  flex: none;
+}
+
+.linkText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.publishButton {
+  margin-left: auto;
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .status {
+    grid-column: 1 / -1;
+  }
+}

@@ -3,6 +3,11 @@
   margin: 0;
 }
 
+.heading {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
 @media print {
   .container {
     width: 100% !important;

@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Breadcrumbs,
@@ -8,7 +9,9 @@ import {
   Loader,
   Stack,
   Title,
+  Tooltip,
 } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
@@ -113,8 +116,8 @@ export const ResumePreviewPage = observer(() => {
     <main>
       <Container size={900} py={{ base: 'lg', sm: 'xl' }} className={styles.container}>
         <Stack gap="lg">
-          <Group justify="space-between" align="flex-end" gap="sm" className={styles.controls}>
-            <Stack gap={4}>
+          <Group justify="space-between" align="center" gap="sm" className={styles.controls}>
+            <Stack gap={4} className={styles.heading}>
               <Breadcrumbs fz="sm">
                 <Anchor component={Link} to="/resumes" underline="never">
                   Мои резюме
@@ -125,11 +128,18 @@ export const ResumePreviewPage = observer(() => {
                 {resume.title}
               </Title>
             </Stack>
-            <Group gap="sm">
-              <Button variant="light" onClick={() => window.print()}>
-                Сохранить как PDF
-              </Button>
-              <Button component={Link} to={`/resumes/${id}/edit`} variant="light">
+            <Group gap="xs" wrap="nowrap">
+              <Tooltip label="Сохранить как PDF">
+                <ActionIcon
+                  aria-label="Сохранить как PDF"
+                  variant="light"
+                  size="lg"
+                  onClick={() => window.print()}
+                >
+                  <IconDownload size={20} aria-hidden="true" />
+                </ActionIcon>
+              </Tooltip>
+              <Button component={Link} to={`/resumes/${id}/edit`}>
                 Редактировать
               </Button>
             </Group>
