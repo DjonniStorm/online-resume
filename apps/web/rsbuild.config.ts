@@ -1,14 +1,15 @@
-import { URL, fileURLToPath } from 'node:url';
-
-import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+  plugins: [pluginReact()],
+  source: {
+    entry: {
+      index: './src/main.tsx',
     },
+  },
+  html: {
+    template: './index.html',
   },
   server: {
     host: '127.0.0.1',
