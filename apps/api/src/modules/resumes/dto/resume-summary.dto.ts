@@ -52,6 +52,9 @@ export class ResumeSummaryDto {
   @ApiProperty()
   isPublished!: boolean;
 
+  @ApiProperty()
+  viewsLast7Days!: number;
+
   @ApiProperty({ type: ResumeTemplateSummaryDto })
   template!: ResumeTemplateSummaryDto;
 

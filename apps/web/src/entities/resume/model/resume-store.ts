@@ -48,6 +48,7 @@ export class ResumeStore {
       getPublic: publicResumeGet,
       get: resumeGet,
       list: resumeList,
+      analyticsOptions: resumeList,
       overview: resumeOverview,
       deletePhoto: resumePhotoDelete,
       getPhoto: resumePhotoGet,
@@ -92,9 +93,12 @@ export class ResumeStore {
     }
   }
 
-  async loadOverview(): Promise<void> {
+  async loadOverview(resumeId?: string | null): Promise<void> {
     const sequence = ++this.overviewSequence;
-    const task = this.operations.overview({}, { showLoader: false });
+    const task = this.operations.overview(
+      { query: resumeId ? { resumeId } : undefined },
+      { showLoader: false },
+    );
     try {
       const result = await task.promise;
       if (result.data && sequence === this.overviewSequence) {
@@ -104,6 +108,19 @@ export class ResumeStore {
       }
     } catch {
       // ErrorStore reads the failed request from RequestStore.
+    }
+  }
+
+  async searchAnalyticsOptions(search: string): Promise<ResumeSummaryDto[]> {
+    const task = this.operations.analyticsOptions(
+      { query: { page: 1, limit: 10, search } },
+      { showLoader: false },
+    );
+    try {
+      const result = await task.promise;
+      return result.data?.items ?? [];
+    } catch {
+      return [];
     }
   }
 

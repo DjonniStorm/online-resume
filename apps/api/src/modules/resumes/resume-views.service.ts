@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 
 const dayMs = 24 * 60 * 60 * 1000;
 const chartDays = 7;
@@ -29,13 +30,24 @@ export class ResumeViewsService {
     }
   }
 
-  async summary(ownerId: string) {
-    const now = new Date();
-    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-    const start = new Date(today - (chartDays - 1) * dayMs);
+  async countsByResume(resumeIds: string[]): Promise<Map<string, number>> {
+    if (resumeIds.length === 0) {
+      return new Map();
+    }
+    const rows = await this.prisma.resumeView.groupBy({
+      by: ['resumeId'],
+      where: { resumeId: { in: resumeIds }, viewedAt: { gte: chartStart() } },
+      _count: { _all: true },
+    });
+    return new Map(rows.map((row) => [row.resumeId, row._count._all]));
+  }
+
+  async summary(ownerId: string, resumeId?: string) {
+    const start = chartStart();
+    const today = start.getTime() + (chartDays - 1) * dayMs;
     const [total, rows] = await Promise.all([
       this.prisma.resumeView.count({
-        where: { resume: { ownerId, deletedAt: null } },
+        where: { resume: { ownerId, deletedAt: null }, ...(resumeId ? { resumeId } : {}) },
       }),
       this.prisma.$queryRaw<Array<{ day: string; count: bigint }>>`
         SELECT to_char(v."viewedAt" AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day,
@@ -45,6 +57,7 @@ export class ResumeViewsService {
         WHERE r."ownerId" = ${ownerId}
           AND r."deletedAt" IS NULL
           AND v."viewedAt" >= ${start}
+          ${resumeId ? Prisma.sql`AND v."resumeId" = ${resumeId}` : Prisma.empty}
         GROUP BY day
         ORDER BY day
       `,
@@ -60,4 +73,10 @@ export class ResumeViewsService {
       dailyViews,
     };
   }
+}
+
+function chartStart(): Date {
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return new Date(today - (chartDays - 1) * dayMs);
 }

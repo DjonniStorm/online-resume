@@ -18,11 +18,14 @@ import { ResumeCard } from '@/entities/resume';
 import type { ResumeOverviewDto, ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 import styles from './HomeOverview.module.css';
+import { ResumeAnalyticsFilter } from './ResumeAnalyticsFilter';
 
 type HomeOverviewProps = {
   error: string | null;
   loading: boolean;
   overview: ResumeOverviewDto | null;
+  selectedResumeId: string | null;
+  onSelectResume: (resumeId: string | null) => void;
   onDelete: (resume: ResumeSummaryDto) => void;
   deleteDisabled: boolean;
 };
@@ -31,16 +34,35 @@ export function HomeOverview({
   error,
   loading,
   overview,
+  selectedResumeId,
+  onSelectResume,
   onDelete,
   deleteDisabled,
 }: HomeOverviewProps) {
   return (
     <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
       {match({ error, loading, overview })
-        .with({ error: P.string }, ({ error }) => <Alert color="red">{error}</Alert>)
+        .with({ error: P.string }, ({ error }) => (
+          <Alert color="red">
+            {error}
+            {selectedResumeId ? (
+              <Button
+                variant="light"
+                color="red"
+                size="xs"
+                ml="sm"
+                onClick={() => onSelectResume(null)}
+              >
+                Показать все резюме
+              </Button>
+            ) : null}
+          </Alert>
+        ))
         .with({ loading: false, overview: P.nonNullable }, ({ overview }) => (
           <OverviewContent
             overview={overview}
+            selectedResumeId={selectedResumeId}
+            onSelectResume={onSelectResume}
             onDelete={onDelete}
             deleteDisabled={deleteDisabled}
           />
@@ -56,10 +78,23 @@ export function HomeOverview({
 
 function OverviewContent({
   overview,
+  selectedResumeId,
+  onSelectResume,
   onDelete,
   deleteDisabled,
-}: Pick<HomeOverviewProps, 'onDelete' | 'deleteDisabled'> & { overview: ResumeOverviewDto }) {
-  const { total, publishedCount, latestResume, viewsTotal, viewsLast7Days, dailyViews } = overview;
+}: Pick<
+  HomeOverviewProps,
+  'onDelete' | 'deleteDisabled' | 'selectedResumeId' | 'onSelectResume'
+> & { overview: ResumeOverviewDto }) {
+  const {
+    total,
+    publishedCount,
+    latestResume,
+    viewsTotal,
+    viewsLast7Days,
+    dailyViews,
+    selectedResume,
+  } = overview;
   const maxDailyViews = Math.max(1, ...dailyViews.map(({ count }) => count));
 
   return (
@@ -82,7 +117,14 @@ function OverviewContent({
         <Card withBorder radius="md" className={styles.analytics}>
           <Stack gap="lg">
             <div>
-              <Text fw={600}>Просмотры за 7 дней</Text>
+              <Group justify="space-between" align="flex-end" gap="sm" mb="sm">
+                <Text fw={600}>Просмотры за 7 дней</Text>
+                <ResumeAnalyticsFilter
+                  selectedResume={selectedResume}
+                  value={selectedResumeId}
+                  onChange={onSelectResume}
+                />
+              </Group>
               <Group align="baseline" gap="lg">
                 <Title order={2} size="h1">
                   {viewsLast7Days}
@@ -121,9 +163,11 @@ function OverviewContent({
               </div>
             ) : (
               <Text size="sm" c="dimmed" className={styles.emptyViews}>
-                {publishedCount > 0
-                  ? 'Публичные ссылки пока не открывали за последние 7 дней.'
-                  : 'Опубликуйте резюме, чтобы его можно было открыть по ссылке.'}
+                {selectedResume
+                  ? 'За последние 7 дней это резюме не просматривали.'
+                  : publishedCount > 0
+                    ? 'Публичные ссылки пока не открывали за последние 7 дней.'
+                    : 'Опубликуйте резюме, чтобы его можно было открыть по ссылке.'}
               </Text>
             )}
           </Stack>

@@ -298,6 +298,7 @@ export const zResumeSummaryDto = z.object({
     lastName: z.string(),
     headline: z.string().nullable(),
     isPublished: z.boolean(),
+    viewsLast7Days: z.number(),
     template: zResumeTemplateSummaryDto,
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime()
@@ -321,12 +322,18 @@ export const zResumeDailyViewsDto = z.object({
     count: z.number()
 });
 
+export const zSelectedResumeDto = z.object({
+    id: z.string(),
+    title: z.string()
+});
+
 export const zResumeOverviewDto = z.object({
     total: z.number(),
     publishedCount: z.number(),
     viewsTotal: z.number(),
     viewsLast7Days: z.number(),
     dailyViews: z.array(zResumeDailyViewsDto),
+    selectedResume: zSelectedResumeDto.nullable(),
     latestResume: zResumeSummaryDto.nullable()
 });
 
@@ -463,6 +470,10 @@ export const zResumeCreateResponse = zResumeDto;
 export const zResumeDeletionNoticesResponse = z.array(zResumeDeletionNoticeDto);
 
 export const zResumeDeletionNoticesDismissResponse = z.void();
+
+export const zResumeOverviewQuery = z.object({
+    resumeId: z.string().min(1).max(100).optional()
+});
 
 export const zResumeOverviewResponse = zResumeOverviewDto;
 

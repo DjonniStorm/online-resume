@@ -134,7 +134,7 @@ export class ResumesService {
           }
         : {}),
     };
-    return this.prisma.$transaction(async (transaction) => {
+    const result = await this.prisma.$transaction(async (transaction) => {
       const total = await transaction.resume.count({ where });
       const currentPage = Math.min(page, Math.max(1, Math.ceil(total / limit)));
       const items = await transaction.resume.findMany({
@@ -146,10 +146,27 @@ export class ResumesService {
       });
       return { items, total, page: currentPage, limit };
     });
+    const counts = await this.views.countsByResume(result.items.map((resume) => resume.id));
+    return {
+      ...result,
+      items: result.items.map((resume) => ({
+        ...resume,
+        viewsLast7Days: counts.get(resume.id) ?? 0,
+      })),
+    };
   }
 
-  async overview(ownerId: string) {
+  async overview(ownerId: string, resumeId?: string) {
     const where: Prisma.ResumeWhereInput = { ownerId, deletedAt: null };
+    const selectedResume = resumeId
+      ? await this.prisma.resume.findFirst({
+          where: { ...where, id: resumeId },
+          select: { id: true, title: true },
+        })
+      : null;
+    if (resumeId && !selectedResume) {
+      throw new NotFoundException('Резюме не найдено');
+    }
     const [[total, publishedCount, latestResume], viewSummary] = await Promise.all([
       this.prisma.$transaction([
         this.prisma.resume.count({ where }),
@@ -160,9 +177,18 @@ export class ResumesService {
           select: resumeSummarySelect,
         }),
       ]),
-      this.views.summary(ownerId),
+      this.views.summary(ownerId, resumeId),
     ]);
-    return { total, publishedCount, latestResume, ...viewSummary };
+    const counts = await this.views.countsByResume(latestResume ? [latestResume.id] : []);
+    return {
+      total,
+      publishedCount,
+      latestResume: latestResume
+        ? { ...latestResume, viewsLast7Days: counts.get(latestResume.id) ?? 0 }
+        : null,
+      selectedResume,
+      ...viewSummary,
+    };
   }
 
   async findOne(ownerId: string, id: string) {

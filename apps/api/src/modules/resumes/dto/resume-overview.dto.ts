@@ -18,8 +18,19 @@ export class ResumeOverviewDto {
   @ApiProperty({ type: () => [ResumeDailyViewsDto] })
   dailyViews!: ResumeDailyViewsDto[];
 
+  @ApiProperty({ type: () => SelectedResumeDto, nullable: true })
+  selectedResume!: SelectedResumeDto | null;
+
   @ApiProperty({ type: ResumeSummaryDto, nullable: true })
   latestResume!: ResumeSummaryDto | null;
+}
+
+export class SelectedResumeDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  title!: string;
 }
 
 export class ResumeDailyViewsDto {

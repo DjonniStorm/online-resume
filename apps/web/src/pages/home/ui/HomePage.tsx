@@ -2,6 +2,7 @@ import { Loader } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { StoreKey, useStore, useStores } from '@/app/store';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
@@ -20,12 +21,26 @@ export const HomePage = observer(() => {
     StoreKey.Resumes,
   );
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedResumeId = searchParams.get('resumeId');
+
+  const selectResume = (resumeId: string | null) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      if (resumeId) {
+        next.set('resumeId', resumeId);
+      } else {
+        next.delete('resumeId');
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (sessionStore.ready && sessionStore.user) {
-      void resumes.loadOverview();
+      void resumes.loadOverview(selectedResumeId);
     }
-  }, [resumes, sessionStore.ready, sessionStore.user]);
+  }, [resumes, selectedResumeId, sessionStore.ready, sessionStore.user]);
 
   return (
     <main className={classes.page}>
@@ -40,6 +55,8 @@ export const HomePage = observer(() => {
           error={errors.forOperation('resumes.overview') ? 'Не удалось загрузить резюме.' : null}
           loading={!resumes.overview || requests.latest('resumes.overview')?.status === 'pending'}
           overview={resumes.overview}
+          selectedResumeId={selectedResumeId}
+          onSelectResume={selectResume}
           onDelete={setSelectedForDeletion}
           deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
         />
@@ -49,7 +66,13 @@ export const HomePage = observer(() => {
       <ResumeDeleteDialog
         resume={selectedForDeletion}
         onClose={() => setSelectedForDeletion(null)}
-        onDeleted={() => void resumes.loadOverview()}
+        onDeleted={() => {
+          if (selectedForDeletion?.id === selectedResumeId) {
+            selectResume(null);
+          } else {
+            void resumes.loadOverview(selectedResumeId);
+          }
+        }}
       />
     </main>
   );
