@@ -137,16 +137,7 @@
     "/api/auth/me": {
       "get": {
         "operationId": "authMe",
-        "parameters": [
-          {
-            "name": "authorization",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -208,6 +199,133 @@
         ],
         "summary": "",
         "tags": ["auth"]
+      }
+    },
+    "/api/resumes": {
+      "post": {
+        "operationId": "resumeCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResumeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Активный шаблон не найден."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "get": {
+        "operationId": "resumeList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResumeSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/resumes/{id}": {
+      "get": {
+        "operationId": "resumeGet",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "delete": {
+        "operationId": "resumeDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
       }
     }
   },
@@ -399,6 +517,124 @@
             "format": "uri"
           }
         }
+      },
+      "CreateResumeDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "Резюме frontend-разработчика"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Анна"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Петрова"
+          },
+          "templateSlug": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "example": "left-rail"
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Frontend-разработчик"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "example": "anna@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "+7 900 000-00-00"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Москва"
+          },
+          "githubUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "pattern": "^https:\\/\\/(?:www\\.)?github\\.com\\/[^/?#]+(?:\\/[^?#]*)?$",
+            "example": "https://github.com/example"
+          },
+          "telegramHandle": {
+            "type": "string",
+            "pattern": "^@?[A-Za-z0-9_]{5,32}$",
+            "example": "@example"
+          },
+          "websiteUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "about": {
+            "type": "string",
+            "maxLength": 5000,
+            "example": "Разрабатываю интерфейсы и сервисы..."
+          }
+        },
+        "required": ["title", "firstName", "lastName", "templateSlug"]
+      },
+      "ResumeTemplateSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "slug", "name"]
+      },
+      "ResumeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ResumeTemplateSummaryDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "title", "firstName", "lastName", "template", "createdAt", "updatedAt"]
       }
     }
   }

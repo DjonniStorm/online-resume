@@ -152,12 +152,12 @@ model AuthSession {
 /// Самостоятельный шаблон: опубликованный экземпляр копируют для изменений.
 model ResumeTemplate {
   id                    String                     @id @default(cuid())
-  slug                  String                     @unique
-  name                  String
-  description           String?
-  previewUrl            String?
-  status                TemplateStatus             @default(DRAFT)
-  layout                TemplateLayout
+  slug                String                     @unique
+  name                String
+  description         String?
+  previewUrl          String?
+  status              TemplateStatus             @default(DRAFT)
+  layout              TemplateLayout
   pageWidthMm           Decimal                    @db.Decimal(8, 3)
   pageHeightMm          Decimal                    @db.Decimal(8, 3)
   sidebarWidthPercent   Int?
@@ -185,16 +185,16 @@ model TemplateTheme {
   titleFontAssetId  String?
   bodyFontAssetId   String?
   titleSizePt       Decimal         @db.Decimal(6, 2)
-  sectionTitleSizePt Decimal        @db.Decimal(6, 2)
-  bodySizePt        Decimal         @db.Decimal(6, 2)
-  lineHeight        Decimal         @default(1.2) @db.Decimal(4, 2)
-  spacing           TemplateSpacing @default(REGULAR)
-  primaryColor      String
-  secondaryColor    String
-  textColor         String
-  pageColor         String
-  headerColor       String?
-  sidebarColor      String?
+  sectionTitleSizePt Decimal         @db.Decimal(6, 2)
+  bodySizePt         Decimal         @db.Decimal(6, 2)
+  lineHeight         Decimal         @default(1.2) @db.Decimal(4, 2)
+  spacing            TemplateSpacing @default(REGULAR)
+  primaryColor       String
+  secondaryColor     String
+  textColor          String
+  pageColor          String
+  headerColor        String?
+  sidebarColor       String?
   template          ResumeTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
   titleFontAsset    TemplateAsset?  @relation("TemplateTitleFont", fields: [titleFontAssetId], references: [id], onDelete: Restrict)
   bodyFontAsset     TemplateAsset?  @relation("TemplateBodyFont", fields: [bodyFontAssetId], references: [id], onDelete: Restrict)
@@ -204,9 +204,9 @@ model TemplateTheme {
 model TemplateSection {
   id           String                @id @default(cuid())
   templateId   String
-  type         ResumeSectionType
-  region       TemplateRegion
-  sortOrder    Int
+  type        ResumeSectionType
+  region      TemplateRegion
+  sortOrder   Int
   itemLayout   TemplateSectionLayout @default(STANDARD)
   canReorder   Boolean               @default(true)
   showHeading  Boolean               @default(true)
@@ -262,38 +262,40 @@ model TemplateAsset {
 /// Резюме пользователя с данными, публикацией и выбранным шаблоном.
 model Resume {
   id                String              @id @default(cuid())
-  ownerId           String
-  templateId        String
-  revision          Int                 @default(1)
-  title             String
-  firstName         String
-  lastName          String
-  headline          String?
-  email             String?
-  phone             String?
-  location          String?
-  githubUrl         String?
-  telegramHandle    String?
-  websiteUrl        String?
-  about             String?
-  photoPath         String?
-  publicSlug        String?             @unique
-  isPublished       Boolean             @default(false)
-  publishedAt       DateTime?           @db.Timestamptz(3)
-  createdAt         DateTime            @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime            @updatedAt @db.Timestamptz(3)
+  ownerId        String
+  templateId     String
+  revision       Int                 @default(1)
+  title          String
+  firstName      String
+  lastName       String
+  headline       String?
+  email          String?
+  phone          String?
+  location       String?
+  githubUrl      String?
+  telegramHandle String?
+  websiteUrl     String?
+  about          String?
+  photoPath      String?
+  publicSlug     String?             @unique
+  isPublished    Boolean             @default(false)
+  publishedAt    DateTime?           @db.Timestamptz(3)
+  deletedAt      DateTime?           @db.Timestamptz(3)
+  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
   owner             User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   template          ResumeTemplate      @relation(fields: [templateId], references: [id], onDelete: Restrict)
   sections          ResumeSection[]
   experiences       ResumeExperience[]
   educations        ResumeEducation[]
-  skills            ResumeSkill[]
-  languages         ResumeLanguage[]
-  projects          ResumeProject[]
-  certificates      ResumeCertificate[]
-  views             ResumeView[]
+  skills             ResumeSkill[]
+  languages          ResumeLanguage[]
+  projects           ResumeProject[]
+  certificates       ResumeCertificate[]
+  views              ResumeView[]
 
   @@index([ownerId, updatedAt])
+  @@index([ownerId, deletedAt, updatedAt])
   @@index([templateId])
   @@index([isPublished, publicSlug])
 }

@@ -50,6 +50,37 @@ export type UpdateProfileDto = {
     websiteUrl?: string | null;
 };
 
+export type CreateResumeDto = {
+    title: string;
+    firstName: string;
+    lastName: string;
+    templateSlug: string;
+    headline?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    githubUrl?: string;
+    telegramHandle?: string;
+    websiteUrl?: string;
+    about?: string;
+};
+
+export type ResumeTemplateSummaryDto = {
+    id: string;
+    slug: string;
+    name: string;
+};
+
+export type ResumeSummaryDto = {
+    id: string;
+    title: string;
+    firstName: string;
+    lastName: string;
+    template: ResumeTemplateSummaryDto;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type HealthControllerCheckData = {
     body?: never;
     path?: never;
@@ -151,9 +182,6 @@ export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
 
 export type AuthMeData = {
     body?: never;
-    headers: {
-        authorization: string;
-    };
     path?: never;
     query?: never;
     url: '/api/auth/me';
@@ -189,3 +217,83 @@ export type AuthUpdateProfileResponses = {
 };
 
 export type AuthUpdateProfileResponse = AuthUpdateProfileResponses[keyof AuthUpdateProfileResponses];
+
+export type ResumeListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/resumes';
+};
+
+export type ResumeListErrors = {
+    401: unknown;
+};
+
+export type ResumeListResponses = {
+    200: Array<ResumeSummaryDto>;
+};
+
+export type ResumeListResponse = ResumeListResponses[keyof ResumeListResponses];
+
+export type ResumeCreateData = {
+    body: CreateResumeDto;
+    path?: never;
+    query?: never;
+    url: '/api/resumes';
+};
+
+export type ResumeCreateErrors = {
+    401: unknown;
+    /**
+     * Активный шаблон не найден.
+     */
+    404: unknown;
+};
+
+export type ResumeCreateResponses = {
+    201: unknown;
+};
+
+export type ResumeDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}';
+};
+
+export type ResumeDeleteErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumeDeleteResponses = {
+    204: void;
+};
+
+export type ResumeDeleteResponse = ResumeDeleteResponses[keyof ResumeDeleteResponses];
+
+export type ResumeGetData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}';
+};
+
+export type ResumeGetErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumeGetResponses = {
+    200: unknown;
+};

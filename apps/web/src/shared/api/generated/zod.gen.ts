@@ -45,6 +45,37 @@ export const zUpdateProfileDto = z.object({
     websiteUrl: z.url().max(2048).nullish()
 });
 
+export const zCreateResumeDto = z.object({
+    title: z.string().min(1).max(200),
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+    templateSlug: z.string().max(100).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    headline: z.string().max(200).optional(),
+    email: z.email().max(254).optional(),
+    phone: z.string().max(50).optional(),
+    location: z.string().max(200).optional(),
+    githubUrl: z.url().max(2048).regex(/^https:\/\/(?:www\.)?github\.com\/[^\/?#]+(?:\/[^?#]*)?$/).optional(),
+    telegramHandle: z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/).optional(),
+    websiteUrl: z.url().max(2048).optional(),
+    about: z.string().max(5000).optional()
+});
+
+export const zResumeTemplateSummaryDto = z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string()
+});
+
+export const zResumeSummaryDto = z.object({
+    id: z.string(),
+    title: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    template: zResumeTemplateSummaryDto,
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -57,12 +88,22 @@ export const zAuthRefreshResponse = zAuthResultDto;
 
 export const zAuthLogoutResponse = z.void();
 
-export const zAuthMeHeaders = z.object({
-    authorization: z.string()
-});
-
 export const zAuthMeResponse = zPublicUserDto;
 
 export const zAuthUpdateProfileBody = zUpdateProfileDto;
 
 export const zAuthUpdateProfileResponse = zPublicUserDto;
+
+export const zResumeListResponse = z.array(zResumeSummaryDto);
+
+export const zResumeCreateBody = zCreateResumeDto;
+
+export const zResumeDeletePath = z.object({
+    id: z.string()
+});
+
+export const zResumeDeleteResponse = z.void();
+
+export const zResumeGetPath = z.object({
+    id: z.string()
+});

@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { ResumesModule } from './modules/resumes/resumes.module';
 
 @Module({
   controllers: [HealthController],
@@ -16,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     DatabaseModule,
     AuthModule,
+    ResumesModule,
   ],
 })
 export class AppModule {}
