@@ -1930,6 +1930,19 @@
         },
         "required": ["resumeId", "title", "deleteAfter"]
       },
+      "ResumeDailyViewsDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": ["date", "count"]
+      },
       "ResumeOverviewDto": {
         "type": "object",
         "properties": {
@@ -1939,8 +1952,17 @@
           "publishedCount": {
             "type": "number"
           },
-          "templateCount": {
+          "viewsTotal": {
             "type": "number"
+          },
+          "viewsLast7Days": {
+            "type": "number"
+          },
+          "dailyViews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResumeDailyViewsDto"
+            }
           },
           "latestResume": {
             "nullable": true,
@@ -1952,7 +1974,14 @@
             ]
           }
         },
-        "required": ["total", "publishedCount", "templateCount", "latestResume"]
+        "required": [
+          "total",
+          "publishedCount",
+          "viewsTotal",
+          "viewsLast7Days",
+          "dailyViews",
+          "latestResume"
+        ]
       },
       "UpdateResumeSectionDto": {
         "type": "object",

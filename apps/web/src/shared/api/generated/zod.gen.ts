@@ -316,10 +316,17 @@ export const zResumeDeletionNoticeDto = z.object({
     deleteAfter: z.iso.datetime()
 });
 
+export const zResumeDailyViewsDto = z.object({
+    date: z.iso.date(),
+    count: z.number()
+});
+
 export const zResumeOverviewDto = z.object({
     total: z.number(),
     publishedCount: z.number(),
-    templateCount: z.number(),
+    viewsTotal: z.number(),
+    viewsLast7Days: z.number(),
+    dailyViews: z.array(zResumeDailyViewsDto),
     latestResume: zResumeSummaryDto.nullable()
 });
 

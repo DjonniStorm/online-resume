@@ -10,8 +10,22 @@ export class ResumeOverviewDto {
   publishedCount!: number;
 
   @ApiProperty()
-  templateCount!: number;
+  viewsTotal!: number;
+
+  @ApiProperty()
+  viewsLast7Days!: number;
+
+  @ApiProperty({ type: () => [ResumeDailyViewsDto] })
+  dailyViews!: ResumeDailyViewsDto[];
 
   @ApiProperty({ type: ResumeSummaryDto, nullable: true })
   latestResume!: ResumeSummaryDto | null;
+}
+
+export class ResumeDailyViewsDto {
+  @ApiProperty({ format: 'date' })
+  date!: string;
+
+  @ApiProperty()
+  count!: number;
 }

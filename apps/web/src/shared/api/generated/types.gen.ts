@@ -251,10 +251,17 @@ export type ResumeDeletionNoticeDto = {
     deleteAfter: string;
 };
 
+export type ResumeDailyViewsDto = {
+    date: string;
+    count: number;
+};
+
 export type ResumeOverviewDto = {
     total: number;
     publishedCount: number;
-    templateCount: number;
+    viewsTotal: number;
+    viewsLast7Days: number;
+    dailyViews: Array<ResumeDailyViewsDto>;
     latestResume: ResumeSummaryDto | null;
 };
 

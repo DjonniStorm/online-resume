@@ -1,5 +1,5 @@
 .previewFrame {
-  aspect-ratio: 210 / 297;
+  height: 320px;
   overflow: hidden;
   background: var(--mantine-color-gray-1);
 }
