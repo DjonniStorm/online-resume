@@ -37,16 +37,27 @@ jobs:
           --reporter=default --reporter=json
           --outputFile.json=reports/vitest-unit.json
 
-      - name: Install Chromium
-        run: pnpm --filter @online-resume/web exec playwright install --with-deps chromium
-
-      - name: Browser tests
-        run: pnpm test:browser
-
       - name: Build
         env:
           DATABASE_URL: postgresql://placeholder@placeholder/placeholder
         run: pnpm build
+
+      - name: Install Chromium
+        run: pnpm --filter @online-resume/web exec playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: |
+          (cd apps/web && exec ./node_modules/.bin/rsbuild preview --host 127.0.0.1 --port 4174 --strict-port) > reports/rsbuild-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4174/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4174/ > /dev/null
+          pnpm test:browser
 
       - name: Summary
         run: |
