@@ -8,7 +8,7 @@
 или `pnpm test:browser:ui`, чтобы открыть интерактивный режим Playwright.
 В UI можно запустить отдельный сценарий и посмотреть шаги и снимки DOM.
 Чтобы открыть UI во вкладке браузера, запустите
-`pnpm test:browser:ui --ui-host 127.0.0.1 --ui-port 9324`
+`pnpm test:browser:ui --ui-port 9324`
 и откройте [локальную страницу Playwright](http://127.0.0.1:9324).
 Playwright запускает веб-приложение; ответы API в браузерных тестах подменяются, поэтому PostgreSQL для них не нужен.
 Пример в `apps/web/test/browser/templates.spec.ts` открывает настоящую страницу `/templates`:

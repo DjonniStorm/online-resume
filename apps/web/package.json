@@ -10,7 +10,7 @@
     "api:generate": "openapi-ts",
     "test": "vitest run --config vitest.config.ts",
     "test:browser": "playwright test",
-    "test:browser:ui": "playwright test --ui"
+    "test:browser:ui": "playwright test --ui --ui-host 127.0.0.1"
   },
   "dependencies": {
     "@mantine/core": "^9.8.1",

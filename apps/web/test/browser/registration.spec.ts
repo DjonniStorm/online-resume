@@ -48,6 +48,10 @@ async function openRegistration(page: Page, registerStatus = 201) {
       await route.fulfill({ json: emptyOverview });
       return;
     }
+    if (path === '/api/resumes') {
+      await route.fulfill({ json: { items: [], total: 0, page: 1, limit: 10 } });
+      return;
+    }
     throw new Error(`Неожиданный запрос API: ${route.request().method()} ${path}`);
   });
   await page.goto('/auth/register');
