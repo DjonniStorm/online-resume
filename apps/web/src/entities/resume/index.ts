@@ -1,1 +1,1 @@
-export { ResumeStore } from './model';
+export * from './model';

@@ -60,29 +60,6 @@ export const zCreateResumeDto = z.object({
     about: z.string().max(5000).optional()
 });
 
-export const zResumeTemplateSummaryDto = z.object({
-    id: z.string(),
-    slug: z.string(),
-    name: z.string()
-});
-
-export const zResumeSummaryDto = z.object({
-    id: z.string(),
-    title: z.string(),
-    firstName: z.string(),
-    lastName: z.string(),
-    template: zResumeTemplateSummaryDto,
-    createdAt: z.iso.datetime(),
-    updatedAt: z.iso.datetime()
-});
-
-export const zResumeListDto = z.object({
-    items: z.array(zResumeSummaryDto),
-    total: z.number(),
-    page: z.number(),
-    limit: z.number()
-});
-
 export const zTemplateThemeDto = z.object({
     titleFontFamily: z.string(),
     bodyFontFamily: z.string(),
@@ -189,6 +166,216 @@ export const zTemplateDto = z.object({
     fields: z.array(zTemplateFieldRuleDto)
 });
 
+export const zResumeSectionDto = z.object({
+    id: z.string(),
+    type: z.enum([
+        'PROFILE',
+        'ABOUT',
+        'CONTACTS',
+        'EXPERIENCE',
+        'EDUCATION',
+        'SKILLS',
+        'LANGUAGES',
+        'PROJECTS',
+        'CERTIFICATES'
+    ]),
+    sortOrder: z.number(),
+    isVisible: z.boolean()
+});
+
+export const zResumeExperienceDto = z.object({
+    id: z.string(),
+    company: z.string(),
+    position: z.string(),
+    location: z.string().nullable(),
+    startDate: z.iso.date().nullish(),
+    endDate: z.iso.date().nullish(),
+    isCurrent: z.boolean(),
+    description: z.string().nullable(),
+    sortOrder: z.number()
+});
+
+export const zResumeEducationDto = z.object({
+    id: z.string(),
+    institution: z.string(),
+    degree: z.string().nullable(),
+    fieldOfStudy: z.string().nullable(),
+    location: z.string().nullable(),
+    startDate: z.iso.date().nullish(),
+    endDate: z.iso.date().nullish(),
+    description: z.string().nullable(),
+    sortOrder: z.number()
+});
+
+export const zResumeSkillDto = z.object({
+    id: z.string(),
+    name: z.string(),
+    level: z.string().nullable(),
+    sortOrder: z.number()
+});
+
+export const zResumeLanguageDto = z.object({
+    id: z.string(),
+    name: z.string(),
+    proficiency: z.string().nullable(),
+    sortOrder: z.number()
+});
+
+export const zResumeProjectDto = z.object({
+    id: z.string(),
+    name: z.string(),
+    role: z.string().nullable(),
+    description: z.string().nullable(),
+    url: z.string().nullable(),
+    startDate: z.iso.date().nullish(),
+    endDate: z.iso.date().nullish(),
+    sortOrder: z.number()
+});
+
+export const zResumeCertificateDto = z.object({
+    id: z.string(),
+    name: z.string(),
+    issuer: z.string().nullable(),
+    issuedAt: z.iso.date().nullish(),
+    expiresAt: z.iso.date().nullish(),
+    credentialUrl: z.string().nullable(),
+    sortOrder: z.number()
+});
+
+export const zResumeDto = z.object({
+    id: z.string(),
+    revision: z.number(),
+    title: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    headline: z.string().nullable(),
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+    location: z.string().nullable(),
+    githubUrl: z.string().nullable(),
+    telegramHandle: z.string().nullable(),
+    websiteUrl: z.string().nullable(),
+    about: z.string().nullable(),
+    photoPath: z.string().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+    template: zTemplateDto,
+    sections: z.array(zResumeSectionDto),
+    experiences: z.array(zResumeExperienceDto),
+    educations: z.array(zResumeEducationDto),
+    skills: z.array(zResumeSkillDto),
+    languages: z.array(zResumeLanguageDto),
+    projects: z.array(zResumeProjectDto),
+    certificates: z.array(zResumeCertificateDto)
+});
+
+export const zResumeTemplateSummaryDto = z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string()
+});
+
+export const zResumeSummaryDto = z.object({
+    id: z.string(),
+    title: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    template: zResumeTemplateSummaryDto,
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
+export const zResumeListDto = z.object({
+    items: z.array(zResumeSummaryDto),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number()
+});
+
+export const zUpdateResumeSectionDto = z.object({
+    type: z.enum([
+        'PROFILE',
+        'ABOUT',
+        'CONTACTS',
+        'EXPERIENCE',
+        'EDUCATION',
+        'SKILLS',
+        'LANGUAGES',
+        'PROJECTS',
+        'CERTIFICATES'
+    ]),
+    isVisible: z.boolean()
+});
+
+export const zUpdateResumeExperienceDto = z.object({
+    company: z.string().min(1).max(200),
+    position: z.string().min(1).max(200),
+    location: z.string().max(200).optional(),
+    startDate: z.iso.date().optional(),
+    endDate: z.iso.date().optional(),
+    isCurrent: z.boolean(),
+    description: z.string().max(5000).optional()
+});
+
+export const zUpdateResumeEducationDto = z.object({
+    institution: z.string().min(1).max(300),
+    degree: z.string().max(200).optional(),
+    fieldOfStudy: z.string().max(200).optional(),
+    location: z.string().max(200).optional(),
+    startDate: z.iso.date().optional(),
+    endDate: z.iso.date().optional(),
+    description: z.string().max(5000).optional()
+});
+
+export const zUpdateResumeSkillDto = z.object({
+    name: z.string().min(1).max(100),
+    level: z.string().max(100).optional()
+});
+
+export const zUpdateResumeLanguageDto = z.object({
+    name: z.string().min(1).max(100),
+    proficiency: z.string().max(100).optional()
+});
+
+export const zUpdateResumeProjectDto = z.object({
+    name: z.string().min(1).max(200),
+    role: z.string().max(200).optional(),
+    description: z.string().max(5000).optional(),
+    url: z.url().max(2048).optional(),
+    startDate: z.iso.date().optional(),
+    endDate: z.iso.date().optional()
+});
+
+export const zUpdateResumeCertificateDto = z.object({
+    name: z.string().min(1).max(200),
+    issuer: z.string().max(200).optional(),
+    issuedAt: z.iso.date().optional(),
+    expiresAt: z.iso.date().optional(),
+    credentialUrl: z.url().max(2048).optional()
+});
+
+export const zUpdateResumeDto = z.object({
+    revision: z.number().gte(1),
+    title: z.string().min(1).max(200),
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+    headline: z.string().max(200).optional(),
+    email: z.email().max(254).optional(),
+    phone: z.string().max(50).optional(),
+    location: z.string().max(200).optional(),
+    githubUrl: z.url().max(2048).regex(/^https:\/\/(?:www\.)?github\.com\/[^\/?#]+(?:\/[^?#]*)?$/).optional(),
+    telegramHandle: z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/).optional(),
+    websiteUrl: z.url().max(2048).optional(),
+    about: z.string().max(5000).optional(),
+    sections: z.array(zUpdateResumeSectionDto).max(9),
+    experiences: z.array(zUpdateResumeExperienceDto).max(50),
+    educations: z.array(zUpdateResumeEducationDto).max(50),
+    skills: z.array(zUpdateResumeSkillDto).max(50),
+    languages: z.array(zUpdateResumeLanguageDto).max(20),
+    projects: z.array(zUpdateResumeProjectDto).max(50),
+    certificates: z.array(zUpdateResumeCertificateDto).max(50)
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -217,6 +404,8 @@ export const zResumeListResponse = zResumeListDto;
 
 export const zResumeCreateBody = zCreateResumeDto;
 
+export const zResumeCreateResponse = zResumeDto;
+
 export const zResumeDeletePath = z.object({
     id: z.string()
 });
@@ -226,6 +415,16 @@ export const zResumeDeleteResponse = z.void();
 export const zResumeGetPath = z.object({
     id: z.string()
 });
+
+export const zResumeGetResponse = zResumeDto;
+
+export const zResumeUpdateBody = zUpdateResumeDto;
+
+export const zResumeUpdatePath = z.object({
+    id: z.string()
+});
+
+export const zResumeUpdateResponse = zResumeDto;
 
 export const zTemplateListResponse = z.array(zTemplateDto);
 

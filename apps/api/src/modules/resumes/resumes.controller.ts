@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -24,8 +25,10 @@ import { CurrentUser } from '../auth/common/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/common/types';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { CreateResumeDto } from './dto/create-resume.dto';
+import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import { ResumeListDto } from './dto/resume-summary.dto';
+import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumesService } from './resumes.service';
 
 @ApiTags('resumes')
@@ -38,7 +41,7 @@ export class ResumesController {
 
   @Post()
   @ApiOperation({ operationId: 'resumeCreate' })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({ type: ResumeDto })
   @ApiNotFoundResponse({ description: 'Активный шаблон не найден.' })
   create(@CurrentUser() user: AuthenticatedUser, @Body() input: CreateResumeDto) {
     return this.resumes.create(user.id, input);
@@ -53,10 +56,22 @@ export class ResumesController {
 
   @Get(':id')
   @ApiOperation({ operationId: 'resumeGet' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: ResumeDto })
   @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.resumes.findOne(user.id, id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ operationId: 'resumeUpdate' })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  update(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() input: UpdateResumeDto,
+  ) {
+    return this.resumes.update(user.id, id, input);
   }
 
   @Delete(':id')

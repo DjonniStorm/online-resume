@@ -1,8 +1,19 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 
 import type { BaseApi } from '@/shared/api';
-import { resumeCreate, resumeDelete, resumeList } from '@/shared/api/generated/sdk.gen';
-import type { CreateResumeDto, ResumeSummaryDto } from '@/shared/api/generated/types.gen';
+import {
+  resumeCreate,
+  resumeDelete,
+  resumeGet,
+  resumeList,
+  resumeUpdate,
+} from '@/shared/api/generated/sdk.gen';
+import type {
+  CreateResumeDto,
+  ResumeDto,
+  ResumeSummaryDto,
+  UpdateResumeDto,
+} from '@/shared/api/generated/types.gen';
 
 export class ResumeStore {
   resumes: ResumeSummaryDto[] = [];
@@ -17,8 +28,10 @@ export class ResumeStore {
   constructor(api: BaseApi) {
     this.operations = api.bind({
       create: resumeCreate,
+      get: resumeGet,
       list: resumeList,
       remove: resumeDelete,
+      update: resumeUpdate,
     });
     makeObservable(this, {
       resumes: observable,
@@ -58,6 +71,26 @@ export class ResumeStore {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async get(id: string): Promise<ResumeDto | null> {
+    const task = this.operations.get({ path: { id } });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async update(id: string, input: UpdateResumeDto): Promise<ResumeDto | null> {
+    const task = this.operations.update({ path: { id }, body: input });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
     }
   }
 

@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
-import { TemplateStatus } from '../../generated/prisma/enums';
+import { ResumeSectionType, TemplateFieldType, TemplateStatus } from '../../generated/prisma/enums';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import type { UpdateResumeDto } from './dto/update-resume.dto';
 
 const resumeDetailInclude = {
   template: {
@@ -125,6 +131,117 @@ export class ResumesService {
     return resume;
   }
 
+  async update(ownerId: string, id: string, input: UpdateResumeDto) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      include: {
+        template: { include: { fields: true, sections: true } },
+      },
+    });
+    if (!current) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    if (current.revision !== input.revision) {
+      throw new ConflictException(
+        'Резюме уже изменилось. Обновите страницу и повторите сохранение.',
+      );
+    }
+
+    validateRequiredFields(current.template.fields, input);
+    const sections = normalizeSections(current.template.sections, input.sections);
+    validateDateRanges(input);
+
+    return this.prisma.$transaction(async (transaction) =>
+      transaction.resume.update({
+        where: { id: current.id },
+        data: {
+          revision: { increment: 1 },
+          title: input.title,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          headline: input.headline,
+          email: input.email,
+          phone: input.phone,
+          location: input.location,
+          githubUrl: input.githubUrl,
+          telegramHandle: input.telegramHandle,
+          websiteUrl: input.websiteUrl,
+          about: input.about,
+          sections: {
+            deleteMany: {},
+            create: sections,
+          },
+          experiences: {
+            deleteMany: {},
+            create: input.experiences.map((item, sortOrder) => ({
+              company: item.company,
+              position: item.position,
+              location: item.location,
+              startDate: dateValue(item.startDate),
+              endDate: dateValue(item.endDate),
+              isCurrent: item.isCurrent,
+              description: item.description,
+              sortOrder,
+            })),
+          },
+          educations: {
+            deleteMany: {},
+            create: input.educations.map((item, sortOrder) => ({
+              institution: item.institution,
+              degree: item.degree,
+              fieldOfStudy: item.fieldOfStudy,
+              location: item.location,
+              startDate: dateValue(item.startDate),
+              endDate: dateValue(item.endDate),
+              description: item.description,
+              sortOrder,
+            })),
+          },
+          skills: {
+            deleteMany: {},
+            create: input.skills.map((item, sortOrder) => ({
+              name: item.name,
+              level: item.level,
+              sortOrder,
+            })),
+          },
+          languages: {
+            deleteMany: {},
+            create: input.languages.map((item, sortOrder) => ({
+              name: item.name,
+              proficiency: item.proficiency,
+              sortOrder,
+            })),
+          },
+          projects: {
+            deleteMany: {},
+            create: input.projects.map((item, sortOrder) => ({
+              name: item.name,
+              role: item.role,
+              description: item.description,
+              url: item.url,
+              startDate: dateValue(item.startDate),
+              endDate: dateValue(item.endDate),
+              sortOrder,
+            })),
+          },
+          certificates: {
+            deleteMany: {},
+            create: input.certificates.map((item, sortOrder) => ({
+              name: item.name,
+              issuer: item.issuer,
+              issuedAt: dateValue(item.issuedAt),
+              expiresAt: dateValue(item.expiresAt),
+              credentialUrl: item.credentialUrl,
+              sortOrder,
+            })),
+          },
+        },
+        include: resumeDetailInclude,
+      }),
+    );
+  }
+
   async remove(ownerId: string, id: string): Promise<void> {
     const result = await this.prisma.resume.updateMany({
       where: { id, ownerId, deletedAt: null },
@@ -139,4 +256,83 @@ export class ResumesService {
       throw new NotFoundException('Резюме не найдено');
     }
   }
+}
+
+function normalizeSections(
+  templateSections: Array<{ type: ResumeSectionType; canReorder: boolean }>,
+  sections: UpdateResumeDto['sections'],
+) {
+  const availableTypes = new Set(templateSections.map((section) => section.type));
+  const usedTypes = new Set<ResumeSectionType>();
+
+  return sections.map((section, sortOrder) => {
+    if (!availableTypes.has(section.type)) {
+      throw new BadRequestException('Раздел не поддерживается выбранным шаблоном');
+    }
+    if (usedTypes.has(section.type)) {
+      throw new BadRequestException('Разделы резюме не должны повторяться');
+    }
+    usedTypes.add(section.type);
+    return {
+      type: section.type,
+      sortOrder,
+      isVisible: section.isVisible,
+    };
+  });
+}
+
+function validateRequiredFields(
+  fields: Array<{ field: TemplateFieldType; isRequired: boolean }>,
+  input: UpdateResumeDto,
+): void {
+  const values: Record<TemplateFieldType, string | undefined> = {
+    [TemplateFieldType.FIRST_NAME]: input.firstName,
+    [TemplateFieldType.LAST_NAME]: input.lastName,
+    [TemplateFieldType.HEADLINE]: input.headline,
+    [TemplateFieldType.EMAIL]: input.email,
+    [TemplateFieldType.PHONE]: input.phone,
+    [TemplateFieldType.LOCATION]: input.location,
+    [TemplateFieldType.GITHUB_URL]: input.githubUrl,
+    [TemplateFieldType.TELEGRAM_HANDLE]: input.telegramHandle,
+    [TemplateFieldType.WEBSITE_URL]: input.websiteUrl,
+  };
+
+  for (const field of fields) {
+    if (field.isRequired && !values[field.field]?.trim()) {
+      throw new BadRequestException(`Поле ${field.field} обязательно`);
+    }
+  }
+}
+
+function validateDateRanges(input: UpdateResumeDto): void {
+  for (const item of input.experiences) {
+    validateDateRange(item.startDate, item.endDate, item.isCurrent, 'Опыт работы');
+  }
+  for (const item of input.educations) {
+    validateDateRange(item.startDate, item.endDate, false, 'Образование');
+  }
+  for (const item of input.projects) {
+    validateDateRange(item.startDate, item.endDate, false, 'Проект');
+  }
+  for (const item of input.certificates) {
+    validateDateRange(item.issuedAt, item.expiresAt, false, 'Сертификат');
+  }
+}
+
+function validateDateRange(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  isCurrent: boolean,
+  label: string,
+): void {
+  if (isCurrent && endDate) {
+    throw new BadRequestException(`${label}: текущая запись не может иметь дату окончания`);
+  }
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+    throw new BadRequestException(`${label}: дата начала не может быть позже даты окончания`);
+  }
+}
+
+function dateValue(value: string | undefined): Date | undefined {
+  return value ? new Date(value) : undefined;
 }

@@ -130,6 +130,9 @@ export const ResumesPage = observer(() => {
                     Обновлено: {formatDate(resume.updatedAt)}
                   </Text>
                   <Group justify="flex-end">
+                    <Button component={Link} to={`/resumes/${resume.id}/edit`} variant="light">
+                      Открыть
+                    </Button>
                     <Button
                       variant="subtle"
                       color="red"

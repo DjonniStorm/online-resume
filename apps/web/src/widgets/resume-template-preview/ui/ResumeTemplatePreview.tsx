@@ -2,6 +2,7 @@ import { type CSSProperties, useLayoutEffect, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 
 import type {
+  ResumeSectionDto,
   TemplateDto,
   TemplateSectionDto,
   TemplateThemeDto,
@@ -20,6 +21,7 @@ import { WideHeaderLayout } from './layouts/WideHeaderLayout';
 type ResumeTemplatePreviewProps = {
   template: TemplateDto;
   data?: ResumePreviewData;
+  sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>;
 };
 
 const pixelsPerMm = 96 / 25.4;
@@ -27,6 +29,7 @@ const pixelsPerMm = 96 / 25.4;
 export function ResumeTemplatePreview({
   template,
   data = previewFixture,
+  sectionState,
 }: ResumeTemplatePreviewProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
@@ -34,8 +37,8 @@ export function ResumeTemplatePreview({
   const theme = template.theme ?? defaultTheme;
   const pageWidth = Number(template.pageWidthMm) * pixelsPerMm;
   const pageHeight = Number(template.pageHeightMm) * pixelsPerMm;
-  const sectionsByRegion = groupSections(template.sections);
-  const layoutProps = { data, sectionsByRegion, theme, template };
+  const sectionsByRegion = groupSections(template.sections, sectionState);
+  const layoutProps = { data, sectionsByRegion, sectionState, theme, template };
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -108,7 +111,10 @@ export function ResumeTemplatePreview({
   );
 }
 
-function groupSections(sections: TemplateSectionDto[]): SectionsByRegion {
+function groupSections(
+  sections: TemplateSectionDto[],
+  sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>,
+): SectionsByRegion {
   const grouped: SectionsByRegion = {
     PAGE: [],
     HEADER: [],
@@ -117,8 +123,17 @@ function groupSections(sections: TemplateSectionDto[]): SectionsByRegion {
     FOOTER: [],
   };
 
+  const stateByType = new Map(sectionState?.map((section) => [section.type, section]));
   for (const section of sections) {
-    grouped[section.region].push(section);
+    const state = stateByType.get(section.type);
+    if (state && !state.isVisible) {
+      continue;
+    }
+    grouped[section.region].push({ ...section, sortOrder: state?.sortOrder ?? section.sortOrder });
+  }
+
+  for (const region of Object.keys(grouped) as Array<keyof SectionsByRegion>) {
+    grouped[region].sort((left, right) => left.sortOrder - right.sortOrder);
   }
 
   return grouped;
