@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Breadcrumbs,
@@ -12,7 +13,9 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
 } from '@mantine/core';
+import { IconDeviceFloppy, IconExternalLink, IconPalette } from '@tabler/icons-react';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useState } from 'react';
@@ -210,36 +213,56 @@ export const ResumeEditPage = observer(() => {
                 </Anchor>
                 <span>{resume.template.slug}</span>
               </Breadcrumbs>
-              <Title order={1} size="h2">
+              <Title order={1} size="h3">
                 {resume.title}
               </Title>
             </Stack>
             <Group gap="sm">
-              <Button
-                type="submit"
-                form="resume-editor-form"
-                data-intent="preview"
-                variant="light"
-                disabled={saveState === 'saving'}
-              >
-                Сохранить и открыть
-              </Button>
-              <Button variant="light" disabled={saveState === 'saving'} onClick={openTemplateModal}>
-                Изменить шаблон
-              </Button>
-              <Button
-                type="submit"
-                form="resume-editor-form"
-                disabled={saveState === 'saving' || saveState === 'saved'}
-              >
-                {match(saveState)
+              <Tooltip label="Сохранить и открыть предпросмотр">
+                <ActionIcon
+                  type="submit"
+                  form="resume-editor-form"
+                  data-intent="preview"
+                  variant="light"
+                  size="lg"
+                  disabled={saveState === 'saving'}
+                  aria-label="Сохранить и открыть предпросмотр"
+                >
+                  <IconExternalLink size={20} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Изменить шаблон">
+                <ActionIcon
+                  variant="light"
+                  size="lg"
+                  disabled={saveState === 'saving'}
+                  onClick={openTemplateModal}
+                  aria-label="Изменить шаблон"
+                >
+                  <IconPalette size={20} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip
+                label={match(saveState)
                   .with('saved', () => 'Сохранено')
                   .with('saving', () => 'Сохраняется…')
                   .with('error', () => 'Ошибка сохранения')
                   .with('invalid', () => 'Исправьте поля')
                   .with('dirty', () => 'Сохранить')
                   .exhaustive()}
-              </Button>
+              >
+                <ActionIcon
+                  type="submit"
+                  form="resume-editor-form"
+                  size="lg"
+                  color={saveState === 'error' || saveState === 'invalid' ? 'red' : undefined}
+                  variant={saveState === 'saved' ? 'default' : 'filled'}
+                  disabled={saveState === 'saving' || saveState === 'saved'}
+                  aria-label="Сохранить изменения"
+                >
+                  <IconDeviceFloppy size={20} />
+                </ActionIcon>
+              </Tooltip>
             </Group>
           </Group>
           <div className={styles.workspace}>
@@ -263,7 +286,7 @@ export const ResumeEditPage = observer(() => {
             />
             <Paper withBorder p="md" className={styles.previewPanel}>
               <div className={styles.previewHeader}>
-                <Title order={2} size="h3">
+                <Title order={2} size="h4">
                   Предпросмотр
                 </Title>
               </div>

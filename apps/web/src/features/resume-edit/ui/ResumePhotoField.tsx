@@ -46,7 +46,9 @@ export function ResumePhotoField({
   return (
     <Paper withBorder p="lg">
       <Stack gap="md">
-        <Title order={2}>Фотография</Title>
+        <Title order={2} size="h3">
+          Фотография
+        </Title>
         <Group align="center" gap="lg">
           <Image
             src={photoUrl ?? '/resume-photo-fallback.svg'}

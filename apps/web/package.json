@@ -16,6 +16,7 @@
     "@mantine/form": "^9.8.1",
     "@mantine/hooks": "^9.6.2",
     "@online-resume/shared": "workspace:*",
+    "@tabler/icons-react": "^3.52.0",
     "@unhead/react": "^3.4.1",
     "mobx": "^7.0.4",
     "mobx-react-lite": "^5.0.3",

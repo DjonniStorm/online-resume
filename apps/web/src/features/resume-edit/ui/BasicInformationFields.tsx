@@ -6,7 +6,9 @@ export function BasicInformationFields({ form }: { form: EditorForm }) {
   return (
     <Paper withBorder p="lg">
       <Stack gap="md">
-        <Title order={2}>Основная информация</Title>
+        <Title order={2} size="h3">
+          Основная информация
+        </Title>
         <TextInput label="Название резюме" {...form.getInputProps('title')} />
         <Group grow>
           <TextInput label="Имя" {...form.getInputProps('firstName')} />
