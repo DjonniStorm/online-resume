@@ -8,6 +8,7 @@ import {
   NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { MAX_PHOTO_SIZE, PHOTO_MIME_TYPES, type UploadedPhoto } from './common/photo';
 
@@ -16,7 +17,12 @@ const photoNamePattern =
 
 @Injectable()
 export class ResumePhotoStorageService {
-  private readonly directory = resolve(process.cwd(), 'uploads', 'resumes');
+  private readonly directory: string;
+
+  constructor(config: ConfigService) {
+    this.directory =
+      config.get<string>('resumePhotoDirectory') ?? resolve(process.cwd(), 'uploads', 'resumes');
+  }
 
   async save(file: UploadedPhoto | undefined): Promise<string> {
     if (!file?.buffer?.length) {
