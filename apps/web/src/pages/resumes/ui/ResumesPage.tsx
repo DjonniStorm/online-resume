@@ -116,7 +116,18 @@ export const ResumesPage = observer(() => {
         {resumes.resumes.length > 0 ? (
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
             {resumes.resumes.map((resume) => (
-              <Card key={resume.id} withBorder shadow="sm" radius="md">
+              <Card
+                key={resume.id}
+                withBorder
+                shadow="sm"
+                radius="md"
+                style={{ position: 'relative' }}
+              >
+                <Link
+                  to={`/resumes/${resume.id}/edit`}
+                  aria-label={`Открыть резюме ${resume.title}`}
+                  style={{ position: 'absolute', inset: 0, zIndex: 1 }}
+                />
                 <Stack gap="sm">
                   <Group justify="space-between" align="flex-start">
                     <Stack gap={2}>
@@ -133,19 +144,20 @@ export const ResumesPage = observer(() => {
                     Обновлено: {formatDate(resume.updatedAt)}
                   </Text>
                   <Group justify="flex-end">
-                    <Button component={Link} to={`/resumes/${resume.id}/edit`} variant="light">
-                      Открыть
-                    </Button>
                     <Menu position="bottom-end" withinPortal>
                       <Menu.Target>
                         <ActionIcon
                           variant="subtle"
                           aria-label={`Действия с резюме ${resume.title}`}
+                          style={{ position: 'relative', zIndex: 2 }}
                         >
                           ⋯
                         </ActionIcon>
                       </Menu.Target>
                       <Menu.Dropdown>
+                        <Menu.Item component={Link} to={`/resumes/${resume.id}/edit`}>
+                          Открыть
+                        </Menu.Item>
                         <Menu.Item component={Link} to={`/resumes/${resume.id}/preview`}>
                           Предпросмотр
                         </Menu.Item>
