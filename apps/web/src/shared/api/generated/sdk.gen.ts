@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -85,3 +85,7 @@ export const resumeGet = <ThrowOnError extends boolean = false>(options: Options
     url: '/api/resumes/{id}',
     ...options
 });
+
+export const templateList = <ThrowOnError extends boolean = false>(options?: Options<TemplateListData, ThrowOnError>): RequestResult<TemplateListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TemplateListResponses, unknown, ThrowOnError>({ url: '/api/templates', ...options });
+
+export const templateGet = <ThrowOnError extends boolean = false>(options: Options<TemplateGetData, ThrowOnError>): RequestResult<TemplateGetResponses, TemplateGetErrors, ThrowOnError> => (options.client ?? client).get<TemplateGetResponses, TemplateGetErrors, ThrowOnError>({ url: '/api/templates/{slug}', ...options });

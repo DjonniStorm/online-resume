@@ -6,6 +6,8 @@ import { AppNuqsProvider } from '@/app/providers';
 import { LoginPage } from '@/pages/auth/login/ui/LoginPage';
 import { RegisterPage } from '@/pages/auth/register/ui/RegisterPage';
 import { HomePage } from '@/pages/home/ui/HomePage';
+import { ResumesPage } from '@/pages/resumes';
+import { TemplatesPage } from '@/pages/templates';
 
 function PageRoute({ children }: { children: ReactNode }) {
   useClearRequestsOnUnmount();
@@ -42,6 +44,22 @@ const router = createBrowserRouter([
         element: (
           <PageRoute key="register">
             <RegisterPage />
+          </PageRoute>
+        ),
+      },
+      {
+        path: 'templates',
+        element: (
+          <PageRoute key="templates">
+            <TemplatesPage />
+          </PageRoute>
+        ),
+      },
+      {
+        path: 'resumes',
+        element: (
+          <PageRoute key="resumes">
+            <ResumesPage />
           </PageRoute>
         ),
       },

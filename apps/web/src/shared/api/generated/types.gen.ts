@@ -81,6 +81,54 @@ export type ResumeSummaryDto = {
     updatedAt: string;
 };
 
+export type TemplateThemeDto = {
+    titleFontFamily: string;
+    bodyFontFamily: string;
+    titleSizePt: string;
+    sectionTitleSizePt: string;
+    bodySizePt: string;
+    lineHeight: string;
+    spacing: 'COMPACT' | 'REGULAR' | 'RELAXED';
+    primaryColor: string;
+    secondaryColor: string;
+    textColor: string;
+    pageColor: string;
+    headerColor: string | null;
+    sidebarColor: string | null;
+};
+
+export type TemplateSectionDto = {
+    id: string;
+    type: 'PROFILE' | 'ABOUT' | 'CONTACTS' | 'EXPERIENCE' | 'EDUCATION' | 'SKILLS' | 'LANGUAGES' | 'PROJECTS' | 'CERTIFICATES';
+    region: 'PAGE' | 'HEADER' | 'SIDEBAR' | 'MAIN' | 'FOOTER';
+    sortOrder: number;
+    itemLayout: 'STANDARD' | 'COMPACT' | 'TIMELINE' | 'TAGS' | 'BARS';
+    canReorder: boolean;
+    showHeading: boolean;
+    headingText: string | null;
+    accentColor: string | null;
+};
+
+export type TemplateFieldRuleDto = {
+    field: 'FIRST_NAME' | 'LAST_NAME' | 'HEADLINE' | 'EMAIL' | 'PHONE' | 'LOCATION' | 'GITHUB_URL' | 'TELEGRAM_HANDLE' | 'WEBSITE_URL';
+    isRequired: boolean;
+};
+
+export type TemplateDto = {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    layout: 'SINGLE_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
+    pageWidthMm: string;
+    pageHeightMm: string;
+    sidebarWidthPercent: number | null;
+    previewUrl: string | null;
+    theme: TemplateThemeDto | null;
+    sections: Array<TemplateSectionDto>;
+    fields: Array<TemplateFieldRuleDto>;
+};
+
 export type HealthControllerCheckData = {
     body?: never;
     path?: never;
@@ -297,3 +345,38 @@ export type ResumeGetErrors = {
 export type ResumeGetResponses = {
     200: unknown;
 };
+
+export type TemplateListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/templates';
+};
+
+export type TemplateListResponses = {
+    200: Array<TemplateDto>;
+};
+
+export type TemplateListResponse = TemplateListResponses[keyof TemplateListResponses];
+
+export type TemplateGetData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/templates/{slug}';
+};
+
+export type TemplateGetErrors = {
+    /**
+     * Шаблон не найден.
+     */
+    404: unknown;
+};
+
+export type TemplateGetResponses = {
+    200: TemplateDto;
+};
+
+export type TemplateGetResponse = TemplateGetResponses[keyof TemplateGetResponses];

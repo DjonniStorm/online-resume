@@ -3,4 +3,6 @@ export enum StoreKey {
   Loader = 'loader',
   Errors = 'errors',
   Session = 'session',
+  Templates = 'templates',
+  Resumes = 'resumes',
 }

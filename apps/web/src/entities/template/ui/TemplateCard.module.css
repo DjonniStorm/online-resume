@@ -1,0 +1,6 @@
+.previewFrame {
+  aspect-ratio: 210 / 297;
+  padding: 14px;
+  overflow: hidden;
+  background: #eef2f6;
+}

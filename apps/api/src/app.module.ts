@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { ResumesModule } from './modules/resumes/resumes.module';
+import { TemplatesModule } from './modules/templates/templates.module';
 
 @Module({
   controllers: [HealthController],
@@ -18,6 +19,7 @@ import { ResumesModule } from './modules/resumes/resumes.module';
     DatabaseModule,
     AuthModule,
     ResumesModule,
+    TemplatesModule,
   ],
 })
 export class AppModule {}

@@ -76,6 +76,95 @@ export const zResumeSummaryDto = z.object({
     updatedAt: z.iso.datetime()
 });
 
+export const zTemplateThemeDto = z.object({
+    titleFontFamily: z.string(),
+    bodyFontFamily: z.string(),
+    titleSizePt: z.string(),
+    sectionTitleSizePt: z.string(),
+    bodySizePt: z.string(),
+    lineHeight: z.string(),
+    spacing: z.enum([
+        'COMPACT',
+        'REGULAR',
+        'RELAXED'
+    ]),
+    primaryColor: z.string(),
+    secondaryColor: z.string(),
+    textColor: z.string(),
+    pageColor: z.string(),
+    headerColor: z.string().nullable(),
+    sidebarColor: z.string().nullable()
+});
+
+export const zTemplateSectionDto = z.object({
+    id: z.string(),
+    type: z.enum([
+        'PROFILE',
+        'ABOUT',
+        'CONTACTS',
+        'EXPERIENCE',
+        'EDUCATION',
+        'SKILLS',
+        'LANGUAGES',
+        'PROJECTS',
+        'CERTIFICATES'
+    ]),
+    region: z.enum([
+        'PAGE',
+        'HEADER',
+        'SIDEBAR',
+        'MAIN',
+        'FOOTER'
+    ]),
+    sortOrder: z.number(),
+    itemLayout: z.enum([
+        'STANDARD',
+        'COMPACT',
+        'TIMELINE',
+        'TAGS',
+        'BARS'
+    ]),
+    canReorder: z.boolean(),
+    showHeading: z.boolean(),
+    headingText: z.string().nullable(),
+    accentColor: z.string().nullable()
+});
+
+export const zTemplateFieldRuleDto = z.object({
+    field: z.enum([
+        'FIRST_NAME',
+        'LAST_NAME',
+        'HEADLINE',
+        'EMAIL',
+        'PHONE',
+        'LOCATION',
+        'GITHUB_URL',
+        'TELEGRAM_HANDLE',
+        'WEBSITE_URL'
+    ]),
+    isRequired: z.boolean()
+});
+
+export const zTemplateDto = z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    layout: z.enum([
+        'SINGLE_COLUMN',
+        'SIDEBAR_LEFT',
+        'SIDEBAR_RIGHT',
+        'WIDE_HEADER'
+    ]),
+    pageWidthMm: z.string(),
+    pageHeightMm: z.string(),
+    sidebarWidthPercent: z.number().nullable(),
+    previewUrl: z.string().nullable(),
+    theme: zTemplateThemeDto.nullable(),
+    sections: z.array(zTemplateSectionDto),
+    fields: z.array(zTemplateFieldRuleDto)
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -107,3 +196,11 @@ export const zResumeDeleteResponse = z.void();
 export const zResumeGetPath = z.object({
     id: z.string()
 });
+
+export const zTemplateListResponse = z.array(zTemplateDto);
+
+export const zTemplateGetPath = z.object({
+    slug: z.string()
+});
+
+export const zTemplateGetResponse = zTemplateDto;
