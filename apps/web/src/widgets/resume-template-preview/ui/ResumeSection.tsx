@@ -77,6 +77,7 @@ function SectionContent({ type, data }: { type: SectionType; data: ResumePreview
               <span className={styles.entryPeriod}>{item.period}</span>
             </div>
             <p className={styles.entrySubtitle}>{item.company}</p>
+            {item.location ? <p>{item.location}</p> : null}
             <p>{item.description}</p>
           </div>
         ))}
@@ -91,6 +92,8 @@ function SectionContent({ type, data }: { type: SectionType; data: ResumePreview
               <span className={styles.entryPeriod}>{item.period}</span>
             </div>
             <p className={styles.entrySubtitle}>{item.institution}</p>
+            {item.location ? <p>{item.location}</p> : null}
+            {item.description ? <p>{item.description}</p> : null}
           </div>
         ))}
       </div>
@@ -123,8 +126,23 @@ function SectionContent({ type, data }: { type: SectionType; data: ResumePreview
       <div>
         {data.projects.map((item) => (
           <div className={styles.entry} key={item.name}>
-            <strong className={styles.entryTitle}>{item.name}</strong>
+            <div className={styles.entryHeading}>
+              <strong className={styles.entryTitle}>{item.name}</strong>
+              {item.period ? <span className={styles.entryPeriod}>{item.period}</span> : null}
+            </div>
+            {item.role ? <p className={styles.entrySubtitle}>{item.role}</p> : null}
             <p>{item.description}</p>
+            {item.url ? (
+              <p>
+                <a
+                  href={/^https?:\/\//i.test(item.url) ? item.url : `https://${item.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.url}
+                </a>
+              </p>
+            ) : null}
           </div>
         ))}
       </div>
@@ -137,6 +155,22 @@ function SectionContent({ type, data }: { type: SectionType; data: ResumePreview
             <p className={styles.entrySubtitle}>
               {item.issuer} · {item.year}
             </p>
+            {item.expiresAt ? <p>Действует до {item.expiresAt}</p> : null}
+            {item.credentialUrl ? (
+              <p>
+                <a
+                  href={
+                    /^https?:\/\//i.test(item.credentialUrl)
+                      ? item.credentialUrl
+                      : `https://${item.credentialUrl}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.credentialUrl}
+                </a>
+              </p>
+            ) : null}
           </div>
         ))}
       </div>

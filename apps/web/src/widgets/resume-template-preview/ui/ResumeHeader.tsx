@@ -50,7 +50,7 @@ export function Contacts({ data }: { data: ResumePreviewData }) {
   const links = [
     { label: data.email, href: `mailto:${data.email}` },
     { label: data.phone, href: `tel:${data.phone.replace(/[^\d+]/g, '')}` },
-    { label: data.githubUrl, href: externalUrl(data.githubUrl) },
+    { label: data.githubUrl, href: githubUrl(data.githubUrl) },
     { label: data.telegramHandle, href: telegramUrl(data.telegramHandle) },
     { label: data.websiteUrl, href: externalUrl(data.websiteUrl) },
   ];
@@ -77,6 +77,13 @@ export function Contacts({ data }: { data: ResumePreviewData }) {
 
 function externalUrl(value: string): string {
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}
+
+function githubUrl(value: string): string {
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+  return `https://github.com/${value.replace(/^(?:www\.)?github\.com\//i, '')}`;
 }
 
 function telegramUrl(value: string): string {

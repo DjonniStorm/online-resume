@@ -1,4 +1,4 @@
-import { Divider, Group, Paper, Stack, TextInput, Textarea, Title } from '@mantine/core';
+import { Divider, Group, Paper, Stack, TextInput, Title } from '@mantine/core';
 
 import type { EditorForm } from '../model';
 
@@ -32,9 +32,6 @@ export function BasicInformationFields({ form, fields }: BasicInformationFieldsP
             {...form.getInputProps('headline')}
           />
         ) : null}
-        {fields.has('ABOUT') ? (
-          <Textarea label="О себе" autosize minRows={4} {...form.getInputProps('about')} />
-        ) : null}
         {['EMAIL', 'PHONE', 'LOCATION', 'GITHUB_URL', 'TELEGRAM_HANDLE', 'WEBSITE_URL'].some(
           (field) => fields.has(field),
         ) ? (
@@ -56,7 +53,7 @@ export function BasicInformationFields({ form, fields }: BasicInformationFieldsP
                 {fields.has('GITHUB_URL') ? (
                   <TextInput
                     label="GitHub"
-                    placeholder="github.com/name"
+                    placeholder="name или https://github.com/name"
                     {...form.getInputProps('githubUrl')}
                   />
                 ) : null}
@@ -72,7 +69,7 @@ export function BasicInformationFields({ form, fields }: BasicInformationFieldsP
             {fields.has('WEBSITE_URL') ? (
               <TextInput
                 label="Сайт"
-                placeholder="example.com"
+                placeholder="example.com или https://example.com"
                 {...form.getInputProps('websiteUrl')}
               />
             ) : null}

@@ -1,13 +1,18 @@
 .form {
   min-height: 0;
   overflow: auto;
-  padding-right: 8px;
+  direction: rtl;
+  padding-left: 8px;
   scrollbar-gutter: stable;
+}
+
+.form > * {
+  direction: ltr;
 }
 
 @media (max-width: 1100px) {
   .form {
     overflow: visible;
-    padding-right: 0;
+    padding-left: 0;
   }
 }

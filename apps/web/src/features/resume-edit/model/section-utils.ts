@@ -1,48 +1,37 @@
 import type { ResumeEditorSection } from '@/entities/resume';
 import type { ResumeDto } from '@/shared/api/generated/types.gen';
 
-export function canMoveSection(
-  sections: ResumeEditorSection[],
-  index: number,
-  direction: -1 | 1,
-  resume: ResumeDto,
-): boolean {
-  const current = sections[index];
-  const target = sections[index + direction];
-  if (!current || !target) {
-    return false;
-  }
-  const currentTemplateSection = resume.template.sections.find(
-    (section) => section.type === current.type,
-  );
-  const targetTemplateSection = resume.template.sections.find(
-    (section) => section.type === target.type,
-  );
-  return Boolean(
-    currentTemplateSection?.canReorder &&
-    targetTemplateSection?.canReorder &&
-    currentTemplateSection.region === targetTemplateSection.region,
-  );
-}
-
 export function moveSection(
   sections: ResumeEditorSection[],
-  index: number,
+  type: ResumeEditorSection['type'],
   direction: -1 | 1,
   resume: ResumeDto,
 ): ResumeEditorSection[] {
-  const activeSections = sections.filter((section) => section.isVisible);
-  if (!canMoveSection(activeSections, index, direction, resume)) {
+  const current = resume.template.sections.find((section) => section.type === type);
+  if (!current?.canReorder) {
     return sections;
   }
-  const first = activeSections[index];
-  const second = activeSections[index + direction];
+  const sameRegion = sections.filter(
+    (section) =>
+      section.isVisible &&
+      resume.template.sections.some(
+        (item) => item.type === section.type && item.region === current.region && item.canReorder,
+      ),
+  );
+  const index = sameRegion.findIndex((section) => section.type === type);
+  const target = sameRegion[index + direction];
+  if (index < 0 || !target) {
+    return sections;
+  }
+  const currentIndex = sections.findIndex((section) => section.type === type);
+  const targetIndex = sections.findIndex((section) => section.type === target.type);
+  const reordered = [...sections];
+  const first = sections[currentIndex];
+  const second = sections[targetIndex];
   if (!first || !second) {
     return sections;
   }
-  const reordered = [...activeSections];
-  reordered[index] = second;
-  reordered[index + direction] = first;
-  const visibleByType = new Map(reordered.map((section) => [section.type, section]));
-  return sections.map((section) => visibleByType.get(section.type) ?? section);
+  reordered[currentIndex] = second;
+  reordered[targetIndex] = first;
+  return reordered;
 }
