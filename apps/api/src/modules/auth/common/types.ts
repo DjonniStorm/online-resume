@@ -4,3 +4,15 @@ export type TokenPayload = {
   type: 'access' | 'refresh';
   jti?: string;
 };
+
+export type AuthenticatedUser = {
+  id: string;
+  role: 'USER' | 'ADMIN';
+};
+
+export type AuthenticatedRequest = {
+  headers: {
+    authorization?: string;
+  };
+  user?: AuthenticatedUser;
+};

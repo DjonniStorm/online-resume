@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Headers, HttpCode, Patch, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Patch,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -14,16 +24,19 @@ import {
 
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './common/current-user.decorator';
 import {
   CookieResponse,
   clearRefreshCookie,
   readRefreshCookie,
   setRefreshCookie,
 } from './common/refresh-cookie';
+import type { AuthenticatedUser } from './common/types';
 import { AuthResultDto } from './dto/auth-result.dto';
 import { LoginDto } from './dto/login.dto';
 import { PublicUserDto } from './dto/public-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AccessTokenGuard } from './guards/access-token.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -87,24 +100,23 @@ export class AuthController {
   }
 
   @Get('me')
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ operationId: 'authMe' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: PublicUserDto })
   @ApiUnauthorizedResponse()
-  me(@Headers('authorization') authorization?: string) {
-    return this.auth.me(authorization);
+  me(@CurrentUser() user: AuthenticatedUser) {
+    return this.auth.me(user.id);
   }
 
   @Patch('me')
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ operationId: 'authUpdateProfile' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: PublicUserDto })
   @ApiBadRequestResponse({ description: 'Поля не прошли проверку.' })
   @ApiUnauthorizedResponse()
-  updateProfile(
-    @Headers('authorization') authorization: string | undefined,
-    @Body() input: UpdateProfileDto,
-  ) {
-    return this.auth.updateProfile(authorization, input);
+  updateProfile(@CurrentUser() user: AuthenticatedUser, @Body() input: UpdateProfileDto) {
+    return this.auth.updateProfile(user.id, input);
   }
 }

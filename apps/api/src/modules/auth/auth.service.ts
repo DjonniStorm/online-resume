@@ -95,8 +95,7 @@ export class AuthService {
     }
   }
 
-  async me(authorization?: string) {
-    const userId = await this.authenticate(authorization);
+  async me(userId: string) {
     const user = await this.users.findPublicById(userId);
     if (!user) {
       throw new UnauthorizedException();
@@ -104,12 +103,11 @@ export class AuthService {
     return user;
   }
 
-  async updateProfile(authorization: string | undefined, input: UpdateProfileDto) {
-    const userId = await this.authenticate(authorization);
+  async updateProfile(userId: string, input: UpdateProfileDto) {
     return this.users.updateProfile(userId, input);
   }
 
-  private async authenticate(authorization?: string): Promise<string> {
+  async authenticate(authorization?: string) {
     const token = /^Bearer (\S+)$/i.exec(authorization ?? '')?.[1];
     if (!token) {
       throw new UnauthorizedException();
@@ -127,7 +125,11 @@ export class AuthService {
     if (!session) {
       throw new UnauthorizedException();
     }
-    return payload.sub;
+    const user = await this.users.findPublicById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return { id: user.id, role: user.role };
   }
 
   private async createSession(user: Awaited<ReturnType<UsersService['create']>>) {
