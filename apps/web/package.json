@@ -7,6 +7,7 @@
     "dev": "rsbuild dev",
     "build": "tsc -b && rsbuild build",
     "preview": "rsbuild preview",
+    "api:generate": "openapi-ts",
     "test": "vitest run --config vitest.config.ts",
     "test:browser": "vitest run --config vitest.browser.config.ts"
   },
@@ -25,6 +26,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
     "@rsbuild/core": "^2.3.2",
     "@rsbuild/plugin-react": "^2.1.1",
     "@types/node": "^26.6.2",
