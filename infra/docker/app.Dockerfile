@@ -35,7 +35,7 @@ COPY --from=build /app/packages/shared/package.json ./packages/shared/package.js
 WORKDIR /app/apps/api
 USER node
 EXPOSE 3000
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy --config ../../prisma.config.ts && node dist/main.js"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy --config ../../prisma.config.ts && node dist/seed.js && node dist/main.js"]
 
 FROM caddy:2-alpine AS web
 

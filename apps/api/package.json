@@ -8,6 +8,7 @@
     "start": "node dist/main.js",
     "db:generate": "prisma generate --config ../../prisma.config.ts",
     "db:push": "prisma db push --config ../../prisma.config.ts",
+    "db:seed": "pnpm run build && node dist/seed.js",
     "db:migrate": "prisma migrate deploy --config ../../prisma.config.ts",
     "openapi:generate": "pnpm run build && node dist/openapi.js",
     "test": "vitest run --config vitest.config.mts"
