@@ -4,11 +4,14 @@ import type { BaseApi } from '@/shared/api';
 import { templateList } from '@/shared/api/generated/sdk.gen';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 
+export const TEMPLATE_PAGE_SIZES = [3, 6, 9, 12] as const;
+const DEFAULT_TEMPLATE_PAGE_SIZE = TEMPLATE_PAGE_SIZES[0];
+
 export class TemplateStore {
   templates: TemplateDto[] = [];
   total = 0;
   page = 1;
-  limit = 4;
+  limit: number = DEFAULT_TEMPLATE_PAGE_SIZE;
   search = '';
 
   private readonly operations;
@@ -67,7 +70,7 @@ export class TemplateStore {
   openSelection(): Promise<void> {
     runInAction(() => {
       this.search = '';
-      this.limit = 4;
+      this.limit = DEFAULT_TEMPLATE_PAGE_SIZE;
     });
     return this.load(1);
   }

@@ -2,6 +2,7 @@ import '@mantine/core/styles.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import '@/app/global.css';
 import { AppProviders } from '@/app/providers';
 import { AppRouter } from '@/app/router';
 
