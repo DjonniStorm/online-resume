@@ -6,3 +6,407 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+/// Роль аккаунта в приложении.
+enum Role {
+  USER
+  ADMIN
+}
+
+/// Доступные виды разделов резюме.
+enum ResumeSectionType {
+  PROFILE
+  ABOUT
+  CONTACTS
+  EXPERIENCE
+  EDUCATION
+  SKILLS
+  LANGUAGES
+  PROJECTS
+  CERTIFICATES
+}
+
+/// Состояние версии шаблона в редакторе администратора.
+/// Состояние шаблона в каталоге.
+enum TemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+/// Поддерживаемая композиция страницы.
+enum TemplateLayout {
+  SINGLE_COLUMN
+  SIDEBAR_LEFT
+  SIDEBAR_RIGHT
+  WIDE_HEADER
+}
+
+/// Место для фотографии в композиции.
+enum TemplatePhotoPlacement {
+  NONE
+  HEADER_START
+  HEADER_END
+  SIDEBAR_TOP
+  MAIN_TOP
+}
+
+/// Форма фотографии.
+enum TemplatePhotoShape {
+  CIRCLE
+  SQUARE
+  ROUNDED_RECTANGLE
+}
+
+/// Вид шапки на страницах продолжения.
+enum TemplateContinuationHeader {
+  FULL
+  COMPACT
+  NONE
+}
+
+/// Область композиции для раздела или рисунка.
+enum TemplateRegion {
+  PAGE
+  HEADER
+  SIDEBAR
+  MAIN
+  FOOTER
+}
+
+/// Представление записей раздела.
+enum TemplateSectionLayout {
+  STANDARD
+  COMPACT
+  TIMELINE
+  TAGS
+  BARS
+}
+
+/// Общий ритм отступов шаблона.
+enum TemplateSpacing {
+  COMPACT
+  REGULAR
+  RELAXED
+}
+
+/// Размещение рисунка внутри области.
+enum TemplateImageFit {
+  COVER
+  CONTAIN
+  FILL
+}
+
+/// Тип файла оформления.
+enum TemplateAssetKind {
+  RASTER_IMAGE
+  VECTOR_IMAGE
+  FONT
+}
+
+/// Отдельное поле резюме, доступное в редакторе.
+enum TemplateFieldType {
+  FIRST_NAME
+  LAST_NAME
+  HEADLINE
+  EMAIL
+  PHONE
+  LOCATION
+  GITHUB_URL
+  TELEGRAM_HANDLE
+  WEBSITE_URL
+}
+
+/// Аккаунт владельца резюме или администратора шаблонов.
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  githubUrl      String?
+  telegramHandle String?
+  websiteUrl     String?
+  role           Role     @default(USER)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  /// Prisma заполняет дату при создании и обновляет при изменениях.
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+  resumes                 Resume[]
+}
+
+/// Самостоятельный шаблон: опубликованный экземпляр копируют для изменений.
+model ResumeTemplate {
+  id                    String                     @id @default(cuid())
+  slug                  String                     @unique
+  name                  String
+  description           String?
+  previewUrl            String?
+  status                TemplateStatus             @default(DRAFT)
+  layout                TemplateLayout
+  pageWidthMm           Decimal                    @db.Decimal(8, 3)
+  pageHeightMm          Decimal                    @db.Decimal(8, 3)
+  sidebarWidthPercent   Int?
+  photoPlacement        TemplatePhotoPlacement     @default(NONE)
+  photoShape            TemplatePhotoShape         @default(CIRCLE)
+  continuationHeader    TemplateContinuationHeader @default(COMPACT)
+  createdAt             DateTime                   @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime?                  @db.Timestamptz(3)
+  publishedAt           DateTime?                  @db.Timestamptz(3)
+  archivedAt            DateTime?                  @db.Timestamptz(3)
+  theme                 TemplateTheme?
+  sections              TemplateSection[]
+  fields                TemplateFieldRule[]
+  decorations           TemplateDecoration[]
+  resumes               Resume[]
+
+  @@index([status])
+}
+
+/// Цвета, шрифты и общий ритм отступов шаблона.
+model TemplateTheme {
+  templateId        String          @id
+  titleFontFamily   String
+  bodyFontFamily    String
+  titleFontAssetId  String?
+  bodyFontAssetId   String?
+  titleSizePt       Decimal         @db.Decimal(6, 2)
+  sectionTitleSizePt Decimal        @db.Decimal(6, 2)
+  bodySizePt        Decimal         @db.Decimal(6, 2)
+  lineHeight        Decimal         @default(1.2) @db.Decimal(4, 2)
+  spacing           TemplateSpacing @default(REGULAR)
+  primaryColor      String
+  secondaryColor    String
+  textColor         String
+  pageColor         String
+  headerColor       String?
+  sidebarColor      String?
+  template          ResumeTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  titleFontAsset    TemplateAsset?  @relation("TemplateTitleFont", fields: [titleFontAssetId], references: [id], onDelete: Restrict)
+  bodyFontAsset     TemplateAsset?  @relation("TemplateBodyFont", fields: [bodyFontAssetId], references: [id], onDelete: Restrict)
+}
+
+/// Раздел, который шаблон показывает в указанной области.
+model TemplateSection {
+  id           String                @id @default(cuid())
+  templateId   String
+  type         ResumeSectionType
+  region       TemplateRegion
+  sortOrder    Int
+  itemLayout   TemplateSectionLayout @default(STANDARD)
+  canReorder   Boolean               @default(true)
+  showHeading  Boolean               @default(true)
+  headingText  String?
+  accentColor  String?
+  template     ResumeTemplate        @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, type])
+  @@unique([templateId, region, sortOrder])
+}
+
+/// Отдельное поле, которое выбранный шаблон открывает в редакторе.
+model TemplateFieldRule {
+  templateId String
+  field      TemplateFieldType
+  isRequired Boolean          @default(false)
+  template   ResumeTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@id([templateId, field])
+}
+
+/// Декоративный файл, закреплённый за областью страницы.
+model TemplateDecoration {
+  id                   String           @id @default(cuid())
+  templateId           String
+  assetId              String
+  region               TemplateRegion
+  sortOrder            Int
+  fit                  TemplateImageFit @default(COVER)
+  opacity              Decimal          @default(1) @db.Decimal(4, 3)
+  repeatOnContinuation Boolean          @default(true)
+  template             ResumeTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  asset                TemplateAsset    @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@unique([templateId, region, sortOrder])
+}
+
+/// Метаданные рисунка или шрифта; сам файл хранится вне БД.
+model TemplateAsset {
+  id             String               @id @default(cuid())
+  storageKey     String               @unique
+  kind           TemplateAssetKind
+  mimeType       String
+  checksumSha256 String
+  widthPx        Int?
+  heightPx       Int?
+  createdAt      DateTime             @default(now()) @db.Timestamptz(3)
+  decorations    TemplateDecoration[]
+  titleThemes    TemplateTheme[]      @relation("TemplateTitleFont")
+  bodyThemes     TemplateTheme[]      @relation("TemplateBodyFont")
+}
+
+/// Резюме пользователя с данными, публикацией и выбранным шаблоном.
+model Resume {
+  id                String              @id @default(cuid())
+  ownerId           String
+  templateId        String
+  revision          Int                 @default(1)
+  title             String
+  firstName         String
+  lastName          String
+  headline          String?
+  email             String?
+  phone             String?
+  location          String?
+  githubUrl         String?
+  telegramHandle    String?
+  websiteUrl        String?
+  about             String?
+  photoPath         String?
+  publicSlug        String?             @unique
+  isPublished       Boolean             @default(false)
+  publishedAt       DateTime?           @db.Timestamptz(3)
+  createdAt         DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime            @updatedAt @db.Timestamptz(3)
+  owner             User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  template          ResumeTemplate      @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  sections          ResumeSection[]
+  experiences       ResumeExperience[]
+  educations        ResumeEducation[]
+  skills            ResumeSkill[]
+  languages         ResumeLanguage[]
+  projects          ResumeProject[]
+  certificates      ResumeCertificate[]
+  views             ResumeView[]
+
+  @@index([ownerId, updatedAt])
+  @@index([templateId])
+  @@index([isPublished, publicSlug])
+}
+
+/// Порядок и видимость раздела в конкретном резюме.
+model ResumeSection {
+  id        String            @id @default(cuid())
+  resumeId  String
+  type      ResumeSectionType
+  sortOrder Int               @default(0)
+  isVisible Boolean           @default(true)
+  createdAt DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime          @updatedAt @db.Timestamptz(3)
+  resume    Resume            @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@unique([resumeId, type])
+  @@index([resumeId, sortOrder])
+}
+
+/// Одна запись об опыте работы.
+model ResumeExperience {
+  id          String    @id @default(cuid())
+  resumeId    String
+  company     String
+  position    String
+  location    String?
+  startDate   DateTime? @db.Date
+  endDate     DateTime? @db.Date
+  isCurrent   Boolean   @default(false)
+  description String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Одна запись об образовании.
+model ResumeEducation {
+  id           String    @id @default(cuid())
+  resumeId     String
+  institution  String
+  degree       String?
+  fieldOfStudy String?
+  location     String?
+  startDate    DateTime? @db.Date
+  endDate      DateTime? @db.Date
+  description  String?
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+  resume       Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Один навык резюме.
+model ResumeSkill {
+  id        String   @id @default(cuid())
+  resumeId  String
+  name      String
+  level     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Один язык и уровень владения им.
+model ResumeLanguage {
+  id          String   @id @default(cuid())
+  resumeId    String
+  name        String
+  proficiency String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Один проект резюме.
+model ResumeProject {
+  id          String    @id @default(cuid())
+  resumeId    String
+  name        String
+  role        String?
+  description String?
+  url         String?
+  startDate   DateTime? @db.Date
+  endDate     DateTime? @db.Date
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Один сертификат резюме.
+model ResumeCertificate {
+  id            String    @id @default(cuid())
+  resumeId      String
+  name          String
+  issuer        String?
+  issuedAt      DateTime? @db.Date
+  expiresAt     DateTime? @db.Date
+  credentialUrl String?
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+  resume        Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, sortOrder])
+}
+
+/// Событие просмотра опубликованного резюме для подсчёта посетителей.
+model ResumeView {
+  id         String   @id @default(cuid())
+  resumeId   String
+  visitorKey String
+  viewedAt   DateTime @default(now()) @db.Timestamptz(3)
+  resume     Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, viewedAt])
+  @@index([resumeId, visitorKey, viewedAt])
+}

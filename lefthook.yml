@@ -8,8 +8,3 @@ pre-commit:
       glob: '*.{js,jsx,ts,tsx,mjs}'
       run: pnpm exec eslint --fix {staged_files}
       stage_fixed: true
-
-commit-msg:
-  commands:
-    commitlint:
-      run: pnpm exec commitlint --edit "{1}"
