@@ -62,7 +62,7 @@ export const TemplatesPage = observer(() => {
     <main>
       <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
         <Stack gap="lg">
-          <Group justify="space-between" align="flex-end" gap="md">
+          <Group justify="space-between" align="center" gap="md">
             <div>
               <Title order={1} size="h2">
                 Шаблоны
