@@ -41,10 +41,7 @@ jobs:
         run: pnpm --filter @online-resume/web exec playwright install --with-deps chromium
 
       - name: Browser tests
-        run: >
-          pnpm exec vitest run --project browser --passWithNoTests
-          --reporter=default --reporter=json
-          --outputFile.json=reports/vitest-browser.json
+        run: pnpm test:browser
 
       - name: Build
         env:
@@ -55,10 +52,10 @@ jobs:
         run: |
           eslint_errors=$(jq '[.[].errorCount] | add // 0' reports/eslint.json)
           eslint_warnings=$(jq '[.[].warningCount] | add // 0' reports/eslint.json)
-          files_passed=$(( $(jq '.numPassedTestSuites // 0' reports/vitest-unit.json) + $(jq '.numPassedTestSuites // 0' reports/vitest-browser.json) ))
-          files_failed=$(( $(jq '.numFailedTestSuites // 0' reports/vitest-unit.json) + $(jq '.numFailedTestSuites // 0' reports/vitest-browser.json) ))
-          tests_passed=$(( $(jq '.numPassedTests // 0' reports/vitest-unit.json) + $(jq '.numPassedTests // 0' reports/vitest-browser.json) ))
-          tests_failed=$(( $(jq '.numFailedTests // 0' reports/vitest-unit.json) + $(jq '.numFailedTests // 0' reports/vitest-browser.json) ))
+          unit_passed=$(jq '.numPassedTests' reports/vitest-unit.json)
+          unit_failed=$(jq '.numFailedTests' reports/vitest-unit.json)
+          browser_passed=$(jq '.stats.expected' reports/playwright-browser.json)
+          browser_failed=$(jq '.stats.unexpected' reports/playwright-browser.json)
           pct() { jq -n --argjson n "$1" '"\(($n * 100 | round) / 100)%"'; }
           line_coverage=$(pct "$(jq '.total.lines.pct' coverage/coverage-summary.json)")
           branch_coverage=$(pct "$(jq '.total.branches.pct' coverage/coverage-summary.json)")
@@ -88,10 +85,10 @@ jobs:
             echo
             echo "| Metric | Value |"
             echo "|---|---:|"
-            echo "| Test files passed | ${files_passed} |"
-            echo "| Test files failed | ${files_failed} |"
-            echo "| Tests passed | ${tests_passed} |"
-            echo "| Tests failed | ${tests_failed} |"
+            echo "| Unit tests passed | ${unit_passed} |"
+            echo "| Unit tests failed | ${unit_failed} |"
+            echo "| Browser tests passed | ${browser_passed} |"
+            echo "| Browser tests failed | ${browser_failed} |"
             echo "| Line coverage | ${line_coverage} |"
             echo "| Branch coverage | ${branch_coverage} |"
             echo "| Function coverage | ${function_coverage} |"
@@ -114,6 +111,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload reports
+        if: always()
         uses: actions/upload-artifact@v5
         with:
           name: metrics
