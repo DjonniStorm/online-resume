@@ -468,6 +468,109 @@
         "tags": ["resumes"]
       }
     },
+    "/api/resumes/{id}/publish": {
+      "post": {
+        "operationId": "resumePublish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumePublicationDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "delete": {
+        "operationId": "resumeUnpublish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/public/resumes/{slug}": {
+      "get": {
+        "operationId": "publicResumeGet",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Резюме недоступно."
+          }
+        },
+        "summary": "",
+        "tags": ["public-resumes"]
+      }
+    },
     "/api/templates": {
       "get": {
         "operationId": "templateList",
@@ -1259,6 +1362,13 @@
           "id": {
             "type": "string"
           },
+          "isPublished": {
+            "type": "boolean"
+          },
+          "publicSlug": {
+            "type": "string",
+            "nullable": true
+          },
           "revision": {
             "type": "number"
           },
@@ -1363,6 +1473,8 @@
         },
         "required": [
           "id",
+          "isPublished",
+          "publicSlug",
           "revision",
           "title",
           "firstName",
@@ -1786,6 +1898,15 @@
           }
         },
         "required": ["revision", "templateSlug"]
+      },
+      "ResumePublicationDto": {
+        "type": "object",
+        "properties": {
+          "publicSlug": {
+            "type": "string"
+          }
+        },
+        "required": ["publicSlug"]
       }
     }
   }

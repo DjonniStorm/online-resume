@@ -1,0 +1,1 @@
+export { ResumePublication } from './ui';

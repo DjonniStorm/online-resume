@@ -6,6 +6,7 @@ import { AppNuqsProvider } from '@/app/providers';
 import { LoginPage } from '@/pages/auth/login/ui/LoginPage';
 import { RegisterPage } from '@/pages/auth/register/ui/RegisterPage';
 import { HomePage } from '@/pages/home/ui/HomePage';
+import { PublicResumePage } from '@/pages/public-resume';
 import { ResumeEditPage } from '@/pages/resume-edit';
 import { ResumePreviewPage } from '@/pages/resume-preview';
 import { ResumesPage } from '@/pages/resumes';
@@ -18,6 +19,14 @@ function PageRoute({ children }: PropsWithChildren) {
 }
 
 const router = createBrowserRouter([
+  {
+    path: '/r/:slug',
+    element: (
+      <PageRoute key="public-resume">
+        <PublicResumePage />
+      </PageRoute>
+    ),
+  },
   {
     path: '/',
     element: (

@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto';
+
 import {
   BadRequestException,
   ConflictException,
@@ -130,6 +132,55 @@ export class ResumesService {
       throw new NotFoundException('Резюме не найдено');
     }
     return resume;
+  }
+
+  async findPublic(slug: string) {
+    const resume = await this.prisma.resume.findFirst({
+      where: { publicSlug: slug, isPublished: true, deletedAt: null },
+      include: resumeDetailInclude,
+    });
+    if (!resume) {
+      throw new NotFoundException('Резюме недоступно');
+    }
+    return { ...resume, ownerId: undefined };
+  }
+
+  async publish(ownerId: string, id: string) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      select: { isPublished: true, publicSlug: true },
+    });
+    if (!current) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    if (!current.isPublished || !current.publicSlug) {
+      await this.prisma.resume.updateMany({
+        where: { id, ownerId, deletedAt: null, isPublished: false },
+        data: {
+          publicSlug: randomBytes(18).toString('base64url'),
+          isPublished: true,
+          publishedAt: new Date(),
+        },
+      });
+    }
+    const resume = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      select: { publicSlug: true },
+    });
+    if (!resume?.publicSlug) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    return { publicSlug: resume.publicSlug };
+  }
+
+  async unpublish(ownerId: string, id: string): Promise<void> {
+    const result = await this.prisma.resume.updateMany({
+      where: { id, ownerId, deletedAt: null },
+      data: { publicSlug: null, isPublished: false, publishedAt: null },
+    });
+    if (result.count !== 1) {
+      throw new NotFoundException('Резюме не найдено');
+    }
   }
 
   async update(ownerId: string, id: string, input: UpdateResumeDto) {
