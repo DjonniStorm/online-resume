@@ -9,6 +9,17 @@
   background: #faf9f7;
 }
 
+@media print {
+  .header {
+    display: none;
+  }
+
+  .shell {
+    min-height: 0;
+    background: white;
+  }
+}
+
 .headerInner {
   display: flex;
   min-height: 72px;

@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Badge,
   Button,
@@ -6,6 +7,7 @@ import {
   Container,
   Group,
   Loader,
+  Menu,
   Pagination,
   Select,
   SimpleGrid,
@@ -131,20 +133,35 @@ export const ResumesPage = observer(() => {
                     Обновлено: {formatDate(resume.updatedAt)}
                   </Text>
                   <Group justify="flex-end">
-                    <Button component={Link} to={`/resumes/${resume.id}/preview`} variant="subtle">
-                      Предпросмотр
-                    </Button>
                     <Button component={Link} to={`/resumes/${resume.id}/edit`} variant="light">
                       Открыть
                     </Button>
-                    <Button
-                      variant="subtle"
-                      color="red"
-                      loading={requests.latest('resumes.remove')?.status === 'pending'}
-                      onClick={() => void removeResume(resume.id, (id) => resumes.remove(id))}
-                    >
-                      Удалить
-                    </Button>
+                    <Menu position="bottom-end" withinPortal>
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          aria-label={`Действия с резюме ${resume.title}`}
+                        >
+                          ⋯
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item component={Link} to={`/resumes/${resume.id}/preview`}>
+                          Предпросмотр
+                        </Menu.Item>
+                        <Menu.Item component={Link} to={`/resumes/${resume.id}/preview?print=1`}>
+                          Сохранить как PDF
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item
+                          color="red"
+                          disabled={requests.latest('resumes.remove')?.status === 'pending'}
+                          onClick={() => void removeResume(resume.id, (id) => resumes.remove(id))}
+                        >
+                          Удалить
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
                   </Group>
                 </Stack>
               </Card>
