@@ -15,7 +15,7 @@ export class TemplateStore {
   }
 
   async load(): Promise<void> {
-    const task = this.operations.list({});
+    const task = this.operations.list({}, { showLoader: false });
     try {
       const result = await task.promise;
       if (!result.data) {
