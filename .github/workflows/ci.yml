@@ -42,7 +42,7 @@ jobs:
 
       - name: Browser tests
         run: >
-          pnpm exec vitest run --project browser
+          pnpm exec vitest run --project browser --passWithNoTests
           --reporter=default --reporter=json
           --outputFile.json=reports/vitest-browser.json
 
