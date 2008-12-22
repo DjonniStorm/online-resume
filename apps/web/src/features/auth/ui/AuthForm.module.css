@@ -1,0 +1,53 @@
+.heading {
+  margin: 0 0 8px;
+  color: #27212f;
+  font-size: clamp(30px, 3.3vw, 38px);
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  line-height: 1.12;
+}
+
+.subtitle {
+  margin: 0 0 30px;
+  color: #716b78;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.form {
+  display: grid;
+  gap: 17px;
+}
+
+.nameRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.submit {
+  margin-top: 8px;
+}
+
+.switch {
+  margin: 27px 0 0;
+  color: #716b78;
+  font-size: 14px;
+  text-align: center;
+}
+
+.switch a {
+  color: #6c35b6;
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+
+.switch a:hover {
+  color: #4d2387;
+}
+
+@media (max-width: 440px) {
+  .nameRow {
+    grid-template-columns: 1fr;
+  }
+}
