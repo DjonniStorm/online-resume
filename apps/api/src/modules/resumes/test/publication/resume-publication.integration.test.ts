@@ -93,11 +93,10 @@ describe('Ожидаемое поведение', () => {
     // Act
     await resumes.remove(ownerId, resumeId);
     const notices = await resumes.deletionNotices(ownerId);
-    const publicRequest = resumes.findPublic(publicSlug);
     await resumes.dismissDeletionNotices(ownerId);
 
     // Assert
-    await expect(publicRequest).rejects.toBeInstanceOf(NotFoundException);
+    await expect(resumes.findPublic(publicSlug)).rejects.toBeInstanceOf(NotFoundException);
     expect(notices).toMatchObject([{ resumeId, title: fixture?.input.title }]);
     expect(await resumes.deletionNotices(ownerId)).toEqual([]);
     expect(await prisma.resume.findUnique({ where: { id: resumeId } })).toMatchObject({
