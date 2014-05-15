@@ -3,21 +3,28 @@ import {
   Button,
   Container,
   Group,
-  Loader,
+  Modal,
+  Pagination,
+  Select,
   SimpleGrid,
+  Skeleton,
   Stack,
   Text,
+  TextInput,
   Title,
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
 import { TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
+import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import { ResumeTemplatePreview } from '@/widgets/resume-template-preview';
+
+import styles from './TemplatesPage.module.css';
 
 export const TemplatesPage = observer(() => {
   useHead({ title: 'Шаблоны — Online Resume' });
@@ -27,7 +34,10 @@ export const TemplatesPage = observer(() => {
     StoreKey.Templates,
     StoreKey.Session,
   );
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const navigate = useNavigate();
 
@@ -35,11 +45,15 @@ export const TemplatesPage = observer(() => {
     void templates.load();
   }, [templates]);
 
-  const selectedTemplate =
-    templates.templates.find((template) => template.slug === selectedSlug) ??
-    templates.templates[0];
+  const normalizedQuery = query.trim().toLocaleLowerCase('ru');
+  const filteredTemplates = templates.templates.filter((template) =>
+    `${template.name} ${template.description}`.toLocaleLowerCase('ru').includes(normalizedQuery),
+  );
+  const pageCount = Math.ceil(filteredTemplates.length / pageSize);
+  const visibleTemplates = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
   const listRequest = requests.latest('templates.list');
   const listError = errors.forOperation('templates.list');
+
   const openCreateModal = () => {
     if (!session.user) {
       navigate('/auth/login');
@@ -49,90 +63,118 @@ export const TemplatesPage = observer(() => {
   };
 
   return (
-    <Container size="xl" py="xl">
-      <Stack gap="xl">
-        <Group justify="space-between" align="flex-end">
-          <Stack gap={4}>
-            <Text size="sm" c="dimmed">
-              Оформление резюме
-            </Text>
-            <Title order={1}>Выберите шаблон</Title>
-            <Text c="dimmed" maw={620}>
-              Готовые варианты с одинаковыми данными, но разной композицией и визуальным ритмом.
-            </Text>
-          </Stack>
-          <Button component={Link} to="/" variant="subtle">
-            На главную
-          </Button>
-        </Group>
+    <main className={styles.page}>
+      <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
+        <Stack gap="lg">
+          <div className={styles.intro}>
+            <div>
+              <Title order={1}>Шаблоны</Title>
+              <Text c="dimmed" size="sm">
+                Выберите оформление для резюме
+              </Text>
+            </div>
+            <TextInput
+              className={styles.search}
+              aria-label="Поиск шаблонов"
+              placeholder="Поиск шаблонов"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.currentTarget.value);
+                setPage(1);
+              }}
+            />
+          </div>
 
-        {listRequest?.status === 'pending' ? <TemplateListSkeleton /> : null}
-        {listError ? (
-          <Alert color="red" title="Не удалось загрузить шаблоны">
-            <Group justify="space-between" mt="sm">
-              <Text size="sm">Проверьте соединение с API и повторите попытку.</Text>
-              <Button variant="light" color="red" onClick={() => void templates.reload()}>
+          {listRequest?.status === 'pending' ? (
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+              <Skeleton height={360} />
+              <Skeleton height={360} />
+            </SimpleGrid>
+          ) : null}
+          {listError ? (
+            <Alert color="red" title="Не удалось загрузить шаблоны">
+              <Button variant="light" color="red" mt="sm" onClick={() => void templates.reload()}>
                 Повторить
               </Button>
+            </Alert>
+          ) : null}
+          {listRequest?.status === 'success' && filteredTemplates.length === 0 ? (
+            <Alert title={query ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
+              {query ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
+            </Alert>
+          ) : null}
+
+          {visibleTemplates.length > 0 ? (
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+              {visibleTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  preview={<ResumeTemplatePreview template={template} />}
+                  onSelect={setSelectedTemplate}
+                />
+              ))}
+            </SimpleGrid>
+          ) : null}
+
+          {filteredTemplates.length > 0 ? (
+            <Group justify="space-between" wrap="wrap" gap="md">
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  На странице
+                </Text>
+                <Select
+                  aria-label="Шаблонов на странице"
+                  size="xs"
+                  w={75}
+                  data={['2', '4', '8', '10']}
+                  value={String(pageSize)}
+                  onChange={(value) => {
+                    setPageSize(Number(value ?? 4));
+                    setPage(1);
+                  }}
+                />
+                <Text size="sm" c="dimmed">
+                  из {filteredTemplates.length}
+                </Text>
+              </Group>
+              {pageCount > 1 ? (
+                <Pagination total={pageCount} value={page} onChange={setPage} />
+              ) : null}
             </Group>
-          </Alert>
-        ) : null}
-        {listRequest?.status === 'success' && templates.templates.length === 0 ? (
-          <Alert title="Шаблонов пока нет">Активные шаблоны ещё не добавлены.</Alert>
-        ) : null}
+          ) : null}
+        </Stack>
+      </Container>
 
-        {templates.templates.length > 0 ? (
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-            {templates.templates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                preview={<ResumeTemplatePreview template={template} />}
-                selected={template.id === selectedTemplate?.id}
-                onSelect={(nextTemplate) => setSelectedSlug(nextTemplate.slug)}
-              />
-            ))}
-          </SimpleGrid>
-        ) : null}
-
+      <Modal
+        opened={selectedTemplate !== null && !createModalOpened}
+        onClose={() => setSelectedTemplate(null)}
+        title={selectedTemplate?.name}
+        size="xl"
+        centered
+      >
         {selectedTemplate ? (
           <Stack gap="md">
-            <Stack gap={4}>
-              <Text size="sm" c="dimmed">
-                Крупный просмотр
-              </Text>
-              <Title order={2}>{selectedTemplate.name}</Title>
-            </Stack>
-            <ResumeTemplatePreview template={selectedTemplate} />
+            <div className={styles.fullPreview}>
+              <ResumeTemplatePreview template={selectedTemplate} />
+            </div>
             <Group justify="flex-end">
-              <Button onClick={openCreateModal}>Создать резюме в этом шаблоне</Button>
+              <Button onClick={openCreateModal}>Создать резюме</Button>
             </Group>
           </Stack>
         ) : null}
-      </Stack>
+      </Modal>
       {selectedTemplate ? (
         <CreateResumeModal
           template={selectedTemplate}
           opened={createModalOpened}
-          onClose={() => setCreateModalOpened(false)}
+          onClose={() => {
+            setCreateModalOpened(false);
+            setSelectedTemplate(null);
+          }}
           onCreated={() => navigate('/resumes')}
         />
       ) : null}
-    </Container>
+    </main>
   );
 });
-
-function TemplateListSkeleton() {
-  return (
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-      {[1, 2, 3].map((item) => (
-        <Stack key={item} gap="md">
-          <Loader size="sm" />
-          <Text size="sm" c="dimmed">
-            Загружаем шаблоны…
-          </Text>
-        </Stack>
-      ))}
-    </SimpleGrid>
-  );
-}

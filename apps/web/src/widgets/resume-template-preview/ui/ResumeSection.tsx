@@ -23,8 +23,11 @@ type ResumeSectionProps = {
 };
 
 export function ResumeSection({ section, data, theme }: ResumeSectionProps) {
+  if (!hasContent(section.type, data)) {
+    return null;
+  }
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-layout={section.itemLayout}>
       {section.showHeading && section.type !== 'PROFILE' ? (
         <h3
           className={styles.sectionHeading}
@@ -36,6 +39,29 @@ export function ResumeSection({ section, data, theme }: ResumeSectionProps) {
       <SectionContent type={section.type} data={data} />
     </section>
   );
+}
+
+function hasContent(type: SectionType, data: ResumePreviewData): boolean {
+  return match(type)
+    .with('PROFILE', () => false)
+    .with('ABOUT', () => Boolean(data.about))
+    .with('CONTACTS', () =>
+      [
+        data.email,
+        data.phone,
+        data.location,
+        data.githubUrl,
+        data.telegramHandle,
+        data.websiteUrl,
+      ].some(Boolean),
+    )
+    .with('EXPERIENCE', () => data.experience.length > 0)
+    .with('EDUCATION', () => data.education.length > 0)
+    .with('SKILLS', () => data.skills.length > 0)
+    .with('LANGUAGES', () => data.languages.length > 0)
+    .with('PROJECTS', () => data.projects.length > 0)
+    .with('CERTIFICATES', () => data.certificates.length > 0)
+    .exhaustive();
 }
 
 function SectionContent({ type, data }: { type: SectionType; data: ResumePreviewData }): ReactNode {

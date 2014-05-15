@@ -1,4 +1,8 @@
-import type { TemplateSectionDto, TemplateThemeDto } from '@/shared/api/generated/types.gen';
+import type {
+  TemplateDto,
+  TemplateSectionDto,
+  TemplateThemeDto,
+} from '@/shared/api/generated/types.gen';
 
 import type { ResumePreviewData } from './resume-preview-data';
 
@@ -10,4 +14,5 @@ export type ResumeTemplateLayoutProps = {
   data: ResumePreviewData;
   sectionsByRegion: SectionsByRegion;
   theme: TemplateThemeDto;
+  template: TemplateDto;
 };

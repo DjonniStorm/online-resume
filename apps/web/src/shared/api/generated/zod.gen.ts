@@ -76,6 +76,13 @@ export const zResumeSummaryDto = z.object({
     updatedAt: z.iso.datetime()
 });
 
+export const zResumeListDto = z.object({
+    items: z.array(zResumeSummaryDto),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number()
+});
+
 export const zTemplateThemeDto = z.object({
     titleFontFamily: z.string(),
     bodyFontFamily: z.string(),
@@ -159,6 +166,23 @@ export const zTemplateDto = z.object({
     pageWidthMm: z.string(),
     pageHeightMm: z.string(),
     sidebarWidthPercent: z.number().nullable(),
+    photoPlacement: z.enum([
+        'NONE',
+        'HEADER_START',
+        'HEADER_END',
+        'SIDEBAR_TOP',
+        'MAIN_TOP'
+    ]),
+    photoShape: z.enum([
+        'CIRCLE',
+        'SQUARE',
+        'ROUNDED_RECTANGLE'
+    ]),
+    continuationHeader: z.enum([
+        'FULL',
+        'COMPACT',
+        'NONE'
+    ]),
     previewUrl: z.string().nullable(),
     theme: zTemplateThemeDto.nullable(),
     sections: z.array(zTemplateSectionDto),
@@ -183,7 +207,13 @@ export const zAuthUpdateProfileBody = zUpdateProfileDto;
 
 export const zAuthUpdateProfileResponse = zPublicUserDto;
 
-export const zResumeListResponse = z.array(zResumeSummaryDto);
+export const zResumeListQuery = z.object({
+    page: z.number().gte(1).optional().default(1),
+    limit: z.number().gte(1).lte(50).optional().default(10),
+    search: z.string().max(100).optional()
+});
+
+export const zResumeListResponse = zResumeListDto;
 
 export const zResumeCreateBody = zCreateResumeDto;
 

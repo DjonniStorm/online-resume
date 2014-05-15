@@ -1,6 +1,19 @@
 .previewFrame {
   aspect-ratio: 210 / 297;
-  padding: 14px;
   overflow: hidden;
-  background: #eef2f6;
+  background: #f0efed;
+}
+.card {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card:hover {
+  border-color: #9c76c8;
+}
+
+.card:focus-visible {
+  outline: 2px solid #7541b7;
+  outline-offset: 3px;
 }

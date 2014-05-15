@@ -1,0 +1,9 @@
+.search {
+  display: flex;
+  max-width: 480px;
+  gap: 10px;
+}
+
+.search > div {
+  flex: 1;
+}

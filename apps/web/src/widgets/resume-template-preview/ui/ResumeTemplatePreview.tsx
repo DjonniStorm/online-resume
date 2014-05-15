@@ -11,6 +11,7 @@ import { defaultTheme } from '../model/default-theme';
 import type { SectionsByRegion } from '../model/layout-types';
 import { previewFixture } from '../model/preview-fixture';
 import type { ResumePreviewData } from '../model/resume-preview-data';
+import { ResumeSection } from './ResumeSection';
 import styles from './ResumeTemplatePreview.module.css';
 import { SidebarLayout } from './layouts/SidebarLayout';
 import { SingleColumnLayout } from './layouts/SingleColumnLayout';
@@ -34,7 +35,7 @@ export function ResumeTemplatePreview({
   const pageWidth = Number(template.pageWidthMm) * pixelsPerMm;
   const pageHeight = Number(template.pageHeightMm) * pixelsPerMm;
   const sectionsByRegion = groupSections(template.sections);
-  const layoutProps = { data, sectionsByRegion, theme };
+  const layoutProps = { data, sectionsByRegion, theme, template };
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -74,6 +75,7 @@ export function ResumeTemplatePreview({
         <article
           ref={pageRef}
           className={styles.page}
+          data-spacing={theme.spacing}
           style={{
             ...getPageStyle(theme, template),
             width: pageWidth,
@@ -81,11 +83,25 @@ export function ResumeTemplatePreview({
             transform: `scale(${dimensions.scale})`,
           }}
         >
+          {sectionsByRegion.PAGE.length > 0 ? (
+            <div className={styles.pageRegion}>
+              {sectionsByRegion.PAGE.map((section) => (
+                <ResumeSection key={section.id} section={section} data={data} theme={theme} />
+              ))}
+            </div>
+          ) : null}
           {match(template.layout)
-            .with('SIDEBAR_LEFT', () => <SidebarLayout {...layoutProps} />)
+            .with('SIDEBAR_LEFT', 'SIDEBAR_RIGHT', () => <SidebarLayout {...layoutProps} />)
             .with('WIDE_HEADER', () => <WideHeaderLayout {...layoutProps} />)
-            .with('SINGLE_COLUMN', 'SIDEBAR_RIGHT', () => <SingleColumnLayout {...layoutProps} />)
+            .with('SINGLE_COLUMN', () => <SingleColumnLayout {...layoutProps} />)
             .exhaustive()}
+          {sectionsByRegion.FOOTER.length > 0 ? (
+            <footer className={styles.footerRegion}>
+              {sectionsByRegion.FOOTER.map((section) => (
+                <ResumeSection key={section.id} section={section} data={data} theme={theme} />
+              ))}
+            </footer>
+          ) : null}
         </article>
       </div>
     </div>
@@ -114,7 +130,10 @@ function getPageStyle(theme: TemplateThemeDto, template: TemplateDto): CSSProper
     '--resume-secondary': theme.secondaryColor,
     '--resume-text': theme.textColor,
     '--resume-page': theme.pageColor,
-    '--resume-header': theme.headerColor ?? theme.primaryColor,
+    '--resume-header':
+      template.layout === 'WIDE_HEADER' && !template.theme
+        ? theme.primaryColor
+        : (theme.headerColor ?? theme.primaryColor),
     '--resume-sidebar': theme.sidebarColor ?? theme.pageColor,
     '--resume-title-size': `${theme.titleSizePt}pt`,
     '--resume-section-size': `${theme.sectionTitleSizePt}pt`,

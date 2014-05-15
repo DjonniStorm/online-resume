@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -14,7 +24,8 @@ import { CurrentUser } from '../auth/common/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/common/types';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { CreateResumeDto } from './dto/create-resume.dto';
-import { ResumeSummaryDto } from './dto/resume-summary.dto';
+import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import { ResumeListDto } from './dto/resume-summary.dto';
 import { ResumesService } from './resumes.service';
 
 @ApiTags('resumes')
@@ -35,9 +46,9 @@ export class ResumesController {
 
   @Get()
   @ApiOperation({ operationId: 'resumeList' })
-  @ApiOkResponse({ type: [ResumeSummaryDto] })
-  findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.resumes.findAll(user.id);
+  @ApiOkResponse({ type: ResumeListDto })
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: ResumeListQueryDto) {
+    return this.resumes.findAll(user.id, query);
   }
 
   @Get(':id')

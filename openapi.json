@@ -236,17 +236,45 @@
       },
       "get": {
         "operationId": "resumeList",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ResumeSummaryDto"
-                  }
+                  "$ref": "#/components/schemas/ResumeListDto"
                 }
               }
             }
@@ -691,6 +719,27 @@
         },
         "required": ["id", "title", "firstName", "lastName", "template", "createdAt", "updatedAt"]
       },
+      "ResumeListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResumeSummaryDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "limit"]
+      },
       "TemplateThemeDto": {
         "type": "object",
         "properties": {
@@ -868,6 +917,18 @@
             "type": "number",
             "nullable": true
           },
+          "photoPlacement": {
+            "enum": ["NONE", "HEADER_START", "HEADER_END", "SIDEBAR_TOP", "MAIN_TOP"],
+            "type": "string"
+          },
+          "photoShape": {
+            "enum": ["CIRCLE", "SQUARE", "ROUNDED_RECTANGLE"],
+            "type": "string"
+          },
+          "continuationHeader": {
+            "enum": ["FULL", "COMPACT", "NONE"],
+            "type": "string"
+          },
           "previewUrl": {
             "type": "string",
             "nullable": true
@@ -903,6 +964,9 @@
           "pageWidthMm",
           "pageHeightMm",
           "sidebarWidthPercent",
+          "photoPlacement",
+          "photoShape",
+          "continuationHeader",
           "previewUrl",
           "theme",
           "sections",

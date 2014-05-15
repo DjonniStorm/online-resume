@@ -81,6 +81,13 @@ export type ResumeSummaryDto = {
     updatedAt: string;
 };
 
+export type ResumeListDto = {
+    items: Array<ResumeSummaryDto>;
+    total: number;
+    page: number;
+    limit: number;
+};
+
 export type TemplateThemeDto = {
     titleFontFamily: string;
     bodyFontFamily: string;
@@ -123,6 +130,9 @@ export type TemplateDto = {
     pageWidthMm: string;
     pageHeightMm: string;
     sidebarWidthPercent: number | null;
+    photoPlacement: 'NONE' | 'HEADER_START' | 'HEADER_END' | 'SIDEBAR_TOP' | 'MAIN_TOP';
+    photoShape: 'CIRCLE' | 'SQUARE' | 'ROUNDED_RECTANGLE';
+    continuationHeader: 'FULL' | 'COMPACT' | 'NONE';
     previewUrl: string | null;
     theme: TemplateThemeDto | null;
     sections: Array<TemplateSectionDto>;
@@ -269,7 +279,11 @@ export type AuthUpdateProfileResponse = AuthUpdateProfileResponses[keyof AuthUpd
 export type ResumeListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+    };
     url: '/api/resumes';
 };
 
@@ -278,7 +292,7 @@ export type ResumeListErrors = {
 };
 
 export type ResumeListResponses = {
-    200: Array<ResumeSummaryDto>;
+    200: ResumeListDto;
 };
 
 export type ResumeListResponse = ResumeListResponses[keyof ResumeListResponses];

@@ -1,5 +1,5 @@
 .shell {
-  min-height: 100vh;
+  min-height: calc(100vh - 73px);
   display: grid;
   grid-template-columns: minmax(360px, 44%) minmax(0, 1fr);
   background: #faf9f7;
@@ -7,29 +7,11 @@
 }
 
 .intro {
-  min-height: 100vh;
+  min-height: calc(100vh - 73px);
   display: flex;
   flex-direction: column;
   padding: clamp(28px, 4vw, 64px);
   background: #f0ecf8;
-}
-
-.brand {
-  display: inline-flex;
-  width: max-content;
-  align-items: center;
-  gap: 12px;
-  color: #30234d;
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: -0.035em;
-  text-decoration: none;
-}
-
-.brand:focus-visible {
-  outline: 2px solid #7941c4;
-  outline-offset: 6px;
-  border-radius: 3px;
 }
 
 .introBody {
@@ -161,7 +143,7 @@
   }
 
   .main {
-    min-height: calc(100vh - 82px);
+    min-height: calc(100vh - 146px);
     align-items: flex-start;
     padding: clamp(36px, 7vw, 72px) 24px;
   }

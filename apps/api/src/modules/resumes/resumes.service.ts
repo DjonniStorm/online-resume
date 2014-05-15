@@ -4,6 +4,7 @@ import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { TemplateStatus } from '../../generated/prisma/enums';
 import { CreateResumeDto } from './dto/create-resume.dto';
+import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 
 const resumeDetailInclude = {
   template: {
@@ -71,26 +72,46 @@ export class ResumesService {
     });
   }
 
-  findAll(ownerId: string) {
-    return this.prisma.resume.findMany({
-      where: { ownerId, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        firstName: true,
-        lastName: true,
-        createdAt: true,
-        updatedAt: true,
-        template: {
-          select: {
-            id: true,
-            slug: true,
-            name: true,
+  async findAll(ownerId: string, { page, limit, search }: ResumeListQueryDto) {
+    const term = search?.trim();
+    const where: Prisma.ResumeWhereInput = {
+      ownerId,
+      deletedAt: null,
+      ...(term
+        ? {
+            OR: [
+              { title: { contains: term, mode: 'insensitive' } },
+              { firstName: { contains: term, mode: 'insensitive' } },
+              { lastName: { contains: term, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+    const [total, items] = await this.prisma.$transaction([
+      this.prisma.resume.count({ where }),
+      this.prisma.resume.findMany({
+        where,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          firstName: true,
+          lastName: true,
+          createdAt: true,
+          updatedAt: true,
+          template: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
+    return { items, total, page, limit };
   }
 
   async findOne(ownerId: string, id: string) {

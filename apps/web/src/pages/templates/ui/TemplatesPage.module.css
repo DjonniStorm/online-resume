@@ -1,0 +1,35 @@
+.page {
+  min-height: calc(100vh - 73px);
+}
+
+.intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.intro h1 {
+  margin-bottom: 4px;
+  font-size: clamp(26px, 3vw, 36px);
+  letter-spacing: -0.04em;
+}
+
+.search {
+  width: min(100%, 320px);
+}
+
+.fullPreview {
+  max-width: 794px;
+  margin: 0 auto;
+}
+
+@media (max-width: 650px) {
+  .intro {
+    display: block;
+  }
+
+  .search {
+    margin-top: 16px;
+  }
+}

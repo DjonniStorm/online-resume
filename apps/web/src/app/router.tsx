@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
+import { RouterProvider, createBrowserRouter } from 'react-router';
 
 import { useClearRequestsOnUnmount } from '@/app/hooks/use-clear-requests-on-unmount';
 import { AppNuqsProvider } from '@/app/providers';
@@ -8,6 +8,7 @@ import { RegisterPage } from '@/pages/auth/register/ui/RegisterPage';
 import { HomePage } from '@/pages/home/ui/HomePage';
 import { ResumesPage } from '@/pages/resumes';
 import { TemplatesPage } from '@/pages/templates';
+import { AppShell } from '@/widgets/app-shell';
 
 function PageRoute({ children }: { children: ReactNode }) {
   useClearRequestsOnUnmount();
@@ -19,7 +20,7 @@ const router = createBrowserRouter([
     path: '/',
     element: (
       <AppNuqsProvider>
-        <Outlet />
+        <AppShell />
       </AppNuqsProvider>
     ),
     children: [
