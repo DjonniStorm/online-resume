@@ -271,10 +271,24 @@ export const zResumeDto = z.object({
     certificates: z.array(zResumeCertificateDto)
 });
 
+export const zResumeTemplateThemeSummaryDto = z.object({
+    primaryColor: z.string(),
+    pageColor: z.string(),
+    headerColor: z.string().nullable(),
+    sidebarColor: z.string().nullable()
+});
+
 export const zResumeTemplateSummaryDto = z.object({
     id: z.string(),
     slug: z.string(),
-    name: z.string()
+    name: z.string(),
+    layout: z.enum([
+        'SINGLE_COLUMN',
+        'SIDEBAR_LEFT',
+        'SIDEBAR_RIGHT',
+        'WIDE_HEADER'
+    ]),
+    theme: zResumeTemplateThemeSummaryDto.nullable()
 });
 
 export const zResumeSummaryDto = z.object({
@@ -282,6 +296,7 @@ export const zResumeSummaryDto = z.object({
     title: z.string(),
     firstName: z.string(),
     lastName: z.string(),
+    headline: z.string().nullable(),
     isPublished: z.boolean(),
     template: zResumeTemplateSummaryDto,
     createdAt: z.iso.datetime(),

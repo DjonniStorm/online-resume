@@ -1743,6 +1743,26 @@
           "certificates"
         ]
       },
+      "ResumeTemplateThemeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "primaryColor": {
+            "type": "string"
+          },
+          "pageColor": {
+            "type": "string"
+          },
+          "headerColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "sidebarColor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["primaryColor", "pageColor", "headerColor", "sidebarColor"]
+      },
       "ResumeTemplateSummaryDto": {
         "type": "object",
         "properties": {
@@ -1754,9 +1774,22 @@
           },
           "name": {
             "type": "string"
+          },
+          "layout": {
+            "enum": ["SINGLE_COLUMN", "SIDEBAR_LEFT", "SIDEBAR_RIGHT", "WIDE_HEADER"],
+            "type": "string"
+          },
+          "theme": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResumeTemplateThemeSummaryDto"
+              }
+            ]
           }
         },
-        "required": ["id", "slug", "name"]
+        "required": ["id", "slug", "name", "layout", "theme"]
       },
       "ResumeSummaryDto": {
         "type": "object",
@@ -1772,6 +1805,10 @@
           },
           "lastName": {
             "type": "string"
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
           },
           "isPublished": {
             "type": "boolean"
@@ -1793,6 +1830,7 @@
           "title",
           "firstName",
           "lastName",
+          "headline",
           "isPublished",
           "template",
           "createdAt",

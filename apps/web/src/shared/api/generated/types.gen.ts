@@ -211,10 +211,19 @@ export type ResumeDto = {
     certificates: Array<ResumeCertificateDto>;
 };
 
+export type ResumeTemplateThemeSummaryDto = {
+    primaryColor: string;
+    pageColor: string;
+    headerColor: string | null;
+    sidebarColor: string | null;
+};
+
 export type ResumeTemplateSummaryDto = {
     id: string;
     slug: string;
     name: string;
+    layout: 'SINGLE_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
+    theme: ResumeTemplateThemeSummaryDto | null;
 };
 
 export type ResumeSummaryDto = {
@@ -222,6 +231,7 @@ export type ResumeSummaryDto = {
     title: string;
     firstName: string;
     lastName: string;
+    headline: string | null;
     isPublished: boolean;
     template: ResumeTemplateSummaryDto;
     createdAt: string;

@@ -1,5 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { TemplateLayout } from '../../../generated/prisma/enums';
+
+export class ResumeTemplateThemeSummaryDto {
+  @ApiProperty()
+  primaryColor!: string;
+
+  @ApiProperty()
+  pageColor!: string;
+
+  @ApiProperty({ nullable: true })
+  headerColor!: string | null;
+
+  @ApiProperty({ nullable: true })
+  sidebarColor!: string | null;
+}
+
 export class ResumeTemplateSummaryDto {
   @ApiProperty()
   id!: string;
@@ -9,6 +25,12 @@ export class ResumeTemplateSummaryDto {
 
   @ApiProperty()
   name!: string;
+
+  @ApiProperty({ enum: TemplateLayout })
+  layout!: TemplateLayout;
+
+  @ApiProperty({ type: ResumeTemplateThemeSummaryDto, nullable: true })
+  theme!: ResumeTemplateThemeSummaryDto | null;
 }
 
 export class ResumeSummaryDto {
@@ -23,6 +45,9 @@ export class ResumeSummaryDto {
 
   @ApiProperty()
   lastName!: string;
+
+  @ApiProperty({ nullable: true })
+  headline!: string | null;
 
   @ApiProperty()
   isPublished!: boolean;

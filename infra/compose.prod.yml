@@ -12,6 +12,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set a different random JWT refresh secret in Coolify}
     expose:
       - '3000'
+    volumes:
+      - api_uploads:/app/apps/api/uploads
     healthcheck:
       test:
         - CMD
@@ -43,3 +45,6 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+
+volumes:
+  api_uploads:

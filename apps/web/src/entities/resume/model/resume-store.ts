@@ -67,7 +67,10 @@ export class ResumeStore {
 
   async load(page = this.page): Promise<void> {
     const sequence = ++this.loadSequence;
-    const task = this.operations.list({ query: { page, limit: this.limit, search: this.search } });
+    const task = this.operations.list(
+      { query: { page, limit: this.limit, search: this.search } },
+      { showLoader: false },
+    );
     try {
       const result = await task.promise;
       if (!result.data || sequence !== this.loadSequence) {
