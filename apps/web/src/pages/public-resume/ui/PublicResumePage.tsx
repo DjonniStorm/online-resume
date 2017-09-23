@@ -62,6 +62,11 @@ export function PublicResumePage() {
           <ResumeTemplatePreview
             template={resume.template}
             data={resumeToPreviewData(resume)}
+            photoUrl={
+              resume.photoPath && slug
+                ? `/api/public/resumes/${encodeURIComponent(slug)}/photo`
+                : null
+            }
             sectionState={resume.sections}
           />
         </Stack>

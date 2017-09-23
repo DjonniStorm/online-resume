@@ -8,6 +8,7 @@ import type { ResumeDto, UpdateResumeDto } from '@/shared/api/generated/types.ge
 import { type SaveState, useResumeAutosave } from '../model';
 import { BasicInformationFields } from './BasicInformationFields';
 import styles from './ResumeEditorForm.module.css';
+import { ResumePhotoField } from './ResumePhotoField';
 import { ResumeSections } from './ResumeSections';
 
 type ResumeEditorFormProps = {
@@ -18,6 +19,11 @@ type ResumeEditorFormProps = {
   onOpenPreview: () => void;
   onSaveStateChange: (state: SaveState) => void;
   onValuesChange: (values: ResumeEditorValues) => void;
+  photoUrl: string | null;
+  photoBusy: boolean;
+  photoError: { status?: number } | undefined;
+  onPhotoUpload: (file: File) => Promise<ResumeDto | null>;
+  onPhotoDelete: () => Promise<ResumeDto | null>;
 };
 
 export function ResumeEditorForm({
@@ -28,6 +34,11 @@ export function ResumeEditorForm({
   onOpenPreview,
   onSaveStateChange,
   onValuesChange,
+  photoUrl,
+  photoBusy,
+  photoError,
+  onPhotoUpload,
+  onPhotoDelete,
 }: ResumeEditorFormProps) {
   const form = useForm<ResumeEditorValues>({
     mode: 'controlled',
@@ -63,6 +74,14 @@ export function ResumeEditorForm({
       }}
     >
       <Stack gap="lg">
+        <ResumePhotoField
+          photoUrl={photoUrl}
+          hasPhoto={Boolean(resume.photoPath)}
+          busy={photoBusy}
+          error={photoError}
+          onUpload={onPhotoUpload}
+          onDelete={onPhotoDelete}
+        />
         <BasicInformationFields form={form} />
         <ResumeSections form={form} resume={resume} />
         {saveError ? (

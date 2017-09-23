@@ -6,6 +6,7 @@ import styles from '../ResumeTemplatePreview.module.css';
 
 export function SingleColumnLayout({
   data,
+  photoUrl,
   sectionsByRegion,
   theme,
   template,
@@ -13,11 +14,11 @@ export function SingleColumnLayout({
   return (
     <div className={styles.singleColumn}>
       {template.photoPlacement === 'HEADER_START' ? (
-        <ResumePhoto data={data} shape={template.photoShape} />
+        <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
       ) : null}
       <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
       {template.photoPlacement === 'HEADER_END' || template.photoPlacement === 'MAIN_TOP' ? (
-        <ResumePhoto data={data} shape={template.photoShape} />
+        <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
       ) : null}
       <main className={styles.main}>
         {sectionsByRegion.MAIN.map((section) => (

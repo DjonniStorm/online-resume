@@ -42,6 +42,10 @@ export function useResumeAutosave({
   const [savedVersion, setSavedVersion] = useState(0);
 
   useEffect(() => {
+    revisionRef.current = resume.revision;
+  }, [resume.revision]);
+
+  useEffect(() => {
     onSaveStateChange(saveState);
   }, [onSaveStateChange, saveState]);
 

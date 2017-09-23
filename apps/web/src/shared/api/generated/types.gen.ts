@@ -565,6 +565,77 @@ export type ResumeUpdateResponses = {
 
 export type ResumeUpdateResponse = ResumeUpdateResponses[keyof ResumeUpdateResponses];
 
+export type ResumePhotoDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/photo';
+};
+
+export type ResumePhotoDeleteErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumePhotoDeleteResponses = {
+    200: ResumeDto;
+};
+
+export type ResumePhotoDeleteResponse = ResumePhotoDeleteResponses[keyof ResumePhotoDeleteResponses];
+
+export type ResumePhotoGetData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/photo';
+};
+
+export type ResumePhotoGetErrors = {
+    401: unknown;
+    /**
+     * Фотография не найдена.
+     */
+    404: unknown;
+};
+
+export type ResumePhotoGetResponses = {
+    200: Blob | File;
+};
+
+export type ResumePhotoGetResponse = ResumePhotoGetResponses[keyof ResumePhotoGetResponses];
+
+export type ResumePhotoUploadData = {
+    body: {
+        file: Blob | File;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/photo';
+};
+
+export type ResumePhotoUploadErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumePhotoUploadResponses = {
+    200: ResumeDto;
+};
+
+export type ResumePhotoUploadResponse = ResumePhotoUploadResponses[keyof ResumePhotoUploadResponses];
+
 export type ResumeTemplateChangeData = {
     body: ChangeResumeTemplateDto;
     path: {
@@ -655,6 +726,28 @@ export type PublicResumeGetResponses = {
 };
 
 export type PublicResumeGetResponse = PublicResumeGetResponses[keyof PublicResumeGetResponses];
+
+export type PublicResumePhotoGetData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/public/resumes/{slug}/photo';
+};
+
+export type PublicResumePhotoGetErrors = {
+    /**
+     * Фотография не найдена.
+     */
+    404: unknown;
+};
+
+export type PublicResumePhotoGetResponses = {
+    200: Blob | File;
+};
+
+export type PublicResumePhotoGetResponse = PublicResumePhotoGetResponses[keyof PublicResumePhotoGetResponses];
 
 export type TemplateListData = {
     body?: never;

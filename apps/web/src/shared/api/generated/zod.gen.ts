@@ -437,6 +437,28 @@ export const zResumeUpdatePath = z.object({
 
 export const zResumeUpdateResponse = zResumeDto;
 
+export const zResumePhotoDeletePath = z.object({
+    id: z.string()
+});
+
+export const zResumePhotoDeleteResponse = zResumeDto;
+
+export const zResumePhotoGetPath = z.object({
+    id: z.string()
+});
+
+export const zResumePhotoGetResponse = z.string();
+
+export const zResumePhotoUploadBody = z.object({
+    file: z.string()
+});
+
+export const zResumePhotoUploadPath = z.object({
+    id: z.string()
+});
+
+export const zResumePhotoUploadResponse = zResumeDto;
+
 export const zResumeTemplateChangeBody = zChangeResumeTemplateDto;
 
 export const zResumeTemplateChangePath = z.object({
@@ -462,6 +484,12 @@ export const zPublicResumeGetPath = z.object({
 });
 
 export const zPublicResumeGetResponse = zResumeDto;
+
+export const zPublicResumePhotoGetPath = z.object({
+    slug: z.string()
+});
+
+export const zPublicResumePhotoGetResponse = z.string();
 
 export const zTemplateListResponse = z.array(zTemplateDto);
 
