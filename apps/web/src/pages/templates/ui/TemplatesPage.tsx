@@ -1,5 +1,6 @@
 import {
   Alert,
+  Box,
   Button,
   Container,
   Group,
@@ -23,8 +24,6 @@ import { TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import { ResumeTemplatePreview } from '@/widgets/resume-template-preview';
-
-import styles from './TemplatesPage.module.css';
 
 export const TemplatesPage = observer(() => {
   useHead({ title: 'Шаблоны — Online Resume' });
@@ -63,10 +62,10 @@ export const TemplatesPage = observer(() => {
   };
 
   return (
-    <main className={styles.page}>
+    <main>
       <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
         <Stack gap="lg">
-          <div className={styles.intro}>
+          <Group justify="space-between" align="flex-end" gap="md">
             <div>
               <Title order={1}>Шаблоны</Title>
               <Text c="dimmed" size="sm">
@@ -74,7 +73,7 @@ export const TemplatesPage = observer(() => {
               </Text>
             </div>
             <TextInput
-              className={styles.search}
+              w={{ base: '100%', sm: 320 }}
               aria-label="Поиск шаблонов"
               placeholder="Поиск шаблонов"
               value={query}
@@ -83,7 +82,7 @@ export const TemplatesPage = observer(() => {
                 setPage(1);
               }}
             />
-          </div>
+          </Group>
 
           {listRequest?.status === 'pending' ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
@@ -155,9 +154,9 @@ export const TemplatesPage = observer(() => {
       >
         {selectedTemplate ? (
           <Stack gap="md">
-            <div className={styles.fullPreview}>
+            <Box maw={794} mx="auto">
               <ResumeTemplatePreview template={selectedTemplate} />
-            </div>
+            </Box>
             <Group justify="flex-end">
               <Button onClick={openCreateModal}>Создать резюме</Button>
             </Group>

@@ -1,12 +1,8 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 import classes from './AuthLayout.module.css';
 
-type AuthLayoutProps = {
-  children: ReactNode;
-};
-
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children }: PropsWithChildren) {
   return (
     <div className={classes.shell}>
       <aside className={classes.intro}>

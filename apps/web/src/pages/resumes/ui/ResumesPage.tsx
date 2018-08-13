@@ -21,8 +21,6 @@ import { Link, useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
 
-import styles from './ResumesPage.module.css';
-
 export const ResumesPage = observer(() => {
   useHead({ title: 'Мои резюме — Online Resume' });
   const { requests, errors, session, resumes } = useStores(
@@ -72,14 +70,17 @@ export const ResumesPage = observer(() => {
           </Button>
         </Group>
 
-        <form
-          className={styles.search}
+        <Group
+          component="form"
+          gap="xs"
+          maw={480}
           onSubmit={(event) => {
             event.preventDefault();
             void resumes.searchFor(search);
           }}
         >
           <TextInput
+            style={{ flex: 1 }}
             aria-label="Поиск резюме"
             placeholder="Поиск по названию и имени"
             value={search}
@@ -88,7 +89,7 @@ export const ResumesPage = observer(() => {
           <Button type="submit" variant="light">
             Найти
           </Button>
-        </form>
+        </Group>
 
         {requests.latest('resumes.list')?.status === 'pending' ? (
           <Group justify="center">

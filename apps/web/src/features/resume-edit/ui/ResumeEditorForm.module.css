@@ -5,21 +5,9 @@
   scrollbar-gutter: stable;
 }
 
-.saveActions {
-  position: sticky;
-  z-index: 1;
-  bottom: 0;
-  padding: 12px 0 2px;
-  background: var(--mantine-color-body);
-}
-
 @media (max-width: 1100px) {
   .form {
     overflow: visible;
     padding-right: 0;
-  }
-
-  .saveActions {
-    position: static;
   }
 }

@@ -376,6 +376,11 @@ export const zUpdateResumeDto = z.object({
     certificates: z.array(zUpdateResumeCertificateDto).max(50)
 });
 
+export const zChangeResumeTemplateDto = z.object({
+    revision: z.number().gte(1),
+    templateSlug: z.string().min(1).max(100).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -425,6 +430,14 @@ export const zResumeUpdatePath = z.object({
 });
 
 export const zResumeUpdateResponse = zResumeDto;
+
+export const zResumeTemplateChangeBody = zChangeResumeTemplateDto;
+
+export const zResumeTemplateChangePath = z.object({
+    id: z.string()
+});
+
+export const zResumeTemplateChangeResponse = zResumeDto;
 
 export const zTemplateListResponse = z.array(zTemplateDto);
 

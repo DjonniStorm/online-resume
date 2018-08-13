@@ -418,6 +418,56 @@
         "tags": ["resumes"]
       }
     },
+    "/api/resumes/{id}/template": {
+      "patch": {
+        "operationId": "resumeTemplateChange",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeResumeTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме или шаблон не найдены."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
     "/api/templates": {
       "get": {
         "operationId": "templateList",
@@ -1719,6 +1769,23 @@
           "projects",
           "certificates"
         ]
+      },
+      "ChangeResumeTemplateDto": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number",
+            "minimum": 1
+          },
+          "templateSlug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "example": "left-rail"
+          }
+        },
+        "required": ["revision", "templateSlug"]
       }
     }
   }

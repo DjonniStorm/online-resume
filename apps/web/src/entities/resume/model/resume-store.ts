@@ -6,9 +6,11 @@ import {
   resumeDelete,
   resumeGet,
   resumeList,
+  resumeTemplateChange,
   resumeUpdate,
 } from '@/shared/api/generated/sdk.gen';
 import type {
+  ChangeResumeTemplateDto,
   CreateResumeDto,
   ResumeDto,
   ResumeSummaryDto,
@@ -31,6 +33,7 @@ export class ResumeStore {
       get: resumeGet,
       list: resumeList,
       remove: resumeDelete,
+      changeTemplate: resumeTemplateChange,
       update: resumeUpdate,
     });
     makeObservable(this, {
@@ -86,6 +89,16 @@ export class ResumeStore {
 
   async update(id: string, input: UpdateResumeDto): Promise<ResumeDto | null> {
     const task = this.operations.update({ path: { id }, body: input });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async changeTemplate(id: string, input: ChangeResumeTemplateDto): Promise<ResumeDto | null> {
+    const task = this.operations.changeTemplate({ path: { id }, body: input });
     try {
       const result = await task.promise;
       return result.data ?? null;

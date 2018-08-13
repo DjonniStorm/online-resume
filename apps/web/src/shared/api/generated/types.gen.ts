@@ -306,6 +306,11 @@ export type UpdateResumeDto = {
     certificates: Array<UpdateResumeCertificateDto>;
 };
 
+export type ChangeResumeTemplateDto = {
+    revision: number;
+    templateSlug: string;
+};
+
 export type HealthControllerCheckData = {
     body?: never;
     path?: never;
@@ -553,6 +558,29 @@ export type ResumeUpdateResponses = {
 };
 
 export type ResumeUpdateResponse = ResumeUpdateResponses[keyof ResumeUpdateResponses];
+
+export type ResumeTemplateChangeData = {
+    body: ChangeResumeTemplateDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/template';
+};
+
+export type ResumeTemplateChangeErrors = {
+    401: unknown;
+    /**
+     * Резюме или шаблон не найдены.
+     */
+    404: unknown;
+};
+
+export type ResumeTemplateChangeResponses = {
+    200: ResumeDto;
+};
+
+export type ResumeTemplateChangeResponse = ResumeTemplateChangeResponses[keyof ResumeTemplateChangeResponses];
 
 export type TemplateListData = {
     body?: never;

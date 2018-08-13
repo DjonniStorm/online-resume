@@ -1,5 +1,5 @@
 import { Card, Title } from '@mantine/core';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 
@@ -12,26 +12,26 @@ type TemplateCardProps = {
 };
 
 export function TemplateCard({ template, preview, onSelect }: TemplateCardProps) {
-  const frameRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) {
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '250px' },
-    );
-    observer.observe(frame);
-    return () => observer.disconnect();
-  }, []);
+  const observeFrame = useCallback(
+    (frame: HTMLDivElement | null) => {
+      if (!frame || visible) {
+        return;
+      }
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        },
+        { rootMargin: '250px' },
+      );
+      observer.observe(frame);
+      return () => observer.disconnect();
+    },
+    [visible],
+  );
 
   return (
     <Card
@@ -44,7 +44,7 @@ export function TemplateCard({ template, preview, onSelect }: TemplateCardProps)
       aria-label={`Посмотреть шаблон ${template.name}`}
       onClick={() => onSelect(template)}
     >
-      <div ref={frameRef} className={styles.previewFrame} aria-hidden="true" inert>
+      <div ref={observeFrame} className={styles.previewFrame} aria-hidden="true" inert>
         {visible ? preview : null}
       </div>
       <Title order={3} size="h4" mt="md" style={{ overflowWrap: 'anywhere' }}>

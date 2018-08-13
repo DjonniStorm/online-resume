@@ -1,6 +1,6 @@
 import { UnheadProvider } from '@unhead/react/client';
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
-export function AppHeadProvider({ children }: { children: ReactNode }) {
+export function AppHeadProvider({ children }: PropsWithChildren) {
   return <UnheadProvider>{children}</UnheadProvider>;
 }

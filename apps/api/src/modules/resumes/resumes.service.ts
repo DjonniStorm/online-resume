@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { ResumeSectionType, TemplateFieldType, TemplateStatus } from '../../generated/prisma/enums';
+import type { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import type { UpdateResumeDto } from './dto/update-resume.dto';
@@ -235,6 +236,62 @@ export class ResumesService {
               credentialUrl: item.credentialUrl,
               sortOrder,
             })),
+          },
+        },
+        include: resumeDetailInclude,
+      }),
+    );
+  }
+
+  async changeTemplate(ownerId: string, id: string, input: ChangeResumeTemplateDto) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      include: { sections: true },
+    });
+    if (!current) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    if (current.revision !== input.revision) {
+      throw new ConflictException(
+        'Резюме уже изменилось. Обновите страницу и повторите смену шаблона.',
+      );
+    }
+
+    const template = await this.prisma.resumeTemplate.findFirst({
+      where: { slug: input.templateSlug, status: TemplateStatus.ACTIVE },
+      include: { sections: true },
+    });
+    if (!template) {
+      throw new NotFoundException('Активный шаблон не найден');
+    }
+    if (current.templateId === template.id) {
+      return this.findOne(ownerId, id);
+    }
+
+    const templateTypes = new Set(template.sections.map((section) => section.type));
+    if (current.sections.some((section) => !templateTypes.has(section.type))) {
+      throw new BadRequestException('Выбранный шаблон не поддерживает разделы этого резюме');
+    }
+
+    const currentSections = new Map(current.sections.map((section) => [section.type, section]));
+    const sections = template.sections.map((templateSection) => {
+      const currentSection = currentSections.get(templateSection.type);
+      return {
+        type: templateSection.type,
+        sortOrder: currentSection?.sortOrder ?? templateSection.sortOrder,
+        isVisible: currentSection?.isVisible ?? true,
+      };
+    });
+
+    return this.prisma.$transaction(async (transaction) =>
+      transaction.resume.update({
+        where: { id: current.id },
+        data: {
+          templateId: template.id,
+          revision: { increment: 1 },
+          sections: {
+            deleteMany: {},
+            create: sections,
           },
         },
         include: resumeDetailInclude,

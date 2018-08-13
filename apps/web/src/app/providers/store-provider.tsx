@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 import { StoreContext, rootStore } from '@/app/store';
 
-export function AppStoreProvider({ children }: { children: ReactNode }) {
+export function AppStoreProvider({ children }: PropsWithChildren) {
   return <StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>;
 }

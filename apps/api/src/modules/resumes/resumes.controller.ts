@@ -24,6 +24,7 @@ import {
 import { CurrentUser } from '../auth/common/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/common/types';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
@@ -72,6 +73,18 @@ export class ResumesController {
     @Body() input: UpdateResumeDto,
   ) {
     return this.resumes.update(user.id, id, input);
+  }
+
+  @Patch(':id/template')
+  @ApiOperation({ operationId: 'resumeTemplateChange' })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме или шаблон не найдены.' })
+  changeTemplate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() input: ChangeResumeTemplateDto,
+  ) {
+    return this.resumes.changeTemplate(user.id, id, input);
   }
 
   @Delete(':id')

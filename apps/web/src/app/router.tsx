@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 
 import { useClearRequestsOnUnmount } from '@/app/hooks/use-clear-requests-on-unmount';
@@ -11,7 +11,7 @@ import { ResumesPage } from '@/pages/resumes';
 import { TemplatesPage } from '@/pages/templates';
 import { AppShell } from '@/widgets/app-shell';
 
-function PageRoute({ children }: { children: ReactNode }) {
+function PageRoute({ children }: PropsWithChildren) {
   useClearRequestsOnUnmount();
   return children;
 }
