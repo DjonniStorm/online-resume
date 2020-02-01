@@ -18,7 +18,11 @@ export function canMoveSection(
   const targetTemplateSection = resume.template.sections.find(
     (section) => section.type === target.type,
   );
-  return currentTemplateSection?.region === targetTemplateSection?.region;
+  return Boolean(
+    currentTemplateSection?.canReorder &&
+    targetTemplateSection?.canReorder &&
+    currentTemplateSection.region === targetTemplateSection.region,
+  );
 }
 
 export function moveSection(
