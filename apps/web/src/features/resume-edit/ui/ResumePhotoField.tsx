@@ -46,7 +46,7 @@ export function ResumePhotoField({
   return (
     <Paper withBorder p="lg">
       <Stack gap="md">
-        <Title order={2} size="h3">
+        <Title order={2} size="h3" fw={600}>
           Фотография
         </Title>
         <Group align="center" gap="lg">

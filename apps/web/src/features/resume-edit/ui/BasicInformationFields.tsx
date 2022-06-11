@@ -11,7 +11,7 @@ export function BasicInformationFields({ form, fields }: BasicInformationFieldsP
   return (
     <Paper withBorder p="lg">
       <Stack gap="md">
-        <Title order={2} size="h3">
+        <Title order={2} size="h3" fw={600}>
           Основная информация
         </Title>
         <TextInput label="Название резюме" {...form.getInputProps('title')} />

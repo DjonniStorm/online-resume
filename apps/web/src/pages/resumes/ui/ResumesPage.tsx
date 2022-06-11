@@ -65,7 +65,7 @@ export const ResumesPage = observer(() => {
     <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
       <Stack gap="xl">
         <Group justify="space-between" align="flex-end" gap="md">
-          <Title order={1} size="h2">
+          <Title order={1} size="h3" fw={600}>
             Мои резюме
           </Title>
           <Button component={Link} to="/templates">

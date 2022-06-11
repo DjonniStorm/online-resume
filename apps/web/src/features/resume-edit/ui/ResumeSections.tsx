@@ -50,7 +50,7 @@ export function ResumeSections({ form, resume }: { form: EditorForm; resume: Res
     <Paper withBorder p="lg">
       <Stack gap="md">
         <div>
-          <Title order={2} size="h3">
+          <Title order={2} size="h3" fw={600}>
             Разделы резюме
           </Title>
           <Text size="sm" c="dimmed">

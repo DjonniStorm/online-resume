@@ -64,7 +64,7 @@ export const TemplatesPage = observer(() => {
         <Stack gap="lg">
           <Group justify="space-between" align="center" gap="md">
             <div>
-              <Title order={1} size="h2">
+              <Title order={1} size="h3" fw={600}>
                 Шаблоны
               </Title>
               <Text c="dimmed" size="sm">
