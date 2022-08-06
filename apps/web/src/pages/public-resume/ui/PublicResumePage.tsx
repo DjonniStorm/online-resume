@@ -1,4 +1,4 @@
-import { Alert, Container, Group, Loader } from '@mantine/core';
+import { Alert, Button, Container, Group, Loader, Stack } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
@@ -6,6 +6,8 @@ import { useParams } from 'react-router';
 import { StoreKey, useStore } from '@/app/store';
 import type { ResumeDto } from '@/shared/api/generated/types.gen';
 import { ResumeTemplatePreview, resumeToPreviewData } from '@/widgets/resume-template-preview';
+
+import styles from './PublicResumePage.module.css';
 
 export function PublicResumePage() {
   const { slug } = useParams();
@@ -52,12 +54,17 @@ export function PublicResumePage() {
   const resume = loaded.resume;
   return (
     <main>
-      <Container size={900} py={{ base: 'lg', sm: 'xl' }}>
-        <ResumeTemplatePreview
-          template={resume.template}
-          data={resumeToPreviewData(resume)}
-          sectionState={resume.sections}
-        />
+      <Container size={900} py={{ base: 'lg', sm: 'xl' }} className={styles.container}>
+        <Stack gap="lg">
+          <Group justify="flex-end" className={styles.controls}>
+            <Button onClick={() => window.print()}>Сохранить как PDF</Button>
+          </Group>
+          <ResumeTemplatePreview
+            template={resume.template}
+            data={resumeToPreviewData(resume)}
+            sectionState={resume.sections}
+          />
+        </Stack>
       </Container>
     </main>
   );
