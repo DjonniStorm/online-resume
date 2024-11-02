@@ -3,6 +3,8 @@ import { makeObservable, observable, runInAction } from 'mobx';
 import type { BaseApi } from '@/shared/api';
 import {
   publicResumeGet,
+  resumeCancelDelete,
+  resumeCancelUnpublish,
   resumeCreate,
   resumeDelete,
   resumeDeletionNotices,
@@ -14,6 +16,8 @@ import {
   resumePhotoGet,
   resumePhotoUpload,
   resumePublish,
+  resumeScheduleDelete,
+  resumeScheduleUnpublish,
   resumeTemplateChange,
   resumeUnpublish,
   resumeUpdate,
@@ -57,6 +61,10 @@ export class ResumeStore {
       deletionNotices: resumeDeletionNotices,
       dismissDeletionNotices: resumeDeletionNoticesDismiss,
       publish: resumePublish,
+      scheduleUnpublish: resumeScheduleUnpublish,
+      cancelUnpublish: resumeCancelUnpublish,
+      scheduleDelete: resumeScheduleDelete,
+      cancelDelete: resumeCancelDelete,
       unpublish: resumeUnpublish,
       changeTemplate: resumeTemplateChange,
       update: resumeUpdate,
@@ -203,6 +211,48 @@ export class ResumeStore {
     try {
       const result = await task.promise;
       return result.response?.status === 204;
+    } catch {
+      return false;
+    }
+  }
+
+  async scheduleUnpublish(id: string): Promise<string | null> {
+    const task = this.operations.scheduleUnpublish({ path: { id } });
+    try {
+      const result = await task.promise;
+      return result.data?.scheduledFor ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async cancelUnpublish(id: string): Promise<boolean> {
+    const task = this.operations.cancelUnpublish({ path: { id } });
+    try {
+      return (await task.promise).response?.status === 204;
+    } catch {
+      return false;
+    }
+  }
+
+  async scheduleDelete(id: string): Promise<boolean> {
+    const task = this.operations.scheduleDelete({ path: { id } });
+    try {
+      const result = await task.promise;
+      if (!result.data) return false;
+      await this.load();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async cancelDelete(id: string): Promise<boolean> {
+    const task = this.operations.cancelDelete({ path: { id } });
+    try {
+      if ((await task.promise).response?.status !== 204) return false;
+      await this.load();
+      return true;
     } catch {
       return false;
     }

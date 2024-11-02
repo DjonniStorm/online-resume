@@ -23,6 +23,16 @@ export class ResumeOverviewDto {
 
   @ApiProperty({ type: ResumeSummaryDto, nullable: true })
   latestResume!: ResumeSummaryDto | null;
+
+  @ApiProperty({ type: () => [ResumeScheduledLinkDto] })
+  scheduledLinks!: ResumeScheduledLinkDto[];
+}
+
+export class ResumeScheduledLinkDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty({ enum: ['unpublish', 'delete'] }) kind!: 'unpublish' | 'delete';
+  @ApiProperty({ format: 'date-time' }) scheduledFor!: Date;
 }
 
 export class SelectedResumeDto {

@@ -28,6 +28,9 @@ type HomeOverviewProps = {
   onSelectResume: (resumeId: string | null) => void;
   onDelete: (resume: ResumeSummaryDto) => void;
   deleteDisabled: boolean;
+  onCancelSchedule: (item: ResumeOverviewDto['scheduledLinks'][number]) => void;
+  onRevokeLink: (item: ResumeOverviewDto['scheduledLinks'][number]) => void;
+  scheduleError: boolean;
 };
 
 export function HomeOverview({
@@ -38,6 +41,9 @@ export function HomeOverview({
   onSelectResume,
   onDelete,
   deleteDisabled,
+  onCancelSchedule,
+  onRevokeLink,
+  scheduleError,
 }: HomeOverviewProps) {
   return (
     <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
@@ -65,6 +71,9 @@ export function HomeOverview({
             onSelectResume={onSelectResume}
             onDelete={onDelete}
             deleteDisabled={deleteDisabled}
+            onCancelSchedule={onCancelSchedule}
+            onRevokeLink={onRevokeLink}
+            scheduleError={scheduleError}
           />
         ))
         .otherwise(() => (
@@ -82,9 +91,18 @@ function OverviewContent({
   onSelectResume,
   onDelete,
   deleteDisabled,
+  onCancelSchedule,
+  onRevokeLink,
+  scheduleError,
 }: Pick<
   HomeOverviewProps,
-  'onDelete' | 'deleteDisabled' | 'selectedResumeId' | 'onSelectResume'
+  | 'onDelete'
+  | 'deleteDisabled'
+  | 'selectedResumeId'
+  | 'onSelectResume'
+  | 'onCancelSchedule'
+  | 'onRevokeLink'
+  | 'scheduleError'
 > & { overview: ResumeOverviewDto }) {
   const {
     total,
@@ -112,6 +130,37 @@ function OverviewContent({
           Создать резюме
         </Button>
       </Group>
+
+      {scheduleError ? (
+        <Alert color="red">Не удалось изменить срок. Попробуйте ещё раз.</Alert>
+      ) : null}
+
+      {overview.scheduledLinks.length > 0 ? (
+        <Alert color="yellow" title="Публичные ссылки скоро отключатся">
+          <Stack gap="xs">
+            {overview.scheduledLinks.map((item) => (
+              <Group key={item.id} justify="space-between" gap="sm" wrap="wrap">
+                <Text size="sm">
+                  {item.title}: {item.kind === 'delete' ? 'удаление' : 'снятие с публикации'}{' '}
+                  {new Intl.DateTimeFormat('ru-RU', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  }).format(new Date(item.scheduledFor))}{' '}
+                  ({remainingTime(item.scheduledFor)})
+                </Text>
+                <Group gap="xs">
+                  <Button size="xs" variant="light" onClick={() => onCancelSchedule(item)}>
+                    Отменить
+                  </Button>
+                  <Button size="xs" variant="subtle" color="red" onClick={() => onRevokeLink(item)}>
+                    Снять ссылку сейчас
+                  </Button>
+                </Group>
+              </Group>
+            ))}
+          </Stack>
+        </Alert>
+      ) : null}
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
         <Card withBorder radius="md" className={styles.analytics}>
@@ -196,6 +245,13 @@ function formatDay(value: string): string {
     month: 'long',
     timeZone: 'UTC',
   }).format(new Date(value));
+}
+
+function remainingTime(value: string): string {
+  const hours = Math.max(0, Math.ceil((new Date(value).getTime() - Date.now()) / 3_600_000));
+  if (hours === 0) return 'срок истёк';
+  const days = Math.floor(hours / 24);
+  return days > 0 ? `осталось ${days} дн. ${hours % 24} ч.` : `осталось ${hours} ч.`;
 }
 
 function formatWeekday(value: string): string {

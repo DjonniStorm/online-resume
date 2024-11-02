@@ -11,7 +11,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { ResumeSectionType, TemplateFieldType, TemplateStatus } from '../../generated/prisma/enums';
-import { resumeDeleteAfter } from './common/deletion';
+import { resumeDeleteAfter, resumeLinkExpiresAt } from './common/deletion';
 import type { UploadedPhoto } from './common/photo';
 import type { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -21,6 +21,7 @@ import { ResumePhotoStorageService } from './resume-photo-storage.service';
 import { ResumeViewsService } from './resume-views.service';
 
 const resumeDetailInclude = {
+  deletion: { select: { scheduledFor: true } },
   template: {
     include: {
       theme: true,
@@ -44,6 +45,8 @@ const resumeSummarySelect = {
   lastName: true,
   headline: true,
   isPublished: true,
+  unpublishAt: true,
+  deletion: { select: { scheduledFor: true } },
   createdAt: true,
   updatedAt: true,
   template: {
@@ -151,6 +154,7 @@ export class ResumesService {
       ...result,
       items: result.items.map((resume) => ({
         ...resume,
+        deletionScheduledAt: resume.deletion?.scheduledFor ?? null,
         viewsLast7Days: counts.get(resume.id) ?? 0,
       })),
     };
@@ -180,13 +184,56 @@ export class ResumesService {
       this.views.summary(ownerId, resumeId),
     ]);
     const counts = await this.views.countsByResume(latestResume ? [latestResume.id] : []);
+    const [unpublishing, deleting] = await Promise.all([
+      this.prisma.resume.findMany({
+        where: { ownerId, deletedAt: null, isPublished: true, unpublishAt: { gt: new Date() } },
+        select: { id: true, title: true, unpublishAt: true },
+        orderBy: { unpublishAt: 'asc' },
+        take: 5,
+      }),
+      this.prisma.resumeDeletion.findMany({
+        where: {
+          scheduledFor: { gt: new Date() },
+          resume: { ownerId, deletedAt: null, isPublished: true },
+        },
+        select: { scheduledFor: true, resume: { select: { id: true, title: true } } },
+        orderBy: { scheduledFor: 'asc' },
+        take: 5,
+      }),
+    ]);
+    const scheduledLinks = [
+      ...unpublishing
+        .filter((item) => item.unpublishAt)
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          kind: 'unpublish' as const,
+          scheduledFor: item.unpublishAt!,
+        })),
+      ...deleting
+        .filter((item) => item.scheduledFor)
+        .map((item) => ({
+          id: item.resume.id,
+          title: item.resume.title,
+          kind: 'delete' as const,
+          scheduledFor: item.scheduledFor!,
+        })),
+    ]
+      .sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime())
+      .filter((item, index, all) => all.findIndex((other) => other.id === item.id) === index)
+      .slice(0, 5);
     return {
       total,
       publishedCount,
       latestResume: latestResume
-        ? { ...latestResume, viewsLast7Days: counts.get(latestResume.id) ?? 0 }
+        ? {
+            ...latestResume,
+            deletionScheduledAt: latestResume.deletion?.scheduledFor ?? null,
+            viewsLast7Days: counts.get(latestResume.id) ?? 0,
+          }
         : null,
       selectedResume,
+      scheduledLinks,
       ...viewSummary,
     };
   }
@@ -199,7 +246,7 @@ export class ResumesService {
     if (!resume) {
       throw new NotFoundException('Резюме не найдено');
     }
-    return resume;
+    return { ...resume, deletionScheduledAt: resume.deletion?.scheduledFor ?? null };
   }
 
   async getPhoto(ownerId: string, id: string) {
@@ -215,7 +262,7 @@ export class ResumesService {
 
   async getPublicPhoto(slug: string) {
     const resume = await this.prisma.resume.findFirst({
-      where: { publicSlug: slug, isPublished: true, deletedAt: null },
+      where: this.publicWhere(slug),
       select: { photoPath: true },
     });
     if (!resume) {
@@ -286,13 +333,30 @@ export class ResumesService {
 
   async findPublic(slug: string) {
     const resume = await this.prisma.resume.findFirst({
-      where: { publicSlug: slug, isPublished: true, deletedAt: null },
+      where: this.publicWhere(slug),
       include: resumeDetailInclude,
     });
     if (!resume) {
       throw new NotFoundException('Резюме недоступно');
     }
-    return { ...resume, ownerId: undefined };
+    return {
+      ...resume,
+      ownerId: undefined,
+      deletionScheduledAt: resume.deletion?.scheduledFor ?? null,
+    };
+  }
+
+  private publicWhere(slug: string): Prisma.ResumeWhereInput {
+    const now = new Date();
+    return {
+      publicSlug: slug,
+      isPublished: true,
+      deletedAt: null,
+      AND: [
+        { OR: [{ unpublishAt: null }, { unpublishAt: { gt: now } }] },
+        { OR: [{ deletion: { is: null } }, { deletion: { is: { scheduledFor: { gt: now } } } }] },
+      ],
+    };
   }
 
   async publish(ownerId: string, id: string) {
@@ -312,6 +376,8 @@ export class ResumesService {
           publishedAt: new Date(),
         },
       });
+    } else {
+      await this.prisma.resume.update({ where: { id }, data: { unpublishAt: null } });
     }
     const resume = await this.prisma.resume.findFirst({
       where: { id, ownerId, deletedAt: null },
@@ -326,11 +392,35 @@ export class ResumesService {
   async unpublish(ownerId: string, id: string): Promise<void> {
     const result = await this.prisma.resume.updateMany({
       where: { id, ownerId, deletedAt: null },
-      data: { isPublished: false, publishedAt: null },
+      data: { isPublished: false, publishedAt: null, unpublishAt: null },
     });
     if (result.count !== 1) {
       throw new NotFoundException('Резюме не найдено');
     }
+  }
+
+  async scheduleUnpublish(ownerId: string, id: string) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null, isPublished: true },
+      select: { unpublishAt: true },
+    });
+    if (!current) throw new NotFoundException('Опубликованное резюме не найдено');
+    if (current.unpublishAt) return { scheduledFor: current.unpublishAt };
+    const unpublishAt = resumeLinkExpiresAt();
+    const result = await this.prisma.resume.updateMany({
+      where: { id, ownerId, deletedAt: null, isPublished: true },
+      data: { unpublishAt },
+    });
+    if (result.count !== 1) throw new NotFoundException('Опубликованное резюме не найдено');
+    return { scheduledFor: unpublishAt };
+  }
+
+  async cancelUnpublish(ownerId: string, id: string): Promise<void> {
+    const result = await this.prisma.resume.updateMany({
+      where: { id, ownerId, deletedAt: null, unpublishAt: { gt: new Date() } },
+      data: { unpublishAt: null },
+    });
+    if (result.count !== 1) throw new NotFoundException('Запланированное снятие не найдено');
   }
 
   async update(ownerId: string, id: string, input: UpdateResumeDto) {
@@ -517,14 +607,21 @@ export class ResumesService {
           isPublished: false,
           publishedAt: null,
           publicSlug: null,
+          unpublishAt: null,
         },
       });
       if (updated.count !== 1) {
         return false;
       }
-      await transaction.resumeDeletion.create({
-        data: {
+      await transaction.resumeDeletion.upsert({
+        where: { resumeId: id },
+        create: {
           resumeId: id,
+          deleteAfter: resumeDeleteAfter(now),
+          wasPublished: resume.isPublished,
+        },
+        update: {
+          scheduledFor: null,
           deleteAfter: resumeDeleteAfter(now),
           wasPublished: resume.isPublished,
         },
@@ -534,6 +631,42 @@ export class ResumesService {
     if (!result) {
       throw new NotFoundException('Резюме не найдено');
     }
+  }
+
+  async scheduleRemove(ownerId: string, id: string) {
+    const scheduledFor = resumeLinkExpiresAt();
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const resume = await transaction.resume.findFirst({
+        where: { id, ownerId, deletedAt: null },
+        select: { isPublished: true, deletion: { select: { scheduledFor: true } } },
+      });
+      if (!resume) return false;
+      if (resume.deletion?.scheduledFor) return resume.deletion.scheduledFor;
+      await transaction.resumeDeletion.upsert({
+        where: { resumeId: id },
+        create: {
+          resumeId: id,
+          scheduledFor,
+          deleteAfter: resumeDeleteAfter(scheduledFor),
+          wasPublished: resume.isPublished,
+        },
+        update: { scheduledFor, deleteAfter: resumeDeleteAfter(scheduledFor) },
+      });
+      return scheduledFor;
+    });
+    if (!result) throw new NotFoundException('Резюме не найдено');
+    return { scheduledFor: result };
+  }
+
+  async cancelRemove(ownerId: string, id: string): Promise<void> {
+    const result = await this.prisma.resumeDeletion.deleteMany({
+      where: {
+        resumeId: id,
+        scheduledFor: { gt: new Date() },
+        resume: { ownerId, deletedAt: null },
+      },
+    });
+    if (result.count !== 1) throw new NotFoundException('Запланированное удаление не найдено');
   }
 
   async deletionNotices(ownerId: string) {

@@ -185,6 +185,8 @@ export type ResumeCertificateDto = {
 export type ResumeDto = {
     id: string;
     isPublished: boolean;
+    unpublishAt: string | null;
+    deletionScheduledAt?: string | null;
     publicSlug: string | null;
     revision: number;
     title: string;
@@ -233,6 +235,8 @@ export type ResumeSummaryDto = {
     lastName: string;
     headline: string | null;
     isPublished: boolean;
+    unpublishAt: string | null;
+    deletionScheduledAt: string | null;
     viewsLast7Days: number;
     template: ResumeTemplateSummaryDto;
     createdAt: string;
@@ -262,6 +266,13 @@ export type SelectedResumeDto = {
     title: string;
 };
 
+export type ResumeScheduledLinkDto = {
+    id: string;
+    title: string;
+    kind: 'unpublish' | 'delete';
+    scheduledFor: string;
+};
+
 export type ResumeOverviewDto = {
     total: number;
     publishedCount: number;
@@ -270,6 +281,7 @@ export type ResumeOverviewDto = {
     dailyViews: Array<ResumeDailyViewsDto>;
     selectedResume: SelectedResumeDto | null;
     latestResume: ResumeSummaryDto | null;
+    scheduledLinks: Array<ResumeScheduledLinkDto>;
 };
 
 export type UpdateResumeSectionDto = {
@@ -353,6 +365,10 @@ export type ChangeResumeTemplateDto = {
 
 export type ResumePublicationDto = {
     publicSlug: string;
+};
+
+export type ResumeScheduleDto = {
+    scheduledFor: string;
 };
 
 export type TemplateListDto = {
@@ -806,6 +822,82 @@ export type ResumePublishResponses = {
 };
 
 export type ResumePublishResponse = ResumePublishResponses[keyof ResumePublishResponses];
+
+export type ResumeCancelUnpublishData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/unpublish-schedule';
+};
+
+export type ResumeCancelUnpublishErrors = {
+    401: unknown;
+};
+
+export type ResumeCancelUnpublishResponses = {
+    204: void;
+};
+
+export type ResumeCancelUnpublishResponse = ResumeCancelUnpublishResponses[keyof ResumeCancelUnpublishResponses];
+
+export type ResumeScheduleUnpublishData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/unpublish-schedule';
+};
+
+export type ResumeScheduleUnpublishErrors = {
+    401: unknown;
+};
+
+export type ResumeScheduleUnpublishResponses = {
+    200: ResumeScheduleDto;
+};
+
+export type ResumeScheduleUnpublishResponse = ResumeScheduleUnpublishResponses[keyof ResumeScheduleUnpublishResponses];
+
+export type ResumeCancelDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/deletion-schedule';
+};
+
+export type ResumeCancelDeleteErrors = {
+    401: unknown;
+};
+
+export type ResumeCancelDeleteResponses = {
+    204: void;
+};
+
+export type ResumeCancelDeleteResponse = ResumeCancelDeleteResponses[keyof ResumeCancelDeleteResponses];
+
+export type ResumeScheduleDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/deletion-schedule';
+};
+
+export type ResumeScheduleDeleteErrors = {
+    401: unknown;
+};
+
+export type ResumeScheduleDeleteResponses = {
+    200: ResumeScheduleDto;
+};
+
+export type ResumeScheduleDeleteResponse = ResumeScheduleDeleteResponses[keyof ResumeScheduleDeleteResponses];
 
 export type PublicResumeGetData = {
     body?: never;

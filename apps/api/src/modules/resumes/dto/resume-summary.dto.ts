@@ -52,6 +52,12 @@ export class ResumeSummaryDto {
   @ApiProperty()
   isPublished!: boolean;
 
+  @ApiProperty({ format: 'date-time', nullable: true })
+  unpublishAt!: Date | null;
+
+  @ApiProperty({ format: 'date-time', nullable: true })
+  deletionScheduledAt!: Date | null;
+
   @ApiProperty()
   viewsLast7Days!: number;
 

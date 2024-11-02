@@ -779,6 +779,136 @@
         "tags": ["resumes"]
       }
     },
+    "/api/resumes/{id}/unpublish-schedule": {
+      "post": {
+        "operationId": "resumeScheduleUnpublish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeScheduleDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "delete": {
+        "operationId": "resumeCancelUnpublish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/resumes/{id}/deletion-schedule": {
+      "post": {
+        "operationId": "resumeScheduleDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeScheduleDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "delete": {
+        "operationId": "resumeCancelDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
     "/api/public/resumes/{slug}": {
       "get": {
         "operationId": "publicResumeGet",
@@ -1678,6 +1808,16 @@
           "isPublished": {
             "type": "boolean"
           },
+          "unpublishAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "deletionScheduledAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
           "publicSlug": {
             "type": "string",
             "nullable": true
@@ -1787,6 +1927,7 @@
         "required": [
           "id",
           "isPublished",
+          "unpublishAt",
           "publicSlug",
           "revision",
           "title",
@@ -1883,6 +2024,16 @@
           "isPublished": {
             "type": "boolean"
           },
+          "unpublishAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "deletionScheduledAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
           "viewsLast7Days": {
             "type": "number"
           },
@@ -1905,6 +2056,8 @@
           "lastName",
           "headline",
           "isPublished",
+          "unpublishAt",
+          "deletionScheduledAt",
           "viewsLast7Days",
           "template",
           "createdAt",
@@ -1973,6 +2126,26 @@
         },
         "required": ["id", "title"]
       },
+      "ResumeScheduledLinkDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": ["unpublish", "delete"],
+            "type": "string"
+          },
+          "scheduledFor": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "kind", "scheduledFor"]
+      },
       "ResumeOverviewDto": {
         "type": "object",
         "properties": {
@@ -2011,6 +2184,12 @@
                 "$ref": "#/components/schemas/ResumeSummaryDto"
               }
             ]
+          },
+          "scheduledLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResumeScheduledLinkDto"
+            }
           }
         },
         "required": [
@@ -2020,7 +2199,8 @@
           "viewsLast7Days",
           "dailyViews",
           "selectedResume",
-          "latestResume"
+          "latestResume",
+          "scheduledLinks"
         ]
       },
       "UpdateResumeSectionDto": {
@@ -2365,6 +2545,16 @@
           }
         },
         "required": ["publicSlug"]
+      },
+      "ResumeScheduleDto": {
+        "type": "object",
+        "properties": {
+          "scheduledFor": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["scheduledFor"]
       },
       "TemplateListDto": {
         "type": "object",
