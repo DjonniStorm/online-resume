@@ -1,0 +1,15 @@
+localhost {
+	tls internal
+	encode gzip
+
+	@api path /api /api/*
+	handle @api {
+		reverse_proxy host.docker.internal:3000
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

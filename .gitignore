@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*
+coverage/
+.idea/
+.DS_Store
+Thumbs.db
+*.local
+apps/web/dist/*
+!apps/web/dist/.gitkeep
+apps/api/src/generated/
