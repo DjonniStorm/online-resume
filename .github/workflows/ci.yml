@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: |
+          mkdir -p reports
+          pnpm exec eslint . -f json -o reports/eslint.json
+
+      - name: Unit tests
+        run: >
+          pnpm exec vitest run --project web --project api --coverage
+          --reporter=default --reporter=json
+          --outputFile.json=reports/vitest-unit.json
+
+      - name: Install Chromium
+        run: pnpm --filter @online-resume/web exec playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: >
+          pnpm exec vitest run --project browser
+          --reporter=default --reporter=json
+          --outputFile.json=reports/vitest-browser.json
+
+      - name: Build
+        env:
+          DATABASE_URL: postgresql://placeholder@placeholder/placeholder
+        run: pnpm build
+
+      - name: Summary
+        run: |
+          eslint_errors=$(jq '[.[].errorCount] | add // 0' reports/eslint.json)
+          eslint_warnings=$(jq '[.[].warningCount] | add // 0' reports/eslint.json)
+          files_passed=$(( $(jq '.numPassedTestSuites // 0' reports/vitest-unit.json) + $(jq '.numPassedTestSuites // 0' reports/vitest-browser.json) ))
+          files_failed=$(( $(jq '.numFailedTestSuites // 0' reports/vitest-unit.json) + $(jq '.numFailedTestSuites // 0' reports/vitest-browser.json) ))
+          tests_passed=$(( $(jq '.numPassedTests // 0' reports/vitest-unit.json) + $(jq '.numPassedTests // 0' reports/vitest-browser.json) ))
+          tests_failed=$(( $(jq '.numFailedTests // 0' reports/vitest-unit.json) + $(jq '.numFailedTests // 0' reports/vitest-browser.json) ))
+          pct() { jq -n --argjson n "$1" '"\(($n * 100 | round) / 100)%"'; }
+          line_coverage=$(pct "$(jq '.total.lines.pct' coverage/coverage-summary.json)")
+          branch_coverage=$(pct "$(jq '.total.branches.pct' coverage/coverage-summary.json)")
+          function_coverage=$(pct "$(jq '.total.functions.pct' coverage/coverage-summary.json)")
+          statement_coverage=$(pct "$(jq '.total.statements.pct' coverage/coverage-summary.json)")
+          if git rev-parse --verify --quiet origin/master >/dev/null; then
+            commits=$(git rev-list --count origin/master..HEAD)
+            diff_stat=$(git diff --shortstat origin/master...HEAD)
+            if [ -z "$diff_stat" ]; then
+              diff_stat="0"
+            fi
+          else
+            commits="n/a"
+            diff_stat="n/a"
+          fi
+          {
+            echo "## CI Metrics"
+            echo
+            echo "### Code Quality"
+            echo
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            echo "| ESLint errors | ${eslint_errors} |"
+            echo "| ESLint warnings | ${eslint_warnings} |"
+            echo
+            echo "### Tests"
+            echo
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            echo "| Test files passed | ${files_passed} |"
+            echo "| Test files failed | ${files_failed} |"
+            echo "| Tests passed | ${tests_passed} |"
+            echo "| Tests failed | ${tests_failed} |"
+            echo "| Line coverage | ${line_coverage} |"
+            echo "| Branch coverage | ${branch_coverage} |"
+            echo "| Function coverage | ${function_coverage} |"
+            echo "| Statement coverage | ${statement_coverage} |"
+            echo
+            echo "### Development"
+            echo
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            echo "| Commits ahead of master | ${commits} |"
+            echo "| Diff vs master | ${diff_stat} |"
+            echo "| CI success rate | Shown by GitHub Actions |"
+            echo "| Pipeline duration | Shown by GitHub Actions |"
+            echo
+            echo "### Build"
+            echo
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            echo "| Build | Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v5
+        with:
+          name: metrics
+          path: |
+            reports
+            coverage

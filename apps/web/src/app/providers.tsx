@@ -1,7 +1,8 @@
 import { MantineProvider } from '@mantine/core';
 import { UnheadProvider } from '@unhead/react/client';
 import type { ReactNode } from 'react';
-import { rootStore, StoreContext } from './store';
+
+import { StoreContext, rootStore } from './store';
 
 type ProvidersProps = {
   children: ReactNode;

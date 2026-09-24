@@ -8,21 +8,31 @@
     "dev:api": "pnpm --filter @online-resume/api dev",
     "build": "pnpm -r build",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:browser": "vitest run --project browser",
+    "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @online-resume/api db:generate",
-    "db:push": "pnpm --filter @online-resume/api db:push"
+    "db:push": "pnpm --filter @online-resume/api db:push",
+    "prepare": "lefthook install"
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.12.0",
+    "lefthook": "^2.1.14",
     "prettier": "^3.9.8",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
   }
 }

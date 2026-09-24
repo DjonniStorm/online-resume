@@ -1,5 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router';
 
 const router = createBrowserRouter([
   {

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { defineConfig, env } from 'prisma/config';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));

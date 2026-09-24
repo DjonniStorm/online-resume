@@ -7,7 +7,8 @@
     "build": "prisma generate --config ../../prisma.config.ts && nest build",
     "start": "node dist/main.js",
     "db:generate": "prisma generate --config ../../prisma.config.ts",
-    "db:push": "prisma db push --config ../../prisma.config.ts"
+    "db:push": "prisma db push --config ../../prisma.config.ts",
+    "test": "vitest run --config vitest.config.mts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.4",
@@ -29,6 +30,7 @@
     "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
     "prisma": "7.10.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
   }
 }
