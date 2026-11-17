@@ -8,6 +8,8 @@ services:
       NODE_ENV: production
       API_PORT: '3000'
       DATABASE_URL: ${DATABASE_URL:?Set the internal PostgreSQL URL in Coolify}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set a random JWT access secret in Coolify}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set a different random JWT refresh secret in Coolify}
     expose:
       - '3000'
     healthcheck:

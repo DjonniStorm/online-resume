@@ -132,6 +132,21 @@ model User {
   /// Prisma заполняет дату при создании и обновляет при изменениях.
   updatedAt      DateTime @updatedAt @db.Timestamptz(3)
   resumes                 Resume[]
+  sessions                AuthSession[]
+}
+
+/// Сессия входа: хранит хеш текущего refresh-токена для обновления и выхода.
+model AuthSession {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String    @unique
+  expiresAt        DateTime  @db.Timestamptz(3)
+  revokedAt        DateTime? @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 /// Самостоятельный шаблон: опубликованный экземпляр копируют для изменений.
