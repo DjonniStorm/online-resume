@@ -1,0 +1,16 @@
+.container {
+  position: fixed;
+  z-index: 300;
+  top: 12px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
+  box-shadow: var(--mantine-shadow-sm);
+  transform: translateX(-50%);
+  pointer-events: none;
+}

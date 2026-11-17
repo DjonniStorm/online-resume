@@ -5,5 +5,6 @@ coverage
 readme.md
 README.md
 apps/api/src/generated
+apps/web/src/shared/api/generated
 coverage
 reports
