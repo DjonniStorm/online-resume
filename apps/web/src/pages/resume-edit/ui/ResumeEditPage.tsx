@@ -17,11 +17,12 @@ import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { match } from 'ts-pattern';
 
 import { StoreKey, useStores } from '@/app/store';
 import { type ResumeEditorValues, resumeToEditorValues } from '@/entities/resume';
 import { TemplateCard } from '@/entities/template';
-import { ResumeEditorForm } from '@/features/resume-edit';
+import { ResumeEditorForm, type SaveState } from '@/features/resume-edit';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import {
   ResumeTemplatePreview,
@@ -50,6 +51,7 @@ export const ResumeEditPage = observer(() => {
   >([]);
   const [templateModalOpened, setTemplateModalOpened] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('saved');
 
   useHead({ title: resume ? `Редактор · ${resume.title}` : 'Редактор резюме — Online Resume' });
 
@@ -75,24 +77,25 @@ export const ResumeEditPage = observer(() => {
   }, []);
 
   const save = useCallback(
-    async (input: Parameters<typeof resumes.update>[1], openPreview: boolean) => {
+    async (input: Parameters<typeof resumes.update>[1]) => {
       if (!id) {
-        return false;
+        return null;
       }
       const value = await resumes.update(id, input);
       if (!value) {
-        return false;
+        return null;
       }
       setResume(value);
-      setPreviewData(resumeToPreviewData(value));
-      setPreviewSections(resumeToEditorValues(value).sections);
-      if (openPreview) {
-        void navigate(`/resumes/${id}/preview`);
-      }
-      return true;
+      return value;
     },
     [id, resumes],
   );
+
+  const openPreview = useCallback(() => {
+    if (id) {
+      void navigate(`/resumes/${id}/preview`);
+    }
+  }, [id, navigate]);
 
   const openTemplateModal = () => {
     setSelectedTemplate(resume?.template ?? null);
@@ -137,7 +140,6 @@ export const ResumeEditPage = observer(() => {
   }
 
   const loadRequest = requests.latest('resumes.get');
-  const saveRequest = requests.latest('resumes.update');
   const loadError = errors.forOperation('resumes.get');
   const saveError = errors.forOperation('resumes.update');
 
@@ -188,27 +190,37 @@ export const ResumeEditPage = observer(() => {
                 form="resume-editor-form"
                 data-intent="preview"
                 variant="light"
-                loading={saveRequest?.status === 'pending'}
+                disabled={saveState === 'saving'}
               >
                 Сохранить и открыть
               </Button>
-              <Button variant="light" onClick={openTemplateModal}>
+              <Button variant="light" disabled={saveState === 'saving'} onClick={openTemplateModal}>
                 Изменить шаблон
               </Button>
               <Button
                 type="submit"
                 form="resume-editor-form"
-                loading={saveRequest?.status === 'pending'}
+                disabled={saveState === 'saving' || saveState === 'saved'}
               >
-                Сохранить изменения
+                {match(saveState)
+                  .with('saved', () => 'Сохранено')
+                  .with('saving', () => 'Сохраняется…')
+                  .with('error', () => 'Ошибка сохранения')
+                  .with('invalid', () => 'Исправьте поля')
+                  .with('dirty', () => 'Сохранить')
+                  .exhaustive()}
               </Button>
             </Group>
           </Group>
           <div className={styles.workspace}>
             <ResumeEditorForm
+              key={`${resume.id}:${resume.template.id}`}
               resume={resume}
               saveError={saveError}
+              paused={templateModalOpened}
               onSave={save}
+              onOpenPreview={openPreview}
+              onSaveStateChange={setSaveState}
               onValuesChange={onValuesChange}
             />
             <Paper withBorder p="md" className={styles.previewPanel}>
