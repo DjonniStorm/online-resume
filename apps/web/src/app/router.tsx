@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/auth/login/ui/LoginPage';
 import { RegisterPage } from '@/pages/auth/register/ui/RegisterPage';
 import { HomePage } from '@/pages/home/ui/HomePage';
 import { ResumeEditPage } from '@/pages/resume-edit';
+import { ResumePreviewPage } from '@/pages/resume-preview';
 import { ResumesPage } from '@/pages/resumes';
 import { TemplatesPage } from '@/pages/templates';
 import { AppShell } from '@/widgets/app-shell';
@@ -62,6 +63,14 @@ const router = createBrowserRouter([
         element: (
           <PageRoute key="resumes">
             <ResumesPage />
+          </PageRoute>
+        ),
+      },
+      {
+        path: 'resumes/:id/preview',
+        element: (
+          <PageRoute key="resume-preview">
+            <ResumePreviewPage />
           </PageRoute>
         ),
       },

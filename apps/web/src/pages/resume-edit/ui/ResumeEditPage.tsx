@@ -75,7 +75,7 @@ export const ResumeEditPage = observer(() => {
   }, []);
 
   const save = useCallback(
-    async (input: Parameters<typeof resumes.update>[1]) => {
+    async (input: Parameters<typeof resumes.update>[1], openPreview: boolean) => {
       if (!id) {
         return false;
       }
@@ -86,6 +86,9 @@ export const ResumeEditPage = observer(() => {
       setResume(value);
       setPreviewData(resumeToPreviewData(value));
       setPreviewSections(resumeToEditorValues(value).sections);
+      if (openPreview) {
+        void navigate(`/resumes/${id}/preview`);
+      }
       return true;
     },
     [id, resumes],
@@ -180,6 +183,15 @@ export const ResumeEditPage = observer(() => {
               </Title>
             </Stack>
             <Group gap="sm">
+              <Button
+                type="submit"
+                form="resume-editor-form"
+                data-intent="preview"
+                variant="light"
+                loading={saveRequest?.status === 'pending'}
+              >
+                Сохранить и открыть
+              </Button>
               <Button variant="light" onClick={openTemplateModal}>
                 Изменить шаблон
               </Button>
