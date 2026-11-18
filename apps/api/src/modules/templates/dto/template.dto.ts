@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import {
+  TemplateContinuationHeader,
   TemplateFieldType,
   TemplateLayout,
+  TemplatePhotoPlacement,
+  TemplatePhotoShape,
   TemplateRegion,
   TemplateSectionLayout,
   TemplateSpacing,
@@ -111,6 +114,15 @@ export class TemplateSummaryDto {
 
   @ApiProperty({ nullable: true })
   sidebarWidthPercent!: number | null;
+
+  @ApiProperty({ enum: TemplatePhotoPlacement })
+  photoPlacement!: TemplatePhotoPlacement;
+
+  @ApiProperty({ enum: TemplatePhotoShape })
+  photoShape!: TemplatePhotoShape;
+
+  @ApiProperty({ enum: TemplateContinuationHeader })
+  continuationHeader!: TemplateContinuationHeader;
 
   @ApiProperty({ nullable: true })
   previewUrl!: string | null;

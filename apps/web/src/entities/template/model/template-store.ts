@@ -25,7 +25,7 @@ export class TemplateStore {
         this.templates = result.data;
       });
     } catch {
-      // ErrorStore reads the failed request from RequestStore.
+      // Ошибка запроса отображается через ErrorStore.
     }
   }
 

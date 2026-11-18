@@ -25,6 +25,11 @@
   box-sizing: border-box;
 }
 
+.pageRegion,
+.footerRegion {
+  padding: 24px 54px;
+}
+
 .page h2,
 .page h3,
 .page p {
@@ -32,45 +37,145 @@
 }
 
 .singleColumn {
-  padding: 54px 62px 62px;
+  padding: 66px 70px 70px;
 }
 
 .singleColumn .main {
-  margin-top: 34px;
+  margin-top: 38px;
   padding: 0;
 }
 
 .singleColumn .section + .section {
-  margin-top: 26px;
+  margin-top: 30px;
 }
 
 .sidebarLayout .header {
-  padding: 46px 54px 34px;
-  border-bottom: 5px solid var(--resume-primary);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 56px 50px 32px;
+}
+
+.sidebarLayout,
+.wideHeaderLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: inherit;
 }
 
 .wideHeaderLayout .header {
-  padding: 44px 54px 39px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  padding: 54px 56px 46px;
   background: var(--resume-header);
   color: var(--resume-page);
 }
 
 .columns {
   display: grid;
+  flex: 1;
   grid-template-columns: var(--resume-sidebar-width) minmax(0, 1fr);
   min-height: 900px;
   align-items: stretch;
 }
 
+.sidebarLayout[data-side='right'] .columns {
+  grid-template-columns: minmax(0, 1fr) var(--resume-sidebar-width);
+}
+
+.sidebarLayout[data-side='right'] .sidebar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.mainArea {
+  min-width: 0;
+}
+
+.sidebarLayout[data-side='right'] .mainArea {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.photo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  margin-bottom: 18px;
+  background: var(--resume-primary);
+  color: #fff;
+  font-size: 21pt;
+  font-weight: 700;
+}
+
+.header .photo {
+  margin-bottom: 0;
+}
+
+.photo[data-shape='CIRCLE'] {
+  border-radius: 50%;
+}
+
+.photo[data-shape='ROUNDED_RECTANGLE'] {
+  border-radius: 12px;
+}
+
+.wideHeaderLayout .photo {
+  background: var(--resume-page);
+  color: var(--resume-primary);
+}
+
+.sidebarLayout .sidebar .photo {
+  background: var(--resume-page);
+  color: var(--resume-sidebar);
+}
+
+.page[data-spacing='COMPACT'] .section + .section {
+  margin-top: 17px;
+}
+
+.page[data-spacing='RELAXED'] .section + .section {
+  margin-top: 30px;
+}
+
+.section[data-layout='TIMELINE'] .entry {
+  padding-left: 13px;
+  border-left: 2px solid var(--resume-primary);
+}
+
+.section[data-layout='COMPACT'] .entry + .entry {
+  margin-top: 8px;
+}
+
 .sidebar {
   min-width: 0;
-  padding: 36px 24px 48px 36px;
+  padding: 54px 28px 50px 36px;
   background: var(--resume-sidebar);
 }
 
 .main {
   min-width: 0;
-  padding: 36px 48px 52px 40px;
+  padding: 44px 54px 58px 48px;
+}
+
+.sidebarLayout .main {
+  padding-top: 12px;
+}
+
+.wideHeaderLayout .columns {
+  grid-template-columns: minmax(0, 1fr) var(--resume-sidebar-width);
+}
+
+.wideHeaderLayout .sidebar {
+  padding: 46px 28px 48px;
+}
+
+.wideHeaderLayout .main {
+  padding: 46px 48px 58px 56px;
 }
 
 .columns .section + .section {
@@ -81,20 +186,12 @@
   margin-top: 30px;
 }
 
-.eyebrow {
-  margin-bottom: 12px;
-  color: var(--resume-secondary);
-  font-size: 8pt;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .name {
   color: var(--resume-primary);
   font-size: var(--resume-title-size);
-  font-weight: 750;
-  line-height: 1.1;
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
 }
 
 .wideHeaderLayout .name {
@@ -102,8 +199,39 @@
 }
 
 .headline {
-  margin-top: 12px !important;
-  font-size: 11pt;
+  margin-top: 10px !important;
+  font-size: 10.5pt;
+  line-height: 1.35;
+}
+
+.singleColumn .profile::before {
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-bottom: 25px;
+  background: var(--resume-secondary);
+  content: '';
+}
+
+.singleColumn .name {
+  font-size: var(--resume-title-size);
+  font-weight: 400;
+}
+
+.singleColumn .headline {
+  color: var(--resume-primary);
+}
+
+.sidebarLayout .name {
+  max-width: 440px;
+}
+
+.wideHeaderLayout .profile {
+  min-width: 0;
+}
+
+.wideHeaderLayout .headline {
+  color: var(--resume-page);
 }
 
 .contacts {
@@ -112,6 +240,18 @@
   gap: 7px 18px;
   margin-top: 22px;
   font-size: 8pt;
+}
+
+.headerContacts {
+  margin-top: 22px;
+}
+
+.headerContacts .contacts {
+  margin-top: 0;
+}
+
+.wideHeaderLayout .headerContacts .sectionHeading {
+  color: var(--resume-page) !important;
 }
 
 .sidebar .contacts {
@@ -137,12 +277,72 @@
 .sectionHeading {
   margin-bottom: 11px !important;
   padding-bottom: 7px;
-  border-bottom: 1px solid currentColor;
+  border-bottom: 1px solid rgb(38 51 58 / 22%);
   color: var(--resume-primary);
   font-size: var(--resume-section-size);
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.singleColumn .sectionHeading {
+  padding-bottom: 9px;
+  border-bottom-color: var(--resume-secondary);
+  font-size: 9pt;
+  letter-spacing: 0.12em;
+}
+
+.sidebarLayout .sidebar {
+  color: var(--resume-page);
+}
+
+.sidebarLayout .sidebar .sectionHeading {
+  border-bottom-color: rgb(255 255 255 / 38%);
+  color: var(--resume-page) !important;
+  font-size: 8pt;
+  letter-spacing: 0.12em;
+}
+
+.sidebarLayout .sidebar .entrySubtitle,
+.sidebarLayout .sidebar .language {
+  color: var(--resume-page);
+}
+
+.sidebarLayout .sidebar .language {
+  border-color: rgb(255 255 255 / 55%);
+}
+
+.sidebarLayout .sidebar .skillTrack {
+  background: rgb(255 255 255 / 25%);
+}
+
+.sidebarLayout .sidebar .skillFill {
+  background: var(--resume-page);
+}
+
+.sidebarLayout .sidebar .entryPeriod {
+  color: var(--resume-page);
+}
+
+.sidebarLayout .main .sectionHeading {
+  border-bottom: 0;
+  font-size: 9pt;
+  letter-spacing: 0.11em;
+}
+
+.wideHeaderLayout .headerContacts .sectionHeading {
+  border-bottom-color: rgb(255 255 255 / 35%);
+}
+
+.wideHeaderLayout .main .sectionHeading {
+  border-bottom-color: var(--resume-secondary);
+  font-size: 9pt;
+  letter-spacing: 0.09em;
+}
+
+.wideHeaderLayout .sidebar .sectionHeading {
+  font-size: 8pt;
+  letter-spacing: 0.1em;
 }
 
 .entry + .entry {
@@ -151,6 +351,7 @@
 
 .entryHeading {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
   gap: 14px;
@@ -161,7 +362,7 @@
 }
 
 .entryPeriod {
-  flex: none;
+  overflow-wrap: anywhere;
   color: #667380;
   font-size: 8pt;
 }
@@ -181,6 +382,20 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 5px;
+}
+
+.sidebar .skillLabel {
+  display: block;
+}
+
+.sidebar .skillLabel span {
+  display: block;
+}
+
+.sidebar .skillLabel span + span {
+  margin-top: 2px;
+  font-size: 8pt;
+  opacity: 0.8;
 }
 
 .skillTrack {

@@ -1,6 +1,6 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v8';
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
-export function AppNuqsProvider({ children }: { children: ReactNode }) {
+export function AppNuqsProvider({ children }: PropsWithChildren) {
   return <NuqsAdapter>{children}</NuqsAdapter>;
 }

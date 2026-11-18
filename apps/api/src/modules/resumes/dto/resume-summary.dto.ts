@@ -33,3 +33,17 @@ export class ResumeSummaryDto {
   @ApiProperty({ format: 'date-time' })
   updatedAt!: string;
 }
+
+export class ResumeListDto {
+  @ApiProperty({ type: [ResumeSummaryDto] })
+  items!: ResumeSummaryDto[];
+
+  @ApiProperty()
+  total!: number;
+
+  @ApiProperty()
+  page!: number;
+
+  @ApiProperty()
+  limit!: number;
+}

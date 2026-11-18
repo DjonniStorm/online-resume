@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -13,8 +24,12 @@ import {
 import { CurrentUser } from '../auth/common/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/common/types';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
-import { ResumeSummaryDto } from './dto/resume-summary.dto';
+import { ResumeDto } from './dto/resume-detail.dto';
+import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import { ResumeListDto } from './dto/resume-summary.dto';
+import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumesService } from './resumes.service';
 
 @ApiTags('resumes')
@@ -27,7 +42,7 @@ export class ResumesController {
 
   @Post()
   @ApiOperation({ operationId: 'resumeCreate' })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({ type: ResumeDto })
   @ApiNotFoundResponse({ description: 'Активный шаблон не найден.' })
   create(@CurrentUser() user: AuthenticatedUser, @Body() input: CreateResumeDto) {
     return this.resumes.create(user.id, input);
@@ -35,17 +50,41 @@ export class ResumesController {
 
   @Get()
   @ApiOperation({ operationId: 'resumeList' })
-  @ApiOkResponse({ type: [ResumeSummaryDto] })
-  findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.resumes.findAll(user.id);
+  @ApiOkResponse({ type: ResumeListDto })
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: ResumeListQueryDto) {
+    return this.resumes.findAll(user.id, query);
   }
 
   @Get(':id')
   @ApiOperation({ operationId: 'resumeGet' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: ResumeDto })
   @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.resumes.findOne(user.id, id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ operationId: 'resumeUpdate' })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  update(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() input: UpdateResumeDto,
+  ) {
+    return this.resumes.update(user.id, id, input);
+  }
+
+  @Patch(':id/template')
+  @ApiOperation({ operationId: 'resumeTemplateChange' })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме или шаблон не найдены.' })
+  changeTemplate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() input: ChangeResumeTemplateDto,
+  ) {
+    return this.resumes.changeTemplate(user.id, id, input);
   }
 
   @Delete(':id')

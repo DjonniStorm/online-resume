@@ -1,22 +1,11 @@
-import type { ReactNode } from 'react';
-import { Link } from 'react-router';
+import type { PropsWithChildren } from 'react';
 
-import Logo from '../../../../public/rsbuild-logo.svg' with { type: 'svg' };
 import classes from './AuthLayout.module.css';
 
-type AuthLayoutProps = {
-  children: ReactNode;
-};
-
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children }: PropsWithChildren) {
   return (
     <div className={classes.shell}>
       <aside className={classes.intro}>
-        <Link className={classes.brand} to="/" aria-label="Online Resume — на главную">
-          <img src={Logo} alt="" width="34" height="34" />
-          <span>Online Resume</span>
-        </Link>
-
         <div className={classes.introBody}>
           <div className={classes.paper} aria-hidden="true">
             <div className={classes.paperHeader}>

@@ -65,22 +65,6 @@ export type CreateResumeDto = {
     about?: string;
 };
 
-export type ResumeTemplateSummaryDto = {
-    id: string;
-    slug: string;
-    name: string;
-};
-
-export type ResumeSummaryDto = {
-    id: string;
-    title: string;
-    firstName: string;
-    lastName: string;
-    template: ResumeTemplateSummaryDto;
-    createdAt: string;
-    updatedAt: string;
-};
-
 export type TemplateThemeDto = {
     titleFontFamily: string;
     bodyFontFamily: string;
@@ -123,10 +107,208 @@ export type TemplateDto = {
     pageWidthMm: string;
     pageHeightMm: string;
     sidebarWidthPercent: number | null;
+    photoPlacement: 'NONE' | 'HEADER_START' | 'HEADER_END' | 'SIDEBAR_TOP' | 'MAIN_TOP';
+    photoShape: 'CIRCLE' | 'SQUARE' | 'ROUNDED_RECTANGLE';
+    continuationHeader: 'FULL' | 'COMPACT' | 'NONE';
     previewUrl: string | null;
     theme: TemplateThemeDto | null;
     sections: Array<TemplateSectionDto>;
     fields: Array<TemplateFieldRuleDto>;
+};
+
+export type ResumeSectionDto = {
+    id: string;
+    type: 'PROFILE' | 'ABOUT' | 'CONTACTS' | 'EXPERIENCE' | 'EDUCATION' | 'SKILLS' | 'LANGUAGES' | 'PROJECTS' | 'CERTIFICATES';
+    sortOrder: number;
+    isVisible: boolean;
+};
+
+export type ResumeExperienceDto = {
+    id: string;
+    company: string;
+    position: string;
+    location: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    isCurrent: boolean;
+    description: string | null;
+    sortOrder: number;
+};
+
+export type ResumeEducationDto = {
+    id: string;
+    institution: string;
+    degree: string | null;
+    fieldOfStudy: string | null;
+    location: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    description: string | null;
+    sortOrder: number;
+};
+
+export type ResumeSkillDto = {
+    id: string;
+    name: string;
+    level: string | null;
+    sortOrder: number;
+};
+
+export type ResumeLanguageDto = {
+    id: string;
+    name: string;
+    proficiency: string | null;
+    sortOrder: number;
+};
+
+export type ResumeProjectDto = {
+    id: string;
+    name: string;
+    role: string | null;
+    description: string | null;
+    url: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    sortOrder: number;
+};
+
+export type ResumeCertificateDto = {
+    id: string;
+    name: string;
+    issuer: string | null;
+    issuedAt?: string | null;
+    expiresAt?: string | null;
+    credentialUrl: string | null;
+    sortOrder: number;
+};
+
+export type ResumeDto = {
+    id: string;
+    revision: number;
+    title: string;
+    firstName: string;
+    lastName: string;
+    headline: string | null;
+    email: string | null;
+    phone: string | null;
+    location: string | null;
+    githubUrl: string | null;
+    telegramHandle: string | null;
+    websiteUrl: string | null;
+    about: string | null;
+    photoPath: string | null;
+    createdAt: string;
+    updatedAt: string;
+    template: TemplateDto;
+    sections: Array<ResumeSectionDto>;
+    experiences: Array<ResumeExperienceDto>;
+    educations: Array<ResumeEducationDto>;
+    skills: Array<ResumeSkillDto>;
+    languages: Array<ResumeLanguageDto>;
+    projects: Array<ResumeProjectDto>;
+    certificates: Array<ResumeCertificateDto>;
+};
+
+export type ResumeTemplateSummaryDto = {
+    id: string;
+    slug: string;
+    name: string;
+};
+
+export type ResumeSummaryDto = {
+    id: string;
+    title: string;
+    firstName: string;
+    lastName: string;
+    template: ResumeTemplateSummaryDto;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ResumeListDto = {
+    items: Array<ResumeSummaryDto>;
+    total: number;
+    page: number;
+    limit: number;
+};
+
+export type UpdateResumeSectionDto = {
+    type: 'PROFILE' | 'ABOUT' | 'CONTACTS' | 'EXPERIENCE' | 'EDUCATION' | 'SKILLS' | 'LANGUAGES' | 'PROJECTS' | 'CERTIFICATES';
+    isVisible: boolean;
+};
+
+export type UpdateResumeExperienceDto = {
+    company: string;
+    position: string;
+    location?: string;
+    startDate?: string;
+    endDate?: string;
+    isCurrent: boolean;
+    description?: string;
+};
+
+export type UpdateResumeEducationDto = {
+    institution: string;
+    degree?: string;
+    fieldOfStudy?: string;
+    location?: string;
+    startDate?: string;
+    endDate?: string;
+    description?: string;
+};
+
+export type UpdateResumeSkillDto = {
+    name: string;
+    level?: string;
+};
+
+export type UpdateResumeLanguageDto = {
+    name: string;
+    proficiency?: string;
+};
+
+export type UpdateResumeProjectDto = {
+    name: string;
+    role?: string;
+    description?: string;
+    url?: string;
+    startDate?: string;
+    endDate?: string;
+};
+
+export type UpdateResumeCertificateDto = {
+    name: string;
+    issuer?: string;
+    issuedAt?: string;
+    expiresAt?: string;
+    credentialUrl?: string;
+};
+
+export type UpdateResumeDto = {
+    revision: number;
+    title: string;
+    firstName: string;
+    lastName: string;
+    headline?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    githubUrl?: string;
+    telegramHandle?: string;
+    websiteUrl?: string;
+    about?: string;
+    sections: Array<UpdateResumeSectionDto>;
+    experiences: Array<UpdateResumeExperienceDto>;
+    educations: Array<UpdateResumeEducationDto>;
+    skills: Array<UpdateResumeSkillDto>;
+    languages: Array<UpdateResumeLanguageDto>;
+    projects: Array<UpdateResumeProjectDto>;
+    certificates: Array<UpdateResumeCertificateDto>;
+};
+
+export type ChangeResumeTemplateDto = {
+    revision: number;
+    templateSlug: string;
 };
 
 export type HealthControllerCheckData = {
@@ -269,7 +451,11 @@ export type AuthUpdateProfileResponse = AuthUpdateProfileResponses[keyof AuthUpd
 export type ResumeListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+    };
     url: '/api/resumes';
 };
 
@@ -278,7 +464,7 @@ export type ResumeListErrors = {
 };
 
 export type ResumeListResponses = {
-    200: Array<ResumeSummaryDto>;
+    200: ResumeListDto;
 };
 
 export type ResumeListResponse = ResumeListResponses[keyof ResumeListResponses];
@@ -299,8 +485,10 @@ export type ResumeCreateErrors = {
 };
 
 export type ResumeCreateResponses = {
-    201: unknown;
+    201: ResumeDto;
 };
+
+export type ResumeCreateResponse = ResumeCreateResponses[keyof ResumeCreateResponses];
 
 export type ResumeDeleteData = {
     body?: never;
@@ -343,8 +531,56 @@ export type ResumeGetErrors = {
 };
 
 export type ResumeGetResponses = {
-    200: unknown;
+    200: ResumeDto;
 };
+
+export type ResumeGetResponse = ResumeGetResponses[keyof ResumeGetResponses];
+
+export type ResumeUpdateData = {
+    body: UpdateResumeDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}';
+};
+
+export type ResumeUpdateErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumeUpdateResponses = {
+    200: ResumeDto;
+};
+
+export type ResumeUpdateResponse = ResumeUpdateResponses[keyof ResumeUpdateResponses];
+
+export type ResumeTemplateChangeData = {
+    body: ChangeResumeTemplateDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/template';
+};
+
+export type ResumeTemplateChangeErrors = {
+    401: unknown;
+    /**
+     * Резюме или шаблон не найдены.
+     */
+    404: unknown;
+};
+
+export type ResumeTemplateChangeResponses = {
+    200: ResumeDto;
+};
+
+export type ResumeTemplateChangeResponse = ResumeTemplateChangeResponses[keyof ResumeTemplateChangeResponses];
 
 export type TemplateListData = {
     body?: never;

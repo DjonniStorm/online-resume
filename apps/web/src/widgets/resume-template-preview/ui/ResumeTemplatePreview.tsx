@@ -2,6 +2,7 @@ import { type CSSProperties, useLayoutEffect, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 
 import type {
+  ResumeSectionDto,
   TemplateDto,
   TemplateSectionDto,
   TemplateThemeDto,
@@ -11,6 +12,7 @@ import { defaultTheme } from '../model/default-theme';
 import type { SectionsByRegion } from '../model/layout-types';
 import { previewFixture } from '../model/preview-fixture';
 import type { ResumePreviewData } from '../model/resume-preview-data';
+import { ResumeSection } from './ResumeSection';
 import styles from './ResumeTemplatePreview.module.css';
 import { SidebarLayout } from './layouts/SidebarLayout';
 import { SingleColumnLayout } from './layouts/SingleColumnLayout';
@@ -19,6 +21,7 @@ import { WideHeaderLayout } from './layouts/WideHeaderLayout';
 type ResumeTemplatePreviewProps = {
   template: TemplateDto;
   data?: ResumePreviewData;
+  sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>;
 };
 
 const pixelsPerMm = 96 / 25.4;
@@ -26,6 +29,7 @@ const pixelsPerMm = 96 / 25.4;
 export function ResumeTemplatePreview({
   template,
   data = previewFixture,
+  sectionState,
 }: ResumeTemplatePreviewProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
@@ -33,8 +37,8 @@ export function ResumeTemplatePreview({
   const theme = template.theme ?? defaultTheme;
   const pageWidth = Number(template.pageWidthMm) * pixelsPerMm;
   const pageHeight = Number(template.pageHeightMm) * pixelsPerMm;
-  const sectionsByRegion = groupSections(template.sections);
-  const layoutProps = { data, sectionsByRegion, theme };
+  const sectionsByRegion = groupSections(template.sections, sectionState);
+  const layoutProps = { data, sectionsByRegion, sectionState, theme, template };
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -74,6 +78,7 @@ export function ResumeTemplatePreview({
         <article
           ref={pageRef}
           className={styles.page}
+          data-spacing={theme.spacing}
           style={{
             ...getPageStyle(theme, template),
             width: pageWidth,
@@ -81,18 +86,35 @@ export function ResumeTemplatePreview({
             transform: `scale(${dimensions.scale})`,
           }}
         >
+          {sectionsByRegion.PAGE.length > 0 ? (
+            <div className={styles.pageRegion}>
+              {sectionsByRegion.PAGE.map((section) => (
+                <ResumeSection key={section.id} section={section} data={data} theme={theme} />
+              ))}
+            </div>
+          ) : null}
           {match(template.layout)
-            .with('SIDEBAR_LEFT', () => <SidebarLayout {...layoutProps} />)
+            .with('SIDEBAR_LEFT', 'SIDEBAR_RIGHT', () => <SidebarLayout {...layoutProps} />)
             .with('WIDE_HEADER', () => <WideHeaderLayout {...layoutProps} />)
-            .with('SINGLE_COLUMN', 'SIDEBAR_RIGHT', () => <SingleColumnLayout {...layoutProps} />)
+            .with('SINGLE_COLUMN', () => <SingleColumnLayout {...layoutProps} />)
             .exhaustive()}
+          {sectionsByRegion.FOOTER.length > 0 ? (
+            <footer className={styles.footerRegion}>
+              {sectionsByRegion.FOOTER.map((section) => (
+                <ResumeSection key={section.id} section={section} data={data} theme={theme} />
+              ))}
+            </footer>
+          ) : null}
         </article>
       </div>
     </div>
   );
 }
 
-function groupSections(sections: TemplateSectionDto[]): SectionsByRegion {
+function groupSections(
+  sections: TemplateSectionDto[],
+  sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>,
+): SectionsByRegion {
   const grouped: SectionsByRegion = {
     PAGE: [],
     HEADER: [],
@@ -101,8 +123,17 @@ function groupSections(sections: TemplateSectionDto[]): SectionsByRegion {
     FOOTER: [],
   };
 
+  const stateByType = new Map(sectionState?.map((section) => [section.type, section]));
   for (const section of sections) {
-    grouped[section.region].push(section);
+    const state = stateByType.get(section.type);
+    if (state && !state.isVisible) {
+      continue;
+    }
+    grouped[section.region].push({ ...section, sortOrder: state?.sortOrder ?? section.sortOrder });
+  }
+
+  for (const region of Object.keys(grouped) as Array<keyof SectionsByRegion>) {
+    grouped[region].sort((left, right) => left.sortOrder - right.sortOrder);
   }
 
   return grouped;
@@ -114,7 +145,10 @@ function getPageStyle(theme: TemplateThemeDto, template: TemplateDto): CSSProper
     '--resume-secondary': theme.secondaryColor,
     '--resume-text': theme.textColor,
     '--resume-page': theme.pageColor,
-    '--resume-header': theme.headerColor ?? theme.primaryColor,
+    '--resume-header':
+      template.layout === 'WIDE_HEADER' && !template.theme
+        ? theme.primaryColor
+        : (theme.headerColor ?? theme.primaryColor),
     '--resume-sidebar': theme.sidebarColor ?? theme.pageColor,
     '--resume-title-size': `${theme.titleSizePt}pt`,
     '--resume-section-size': `${theme.sectionTitleSizePt}pt`,

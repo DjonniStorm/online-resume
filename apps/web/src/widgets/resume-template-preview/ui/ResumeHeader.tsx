@@ -10,16 +10,38 @@ type ResumeHeaderProps = {
 };
 
 export function ResumeHeader({ data, sections, theme }: ResumeHeaderProps) {
-  const hasContacts = sections.some((section) => section.type === 'CONTACTS');
+  const contactSection = sections.find((section) => section.type === 'CONTACTS');
+  const hasContacts = [
+    data.email,
+    data.phone,
+    data.location,
+    data.githubUrl,
+    data.telegramHandle,
+    data.websiteUrl,
+  ].some(Boolean);
 
   return (
-    <div style={{ fontFamily: `${theme.titleFontFamily}, Arial, sans-serif` }}>
-      <p className={styles.eyebrow}>Online Resume</p>
-      <h2 className={styles.name}>
+    <div className={styles.profile}>
+      <h2
+        className={styles.name}
+        style={{ fontFamily: `${theme.titleFontFamily}, Arial, sans-serif` }}
+      >
         {data.firstName} {data.lastName}
       </h2>
       <p className={styles.headline}>{data.headline}</p>
-      {hasContacts ? <Contacts data={data} /> : null}
+      {contactSection && hasContacts ? (
+        <div className={styles.headerContacts}>
+          {contactSection.showHeading ? (
+            <h3
+              className={styles.sectionHeading}
+              style={{ color: contactSection.accentColor ?? theme.primaryColor }}
+            >
+              {contactSection.headingText ?? 'Контакты'}
+            </h3>
+          ) : null}
+          <Contacts data={data} />
+        </div>
+      ) : null}
     </div>
   );
 }

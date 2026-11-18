@@ -86,18 +86,18 @@ const templates = [
     photoShape: TemplatePhotoShape.CIRCLE,
     continuationHeader: TemplateContinuationHeader.COMPACT,
     theme: {
-      titleFontFamily: 'Inter',
-      bodyFontFamily: 'Inter',
-      titleSizePt: 24,
-      sectionTitleSizePt: 11,
+      titleFontFamily: 'Georgia',
+      bodyFontFamily: 'Arial',
+      titleSizePt: 29,
+      sectionTitleSizePt: 10,
       bodySizePt: 9.5,
       lineHeight: 1.3,
       spacing: TemplateSpacing.RELAXED,
-      primaryColor: '#17324D',
-      secondaryColor: '#C77B5B',
-      textColor: '#24313A',
-      pageColor: '#FFFDF9',
-      headerColor: '#FFFDF9',
+      primaryColor: '#24313B',
+      secondaryColor: '#A35E40',
+      textColor: '#2D3337',
+      pageColor: '#FFFEFB',
+      headerColor: '#FFFEFB',
       sidebarColor: null,
     },
     sections: [
@@ -112,6 +112,7 @@ const templates = [
         region: TemplateRegion.HEADER,
         sortOrder: 1,
         itemLayout: TemplateSectionLayout.COMPACT,
+        showHeading: false,
       },
       {
         type: ResumeSectionType.ABOUT,
@@ -169,19 +170,19 @@ const templates = [
     photoShape: TemplatePhotoShape.ROUNDED_RECTANGLE,
     continuationHeader: TemplateContinuationHeader.COMPACT,
     theme: {
-      titleFontFamily: 'Manrope',
-      bodyFontFamily: 'Inter',
-      titleSizePt: 22,
+      titleFontFamily: 'Arial',
+      bodyFontFamily: 'Arial',
+      titleSizePt: 27,
       sectionTitleSizePt: 10,
       bodySizePt: 9,
-      lineHeight: 1.25,
+      lineHeight: 1.32,
       spacing: TemplateSpacing.REGULAR,
-      primaryColor: '#2E6FAE',
-      secondaryColor: '#DBE8F4',
-      textColor: '#1D2B3A',
+      primaryColor: '#175A68',
+      secondaryColor: '#C6E0DD',
+      textColor: '#26353B',
       pageColor: '#FFFFFF',
       headerColor: '#FFFFFF',
-      sidebarColor: '#E8F1FB',
+      sidebarColor: '#174453',
     },
     sections: [
       {
@@ -252,19 +253,19 @@ const templates = [
     photoShape: TemplatePhotoShape.CIRCLE,
     continuationHeader: TemplateContinuationHeader.FULL,
     theme: {
-      titleFontFamily: 'Manrope',
-      bodyFontFamily: 'Inter',
+      titleFontFamily: 'Arial',
+      bodyFontFamily: 'Arial',
       titleSizePt: 26,
-      sectionTitleSizePt: 11,
+      sectionTitleSizePt: 10,
       bodySizePt: 9,
       lineHeight: 1.2,
       spacing: TemplateSpacing.COMPACT,
-      primaryColor: '#223B52',
-      secondaryColor: '#6F8240',
-      textColor: '#27313A',
+      primaryColor: '#233B41',
+      secondaryColor: '#C6A275',
+      textColor: '#2B3439',
       pageColor: '#FFFFFF',
-      headerColor: '#223B52',
-      sidebarColor: '#F4F5EE',
+      headerColor: '#233B41',
+      sidebarColor: '#F0F2ED',
     },
     sections: [
       {
@@ -278,6 +279,7 @@ const templates = [
         region: TemplateRegion.HEADER,
         sortOrder: 1,
         itemLayout: TemplateSectionLayout.COMPACT,
+        showHeading: false,
       },
       {
         type: ResumeSectionType.SKILLS,
@@ -327,6 +329,11 @@ const templates = [
 
 async function seedTemplate(template: (typeof templates)[number]) {
   await prisma.$transaction(async (transaction) => {
+    await transaction.$queryRaw`SELECT pg_advisory_xact_lock(42, hashtext(${template.slug}))::text`;
+    const existing = await transaction.resumeTemplate.findUnique({
+      where: { slug: template.slug },
+      include: { sections: true, fields: true },
+    });
     const savedTemplate = await transaction.resumeTemplate.upsert({
       where: { slug: template.slug },
       create: {
@@ -346,7 +353,6 @@ async function seedTemplate(template: (typeof templates)[number]) {
       update: {
         name: template.name,
         description: template.description,
-        status: TemplateStatus.ACTIVE,
         layout: template.layout,
         pageWidthMm: template.pageWidthMm,
         pageHeightMm: template.pageHeightMm,
@@ -364,25 +370,56 @@ async function seedTemplate(template: (typeof templates)[number]) {
       update: template.theme,
     });
 
-    await transaction.templateSection.deleteMany({ where: { templateId: savedTemplate.id } });
-    await transaction.templateFieldRule.deleteMany({ where: { templateId: savedTemplate.id } });
+    const sectionsChanged =
+      !existing ||
+      existing.sections.length !== template.sections.length ||
+      template.sections.some((section) => {
+        const current = existing.sections.find((item) => item.type === section.type);
+        return (
+          !current ||
+          current.region !== section.region ||
+          current.sortOrder !== section.sortOrder ||
+          current.itemLayout !== section.itemLayout ||
+          !current.canReorder ||
+          current.showHeading !== ('showHeading' in section ? section.showHeading : true)
+        );
+      });
 
-    await transaction.templateSection.createMany({
-      data: template.sections.map((section) => ({
-        templateId: savedTemplate.id,
-        ...section,
-        canReorder: true,
-        showHeading: true,
-      })),
-    });
+    if (sectionsChanged) {
+      await transaction.templateSection.deleteMany({ where: { templateId: savedTemplate.id } });
+      await transaction.templateSection.createMany({
+        data: template.sections.map((section) => ({
+          templateId: savedTemplate.id,
+          ...section,
+          canReorder: true,
+          showHeading: 'showHeading' in section ? section.showHeading : true,
+        })),
+      });
+    }
 
-    await transaction.templateFieldRule.createMany({
-      data: fields.map((field) => ({
-        templateId: savedTemplate.id,
-        field,
-        isRequired: field === TemplateFieldType.FIRST_NAME || field === TemplateFieldType.LAST_NAME,
-      })),
-    });
+    const fieldsChanged =
+      !existing ||
+      existing.fields.length !== fields.length ||
+      fields.some((field) => {
+        const current = existing.fields.find((item) => item.field === field);
+        return (
+          !current ||
+          current.isRequired !==
+            (field === TemplateFieldType.FIRST_NAME || field === TemplateFieldType.LAST_NAME)
+        );
+      });
+
+    if (fieldsChanged) {
+      await transaction.templateFieldRule.deleteMany({ where: { templateId: savedTemplate.id } });
+      await transaction.templateFieldRule.createMany({
+        data: fields.map((field) => ({
+          templateId: savedTemplate.id,
+          field,
+          isRequired:
+            field === TemplateFieldType.FIRST_NAME || field === TemplateFieldType.LAST_NAME,
+        })),
+      });
+    }
   });
 
   console.info(`Seeded template: ${template.slug}`);

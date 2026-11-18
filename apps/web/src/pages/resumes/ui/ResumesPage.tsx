@@ -6,14 +6,17 @@ import {
   Container,
   Group,
   Loader,
+  Pagination,
+  Select,
   SimpleGrid,
   Stack,
   Text,
+  TextInput,
   Title,
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
@@ -27,6 +30,7 @@ export const ResumesPage = observer(() => {
     StoreKey.Resumes,
   );
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (session.ready && !session.user) {
@@ -50,23 +54,41 @@ export const ResumesPage = observer(() => {
   }
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="xl" py={{ base: 'lg', sm: 'xl' }}>
       <Stack gap="xl">
-        <Group justify="space-between" align="flex-end">
-          <Stack gap={4}>
-            <Text size="sm" c="dimmed">
-              Ваши документы
-            </Text>
+        <Group justify="space-between" align="flex-end" gap="md">
+          <Stack gap={2}>
             <Title order={1}>Мои резюме</Title>
+            {requests.latest('resumes.list')?.status === 'success' ? (
+              <Text size="sm" c="dimmed">
+                Всего: {resumes.total}
+              </Text>
+            ) : null}
           </Stack>
-          <Group>
-            <Button component={Link} to="/templates" variant="light">
-              Выбрать шаблон
-            </Button>
-            <Button component={Link} to="/" variant="subtle">
-              На главную
-            </Button>
-          </Group>
+          <Button component={Link} to="/templates">
+            Создать резюме
+          </Button>
+        </Group>
+
+        <Group
+          component="form"
+          gap="xs"
+          maw={480}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void resumes.searchFor(search);
+          }}
+        >
+          <TextInput
+            style={{ flex: 1 }}
+            aria-label="Поиск резюме"
+            placeholder="Поиск по названию и имени"
+            value={search}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+          />
+          <Button type="submit" variant="light">
+            Найти
+          </Button>
         </Group>
 
         {requests.latest('resumes.list')?.status === 'pending' ? (
@@ -82,8 +104,10 @@ export const ResumesPage = observer(() => {
           </Alert>
         ) : null}
         {requests.latest('resumes.list')?.status === 'success' && resumes.resumes.length === 0 ? (
-          <Alert title="Резюме ещё нет">
-            Выберите шаблон и заполните обязательные поля, чтобы создать первое резюме.
+          <Alert title={resumes.search ? 'Ничего не найдено' : 'Резюме ещё нет'}>
+            {resumes.search
+              ? 'Попробуйте другой запрос.'
+              : 'Выберите шаблон, чтобы создать первое резюме.'}
           </Alert>
         ) : null}
 
@@ -107,6 +131,9 @@ export const ResumesPage = observer(() => {
                     Обновлено: {formatDate(resume.updatedAt)}
                   </Text>
                   <Group justify="flex-end">
+                    <Button component={Link} to={`/resumes/${resume.id}/edit`} variant="light">
+                      Открыть
+                    </Button>
                     <Button
                       variant="subtle"
                       color="red"
@@ -120,6 +147,33 @@ export const ResumesPage = observer(() => {
               </Card>
             ))}
           </SimpleGrid>
+        ) : null}
+        {resumes.total > 0 ? (
+          <Group justify="space-between" wrap="wrap">
+            <Group gap="xs">
+              <Text size="sm" c="dimmed">
+                На странице
+              </Text>
+              <Select
+                aria-label="Резюме на странице"
+                size="xs"
+                w={75}
+                data={['2', '4', '8', '10']}
+                value={String(resumes.limit)}
+                onChange={(value) => void resumes.setPageSize(Number(value ?? 10))}
+              />
+              <Text size="sm" c="dimmed">
+                из {resumes.total}
+              </Text>
+            </Group>
+            {resumes.total > resumes.limit ? (
+              <Pagination
+                total={Math.ceil(resumes.total / resumes.limit)}
+                value={resumes.page}
+                onChange={(page) => void resumes.load(page)}
+              />
+            ) : null}
+          </Group>
         ) : null}
         {errors.forOperation('resumes.remove') ? (
           <Alert color="red">Не удалось удалить резюме. Попробуйте ещё раз.</Alert>
