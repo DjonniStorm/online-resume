@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, ResumeTemplateChangeData, ResumeTemplateChangeErrors, ResumeTemplateChangeResponses, ResumeUpdateData, ResumeUpdateErrors, ResumeUpdateResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, PublicResumeGetData, PublicResumeGetErrors, PublicResumeGetResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, ResumePublishData, ResumePublishErrors, ResumePublishResponses, ResumeTemplateChangeData, ResumeTemplateChangeErrors, ResumeTemplateChangeResponses, ResumeUnpublishData, ResumeUnpublishErrors, ResumeUnpublishResponses, ResumeUpdateData, ResumeUpdateErrors, ResumeUpdateResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -105,6 +105,20 @@ export const resumeTemplateChange = <ThrowOnError extends boolean = false>(optio
         ...options.headers
     }
 });
+
+export const resumeUnpublish = <ThrowOnError extends boolean = false>(options: Options<ResumeUnpublishData, ThrowOnError>): RequestResult<ResumeUnpublishResponses, ResumeUnpublishErrors, ThrowOnError> => (options.client ?? client).delete<ResumeUnpublishResponses, ResumeUnpublishErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/{id}/publish',
+    ...options
+});
+
+export const resumePublish = <ThrowOnError extends boolean = false>(options: Options<ResumePublishData, ThrowOnError>): RequestResult<ResumePublishResponses, ResumePublishErrors, ThrowOnError> => (options.client ?? client).post<ResumePublishResponses, ResumePublishErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/{id}/publish',
+    ...options
+});
+
+export const publicResumeGet = <ThrowOnError extends boolean = false>(options: Options<PublicResumeGetData, ThrowOnError>): RequestResult<PublicResumeGetResponses, PublicResumeGetErrors, ThrowOnError> => (options.client ?? client).get<PublicResumeGetResponses, PublicResumeGetErrors, ThrowOnError>({ url: '/api/public/resumes/{slug}', ...options });
 
 export const templateList = <ThrowOnError extends boolean = false>(options?: Options<TemplateListData, ThrowOnError>): RequestResult<TemplateListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TemplateListResponses, unknown, ThrowOnError>({ url: '/api/templates', ...options });
 

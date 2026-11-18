@@ -2,11 +2,14 @@ import { makeObservable, observable, runInAction } from 'mobx';
 
 import type { BaseApi } from '@/shared/api';
 import {
+  publicResumeGet,
   resumeCreate,
   resumeDelete,
   resumeGet,
   resumeList,
+  resumePublish,
   resumeTemplateChange,
+  resumeUnpublish,
   resumeUpdate,
 } from '@/shared/api/generated/sdk.gen';
 import type {
@@ -30,9 +33,12 @@ export class ResumeStore {
   constructor(api: BaseApi) {
     this.operations = api.bind({
       create: resumeCreate,
+      getPublic: publicResumeGet,
       get: resumeGet,
       list: resumeList,
       remove: resumeDelete,
+      publish: resumePublish,
+      unpublish: resumeUnpublish,
       changeTemplate: resumeTemplateChange,
       update: resumeUpdate,
     });
@@ -84,6 +90,36 @@ export class ResumeStore {
       return result.data ?? null;
     } catch {
       return null;
+    }
+  }
+
+  async getPublic(slug: string): Promise<ResumeDto | null> {
+    const task = this.operations.getPublic({ path: { slug } }, { retryOnUnauthorized: false });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async publish(id: string): Promise<string | null> {
+    const task = this.operations.publish({ path: { id } });
+    try {
+      const result = await task.promise;
+      return result.data?.publicSlug ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async unpublish(id: string): Promise<boolean> {
+    const task = this.operations.unpublish({ path: { id } });
+    try {
+      const result = await task.promise;
+      return result.response?.status === 204;
+    } catch {
+      return false;
     }
   }
 

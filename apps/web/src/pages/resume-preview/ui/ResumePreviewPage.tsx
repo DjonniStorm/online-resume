@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
+import { ResumePublication } from '@/features/resume-publication';
 import type { ResumeDto } from '@/shared/api/generated/types.gen';
 import { ResumeTemplatePreview, resumeToPreviewData } from '@/widgets/resume-template-preview';
 
@@ -117,6 +118,18 @@ export const ResumePreviewPage = observer(() => {
               </Button>
             </Group>
           </Group>
+          <div className={styles.controls}>
+            <ResumePublication
+              id={id}
+              publicSlug={resume.publicSlug}
+              onChange={(publicSlug) =>
+                setLoaded({
+                  id,
+                  resume: { ...resume, publicSlug, isPublished: publicSlug !== null },
+                })
+              }
+            />
+          </div>
           <ResumeTemplatePreview
             template={resume.template}
             data={resumeToPreviewData(resume)}

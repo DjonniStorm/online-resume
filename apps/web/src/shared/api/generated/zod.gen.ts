@@ -244,6 +244,8 @@ export const zResumeCertificateDto = z.object({
 
 export const zResumeDto = z.object({
     id: z.string(),
+    isPublished: z.boolean(),
+    publicSlug: z.string().nullable(),
     revision: z.number(),
     title: z.string(),
     firstName: z.string(),
@@ -381,6 +383,10 @@ export const zChangeResumeTemplateDto = z.object({
     templateSlug: z.string().min(1).max(100).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
 });
 
+export const zResumePublicationDto = z.object({
+    publicSlug: z.string()
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -438,6 +444,24 @@ export const zResumeTemplateChangePath = z.object({
 });
 
 export const zResumeTemplateChangeResponse = zResumeDto;
+
+export const zResumeUnpublishPath = z.object({
+    id: z.string()
+});
+
+export const zResumeUnpublishResponse = z.void();
+
+export const zResumePublishPath = z.object({
+    id: z.string()
+});
+
+export const zResumePublishResponse = zResumePublicationDto;
+
+export const zPublicResumeGetPath = z.object({
+    slug: z.string()
+});
+
+export const zPublicResumeGetResponse = zResumeDto;
 
 export const zTemplateListResponse = z.array(zTemplateDto);
 

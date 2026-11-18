@@ -184,6 +184,8 @@ export type ResumeCertificateDto = {
 
 export type ResumeDto = {
     id: string;
+    isPublished: boolean;
+    publicSlug: string | null;
     revision: number;
     title: string;
     firstName: string;
@@ -309,6 +311,10 @@ export type UpdateResumeDto = {
 export type ChangeResumeTemplateDto = {
     revision: number;
     templateSlug: string;
+};
+
+export type ResumePublicationDto = {
+    publicSlug: string;
 };
 
 export type HealthControllerCheckData = {
@@ -581,6 +587,74 @@ export type ResumeTemplateChangeResponses = {
 };
 
 export type ResumeTemplateChangeResponse = ResumeTemplateChangeResponses[keyof ResumeTemplateChangeResponses];
+
+export type ResumeUnpublishData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/publish';
+};
+
+export type ResumeUnpublishErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumeUnpublishResponses = {
+    204: void;
+};
+
+export type ResumeUnpublishResponse = ResumeUnpublishResponses[keyof ResumeUnpublishResponses];
+
+export type ResumePublishData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/resumes/{id}/publish';
+};
+
+export type ResumePublishErrors = {
+    401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
+};
+
+export type ResumePublishResponses = {
+    200: ResumePublicationDto;
+};
+
+export type ResumePublishResponse = ResumePublishResponses[keyof ResumePublishResponses];
+
+export type PublicResumeGetData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/public/resumes/{slug}';
+};
+
+export type PublicResumeGetErrors = {
+    /**
+     * Резюме недоступно.
+     */
+    404: unknown;
+};
+
+export type PublicResumeGetResponses = {
+    200: ResumeDto;
+};
+
+export type PublicResumeGetResponse = PublicResumeGetResponses[keyof PublicResumeGetResponses];
 
 export type TemplateListData = {
     body?: never;

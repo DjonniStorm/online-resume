@@ -28,6 +28,7 @@ import { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import { ResumePublicationDto } from './dto/resume-publication.dto';
 import { ResumeListDto } from './dto/resume-summary.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumesService } from './resumes.service';
@@ -85,6 +86,24 @@ export class ResumesController {
     @Body() input: ChangeResumeTemplateDto,
   ) {
     return this.resumes.changeTemplate(user.id, id, input);
+  }
+
+  @Post(':id/publish')
+  @HttpCode(200)
+  @ApiOperation({ operationId: 'resumePublish' })
+  @ApiOkResponse({ type: ResumePublicationDto })
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  publish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.publish(user.id, id);
+  }
+
+  @Delete(':id/publish')
+  @HttpCode(204)
+  @ApiOperation({ operationId: 'resumeUnpublish' })
+  @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  unpublish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.unpublish(user.id, id);
   }
 
   @Delete(':id')

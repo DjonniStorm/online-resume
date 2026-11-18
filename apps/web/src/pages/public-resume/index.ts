@@ -1,0 +1,1 @@
+export { PublicResumePage } from './ui';

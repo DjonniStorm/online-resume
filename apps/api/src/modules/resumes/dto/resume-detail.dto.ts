@@ -157,6 +157,12 @@ export class ResumeDto {
   id!: string;
 
   @ApiProperty()
+  isPublished!: boolean;
+
+  @ApiProperty({ nullable: true })
+  publicSlug!: string | null;
+
+  @ApiProperty()
   revision!: number;
 
   @ApiProperty()
