@@ -1,4 +1,6 @@
+import { ResumeStore } from '@/entities/resume';
 import { SessionStore } from '@/entities/session/model/session-store';
+import { TemplateStore } from '@/entities/template';
 import { createApi } from '@/shared/api';
 
 import { ErrorStore } from './error-store';
@@ -21,6 +23,8 @@ export class RootStore {
     this.requests,
     this.errors,
   );
+  readonly templates = new TemplateStore(this.api.forStore(StoreKey.Templates));
+  readonly resumes = new ResumeStore(this.api.forStore(StoreKey.Resumes));
 
   constructor() {
     this.api.setAuth({

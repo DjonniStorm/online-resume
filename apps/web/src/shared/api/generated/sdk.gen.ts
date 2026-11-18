@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -42,7 +42,7 @@ export const authRefresh = <ThrowOnError extends boolean = false>(options?: Opti
 
 export const authLogout = <ThrowOnError extends boolean = false>(options?: Options<AuthLogoutData, ThrowOnError>): RequestResult<AuthLogoutResponses, AuthLogoutErrors, ThrowOnError> => (options?.client ?? client).post<AuthLogoutResponses, AuthLogoutErrors, ThrowOnError>({ url: '/api/auth/logout', ...options });
 
-export const authMe = <ThrowOnError extends boolean = false>(options: Options<AuthMeData, ThrowOnError>): RequestResult<AuthMeResponses, AuthMeErrors, ThrowOnError> => (options.client ?? client).get<AuthMeResponses, AuthMeErrors, ThrowOnError>({
+export const authMe = <ThrowOnError extends boolean = false>(options?: Options<AuthMeData, ThrowOnError>): RequestResult<AuthMeResponses, AuthMeErrors, ThrowOnError> => (options?.client ?? client).get<AuthMeResponses, AuthMeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/auth/me',
     ...options
@@ -57,3 +57,35 @@ export const authUpdateProfile = <ThrowOnError extends boolean = false>(options:
         ...options.headers
     }
 });
+
+export const resumeList = <ThrowOnError extends boolean = false>(options?: Options<ResumeListData, ThrowOnError>): RequestResult<ResumeListResponses, ResumeListErrors, ThrowOnError> => (options?.client ?? client).get<ResumeListResponses, ResumeListErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes',
+    ...options
+});
+
+export const resumeCreate = <ThrowOnError extends boolean = false>(options: Options<ResumeCreateData, ThrowOnError>): RequestResult<ResumeCreateResponses, ResumeCreateErrors, ThrowOnError> => (options.client ?? client).post<ResumeCreateResponses, ResumeCreateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const resumeDelete = <ThrowOnError extends boolean = false>(options: Options<ResumeDeleteData, ThrowOnError>): RequestResult<ResumeDeleteResponses, ResumeDeleteErrors, ThrowOnError> => (options.client ?? client).delete<ResumeDeleteResponses, ResumeDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/{id}',
+    ...options
+});
+
+export const resumeGet = <ThrowOnError extends boolean = false>(options: Options<ResumeGetData, ThrowOnError>): RequestResult<ResumeGetResponses, ResumeGetErrors, ThrowOnError> => (options.client ?? client).get<ResumeGetResponses, ResumeGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/{id}',
+    ...options
+});
+
+export const templateList = <ThrowOnError extends boolean = false>(options?: Options<TemplateListData, ThrowOnError>): RequestResult<TemplateListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TemplateListResponses, unknown, ThrowOnError>({ url: '/api/templates', ...options });
+
+export const templateGet = <ThrowOnError extends boolean = false>(options: Options<TemplateGetData, ThrowOnError>): RequestResult<TemplateGetResponses, TemplateGetErrors, ThrowOnError> => (options.client ?? client).get<TemplateGetResponses, TemplateGetErrors, ThrowOnError>({ url: '/api/templates/{slug}', ...options });

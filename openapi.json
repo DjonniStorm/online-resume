@@ -137,16 +137,7 @@
     "/api/auth/me": {
       "get": {
         "operationId": "authMe",
-        "parameters": [
-          {
-            "name": "authorization",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -208,6 +199,188 @@
         ],
         "summary": "",
         "tags": ["auth"]
+      }
+    },
+    "/api/resumes": {
+      "post": {
+        "operationId": "resumeCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResumeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Активный шаблон не найден."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "get": {
+        "operationId": "resumeList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResumeSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/resumes/{id}": {
+      "get": {
+        "operationId": "resumeGet",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      },
+      "delete": {
+        "operationId": "resumeDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/templates": {
+      "get": {
+        "operationId": "templateList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": ["templates"]
+      }
+    },
+    "/api/templates/{slug}": {
+      "get": {
+        "operationId": "templateGet",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Шаблон не найден."
+          }
+        },
+        "summary": "",
+        "tags": ["templates"]
       }
     }
   },
@@ -399,6 +572,342 @@
             "format": "uri"
           }
         }
+      },
+      "CreateResumeDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "Резюме frontend-разработчика"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Анна"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Петрова"
+          },
+          "templateSlug": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "example": "left-rail"
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Frontend-разработчик"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "example": "anna@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "+7 900 000-00-00"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Москва"
+          },
+          "githubUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "pattern": "^https:\\/\\/(?:www\\.)?github\\.com\\/[^/?#]+(?:\\/[^?#]*)?$",
+            "example": "https://github.com/example"
+          },
+          "telegramHandle": {
+            "type": "string",
+            "pattern": "^@?[A-Za-z0-9_]{5,32}$",
+            "example": "@example"
+          },
+          "websiteUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "about": {
+            "type": "string",
+            "maxLength": 5000,
+            "example": "Разрабатываю интерфейсы и сервисы..."
+          }
+        },
+        "required": ["title", "firstName", "lastName", "templateSlug"]
+      },
+      "ResumeTemplateSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "slug", "name"]
+      },
+      "ResumeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ResumeTemplateSummaryDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "title", "firstName", "lastName", "template", "createdAt", "updatedAt"]
+      },
+      "TemplateThemeDto": {
+        "type": "object",
+        "properties": {
+          "titleFontFamily": {
+            "type": "string"
+          },
+          "bodyFontFamily": {
+            "type": "string"
+          },
+          "titleSizePt": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "sectionTitleSizePt": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "bodySizePt": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "lineHeight": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "spacing": {
+            "enum": ["COMPACT", "REGULAR", "RELAXED"],
+            "type": "string"
+          },
+          "primaryColor": {
+            "type": "string"
+          },
+          "secondaryColor": {
+            "type": "string"
+          },
+          "textColor": {
+            "type": "string"
+          },
+          "pageColor": {
+            "type": "string"
+          },
+          "headerColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "sidebarColor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "titleFontFamily",
+          "bodyFontFamily",
+          "titleSizePt",
+          "sectionTitleSizePt",
+          "bodySizePt",
+          "lineHeight",
+          "spacing",
+          "primaryColor",
+          "secondaryColor",
+          "textColor",
+          "pageColor",
+          "headerColor",
+          "sidebarColor"
+        ]
+      },
+      "TemplateSectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "PROFILE",
+              "ABOUT",
+              "CONTACTS",
+              "EXPERIENCE",
+              "EDUCATION",
+              "SKILLS",
+              "LANGUAGES",
+              "PROJECTS",
+              "CERTIFICATES"
+            ],
+            "type": "string"
+          },
+          "region": {
+            "enum": ["PAGE", "HEADER", "SIDEBAR", "MAIN", "FOOTER"],
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "itemLayout": {
+            "enum": ["STANDARD", "COMPACT", "TIMELINE", "TAGS", "BARS"],
+            "type": "string"
+          },
+          "canReorder": {
+            "type": "boolean"
+          },
+          "showHeading": {
+            "type": "boolean"
+          },
+          "headingText": {
+            "type": "string",
+            "nullable": true
+          },
+          "accentColor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "region",
+          "sortOrder",
+          "itemLayout",
+          "canReorder",
+          "showHeading",
+          "headingText",
+          "accentColor"
+        ]
+      },
+      "TemplateFieldRuleDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "enum": [
+              "FIRST_NAME",
+              "LAST_NAME",
+              "HEADLINE",
+              "EMAIL",
+              "PHONE",
+              "LOCATION",
+              "GITHUB_URL",
+              "TELEGRAM_HANDLE",
+              "WEBSITE_URL"
+            ],
+            "type": "string"
+          },
+          "isRequired": {
+            "type": "boolean"
+          }
+        },
+        "required": ["field", "isRequired"]
+      },
+      "TemplateDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "enum": ["SINGLE_COLUMN", "SIDEBAR_LEFT", "SIDEBAR_RIGHT", "WIDE_HEADER"],
+            "type": "string"
+          },
+          "pageWidthMm": {
+            "type": "string"
+          },
+          "pageHeightMm": {
+            "type": "string"
+          },
+          "sidebarWidthPercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "previewUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "theme": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TemplateThemeDto"
+              }
+            ]
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateSectionDto"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateFieldRuleDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "layout",
+          "pageWidthMm",
+          "pageHeightMm",
+          "sidebarWidthPercent",
+          "previewUrl",
+          "theme",
+          "sections",
+          "fields"
+        ]
       }
     }
   }

@@ -45,6 +45,126 @@ export const zUpdateProfileDto = z.object({
     websiteUrl: z.url().max(2048).nullish()
 });
 
+export const zCreateResumeDto = z.object({
+    title: z.string().min(1).max(200),
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+    templateSlug: z.string().max(100).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    headline: z.string().max(200).optional(),
+    email: z.email().max(254).optional(),
+    phone: z.string().max(50).optional(),
+    location: z.string().max(200).optional(),
+    githubUrl: z.url().max(2048).regex(/^https:\/\/(?:www\.)?github\.com\/[^\/?#]+(?:\/[^?#]*)?$/).optional(),
+    telegramHandle: z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/).optional(),
+    websiteUrl: z.url().max(2048).optional(),
+    about: z.string().max(5000).optional()
+});
+
+export const zResumeTemplateSummaryDto = z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string()
+});
+
+export const zResumeSummaryDto = z.object({
+    id: z.string(),
+    title: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    template: zResumeTemplateSummaryDto,
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
+export const zTemplateThemeDto = z.object({
+    titleFontFamily: z.string(),
+    bodyFontFamily: z.string(),
+    titleSizePt: z.string(),
+    sectionTitleSizePt: z.string(),
+    bodySizePt: z.string(),
+    lineHeight: z.string(),
+    spacing: z.enum([
+        'COMPACT',
+        'REGULAR',
+        'RELAXED'
+    ]),
+    primaryColor: z.string(),
+    secondaryColor: z.string(),
+    textColor: z.string(),
+    pageColor: z.string(),
+    headerColor: z.string().nullable(),
+    sidebarColor: z.string().nullable()
+});
+
+export const zTemplateSectionDto = z.object({
+    id: z.string(),
+    type: z.enum([
+        'PROFILE',
+        'ABOUT',
+        'CONTACTS',
+        'EXPERIENCE',
+        'EDUCATION',
+        'SKILLS',
+        'LANGUAGES',
+        'PROJECTS',
+        'CERTIFICATES'
+    ]),
+    region: z.enum([
+        'PAGE',
+        'HEADER',
+        'SIDEBAR',
+        'MAIN',
+        'FOOTER'
+    ]),
+    sortOrder: z.number(),
+    itemLayout: z.enum([
+        'STANDARD',
+        'COMPACT',
+        'TIMELINE',
+        'TAGS',
+        'BARS'
+    ]),
+    canReorder: z.boolean(),
+    showHeading: z.boolean(),
+    headingText: z.string().nullable(),
+    accentColor: z.string().nullable()
+});
+
+export const zTemplateFieldRuleDto = z.object({
+    field: z.enum([
+        'FIRST_NAME',
+        'LAST_NAME',
+        'HEADLINE',
+        'EMAIL',
+        'PHONE',
+        'LOCATION',
+        'GITHUB_URL',
+        'TELEGRAM_HANDLE',
+        'WEBSITE_URL'
+    ]),
+    isRequired: z.boolean()
+});
+
+export const zTemplateDto = z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    layout: z.enum([
+        'SINGLE_COLUMN',
+        'SIDEBAR_LEFT',
+        'SIDEBAR_RIGHT',
+        'WIDE_HEADER'
+    ]),
+    pageWidthMm: z.string(),
+    pageHeightMm: z.string(),
+    sidebarWidthPercent: z.number().nullable(),
+    previewUrl: z.string().nullable(),
+    theme: zTemplateThemeDto.nullable(),
+    sections: z.array(zTemplateSectionDto),
+    fields: z.array(zTemplateFieldRuleDto)
+});
+
 export const zAuthRegisterBody = zCreateUserDto;
 
 export const zAuthRegisterResponse = zAuthResultDto;
@@ -57,12 +177,30 @@ export const zAuthRefreshResponse = zAuthResultDto;
 
 export const zAuthLogoutResponse = z.void();
 
-export const zAuthMeHeaders = z.object({
-    authorization: z.string()
-});
-
 export const zAuthMeResponse = zPublicUserDto;
 
 export const zAuthUpdateProfileBody = zUpdateProfileDto;
 
 export const zAuthUpdateProfileResponse = zPublicUserDto;
+
+export const zResumeListResponse = z.array(zResumeSummaryDto);
+
+export const zResumeCreateBody = zCreateResumeDto;
+
+export const zResumeDeletePath = z.object({
+    id: z.string()
+});
+
+export const zResumeDeleteResponse = z.void();
+
+export const zResumeGetPath = z.object({
+    id: z.string()
+});
+
+export const zTemplateListResponse = z.array(zTemplateDto);
+
+export const zTemplateGetPath = z.object({
+    slug: z.string()
+});
+
+export const zTemplateGetResponse = zTemplateDto;

@@ -35,9 +35,13 @@ export const HomePage = observer(() => {
           Online Resume
         </Link>
         {sessionStore.user ? (
-          <Button variant="subtle" loading={isLoggingOut} onClick={() => void logout()}>
-            Выйти
-          </Button>
+          <nav className={classes.navigation} aria-label="Навигация пользователя">
+            <Link to="/templates">Шаблоны</Link>
+            <Link to="/resumes">Мои резюме</Link>
+            <Button variant="subtle" loading={isLoggingOut} onClick={() => void logout()}>
+              Выйти
+            </Button>
+          </nav>
         ) : (
           <nav className={classes.navigation} aria-label="Основная навигация">
             <a className={classes.featuresLink} href="#features">
