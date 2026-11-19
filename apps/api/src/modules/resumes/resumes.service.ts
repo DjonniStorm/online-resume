@@ -4,16 +4,19 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
 import type { Prisma } from '../../generated/prisma/client';
 import { ResumeSectionType, TemplateFieldType, TemplateStatus } from '../../generated/prisma/enums';
+import type { UploadedPhoto } from './common/photo';
 import type { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import type { UpdateResumeDto } from './dto/update-resume.dto';
+import { ResumePhotoStorageService } from './resume-photo-storage.service';
 
 const resumeDetailInclude = {
   template: {
@@ -34,7 +37,12 @@ const resumeDetailInclude = {
 
 @Injectable()
 export class ResumesService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ResumesService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly photos: ResumePhotoStorageService,
+  ) {}
 
   async create(ownerId: string, input: CreateResumeDto) {
     const template = await this.prisma.resumeTemplate.findFirst({
@@ -132,6 +140,88 @@ export class ResumesService {
       throw new NotFoundException('Резюме не найдено');
     }
     return resume;
+  }
+
+  async getPhoto(ownerId: string, id: string) {
+    const resume = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      select: { photoPath: true },
+    });
+    if (!resume) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    return this.photos.read(resume.photoPath);
+  }
+
+  async getPublicPhoto(slug: string) {
+    const resume = await this.prisma.resume.findFirst({
+      where: { publicSlug: slug, isPublished: true, deletedAt: null },
+      select: { photoPath: true },
+    });
+    if (!resume) {
+      throw new NotFoundException('Фотография не найдена');
+    }
+    return this.photos.read(resume.photoPath);
+  }
+
+  async uploadPhoto(ownerId: string, id: string, file: UploadedPhoto | undefined) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      select: { photoPath: true, revision: true },
+    });
+    if (!current) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+
+    const name = await this.photos.save(file);
+    try {
+      const result = await this.prisma.resume.updateMany({
+        where: { id, ownerId, deletedAt: null, revision: current.revision },
+        data: { photoPath: name, revision: { increment: 1 } },
+      });
+      if (result.count !== 1) {
+        throw new ConflictException('Резюме уже изменилось. Обновите страницу.');
+      }
+    } catch (error) {
+      await this.discardPhoto(name);
+      throw error;
+    }
+
+    if (current.photoPath) {
+      await this.discardPhoto(current.photoPath);
+    }
+    return this.findOne(ownerId, id);
+  }
+
+  async removePhoto(ownerId: string, id: string) {
+    const current = await this.prisma.resume.findFirst({
+      where: { id, ownerId, deletedAt: null },
+      select: { photoPath: true, revision: true },
+    });
+    if (!current) {
+      throw new NotFoundException('Резюме не найдено');
+    }
+    if (!current.photoPath) {
+      return this.findOne(ownerId, id);
+    }
+
+    const result = await this.prisma.resume.updateMany({
+      where: { id, ownerId, deletedAt: null, revision: current.revision },
+      data: { photoPath: null, revision: { increment: 1 } },
+    });
+    if (result.count !== 1) {
+      throw new ConflictException('Резюме уже изменилось. Обновите страницу.');
+    }
+    await this.discardPhoto(current.photoPath);
+    return this.findOne(ownerId, id);
+  }
+
+  private async discardPhoto(name: string): Promise<void> {
+    try {
+      await this.photos.remove(name);
+    } catch (error) {
+      this.logger.warn(`Не удалось удалить файл фотографии ${name}`, error);
+    }
   }
 
   async findPublic(slug: string) {

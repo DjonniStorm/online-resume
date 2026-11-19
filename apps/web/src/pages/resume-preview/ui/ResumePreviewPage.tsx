@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
+import { useResumePhotoUrl } from '@/entities/resume';
 import { ResumePublication } from '@/features/resume-publication';
 import type { ResumeDto } from '@/shared/api/generated/types.gen';
 import { ResumeTemplatePreview, resumeToPreviewData } from '@/widgets/resume-template-preview';
@@ -26,8 +27,13 @@ export const ResumePreviewPage = observer(() => {
   const [searchParams] = useSearchParams();
   const printOnOpen = searchParams.get('print') === '1';
   const navigate = useNavigate();
-  const { resumes, session } = useStores(StoreKey.Resumes, StoreKey.Session);
+  const { requests, resumes, session } = useStores(
+    StoreKey.Requests,
+    StoreKey.Resumes,
+    StoreKey.Session,
+  );
   const [loaded, setLoaded] = useState<{ id: string; resume: ResumeDto | null } | null>(null);
+  const photoUrl = useResumePhotoUrl(resumes, id ?? '', loaded?.resume?.photoPath ?? null);
 
   useHead({
     title: loaded?.resume ? `${loaded.resume.title} — предпросмотр` : 'Предпросмотр резюме',
@@ -56,8 +62,18 @@ export const ResumePreviewPage = observer(() => {
     if (!printOnOpen || !id || loaded?.id !== id || !loaded.resume) {
       return;
     }
+    if (
+      loaded.resume.photoPath &&
+      !photoUrl &&
+      requests.latest('resumes.getPhoto')?.status !== 'error'
+    ) {
+      return;
+    }
     let active = true;
-    void document.fonts.ready.then(() => {
+    void Promise.all([
+      document.fonts.ready,
+      ...Array.from(document.images, (image) => image.decode().catch(() => undefined)),
+    ]).then(() => {
       if (active) {
         window.print();
       }
@@ -65,7 +81,7 @@ export const ResumePreviewPage = observer(() => {
     return () => {
       active = false;
     };
-  }, [id, loaded, printOnOpen]);
+  }, [id, loaded, photoUrl, printOnOpen, requests]);
 
   if (!session.ready || !session.user || !id || loaded?.id !== id) {
     return (
@@ -133,6 +149,7 @@ export const ResumePreviewPage = observer(() => {
           <ResumeTemplatePreview
             template={resume.template}
             data={resumeToPreviewData(resume)}
+            photoUrl={photoUrl}
             sectionState={resume.sections}
           />
         </Stack>

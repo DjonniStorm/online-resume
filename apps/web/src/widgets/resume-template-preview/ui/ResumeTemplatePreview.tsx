@@ -21,6 +21,7 @@ import { WideHeaderLayout } from './layouts/WideHeaderLayout';
 type ResumeTemplatePreviewProps = {
   template: TemplateDto;
   data?: ResumePreviewData;
+  photoUrl?: string | null;
   sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>;
 };
 
@@ -29,6 +30,7 @@ const pixelsPerMm = 96 / 25.4;
 export function ResumeTemplatePreview({
   template,
   data = previewFixture,
+  photoUrl,
   sectionState,
 }: ResumeTemplatePreviewProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,7 @@ export function ResumeTemplatePreview({
   const pageWidth = Number(template.pageWidthMm) * pixelsPerMm;
   const pageHeight = Number(template.pageHeightMm) * pixelsPerMm;
   const sectionsByRegion = groupSections(template.sections, sectionState);
-  const layoutProps = { data, sectionsByRegion, sectionState, theme, template };
+  const layoutProps = { data, photoUrl, sectionsByRegion, sectionState, theme, template };
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;

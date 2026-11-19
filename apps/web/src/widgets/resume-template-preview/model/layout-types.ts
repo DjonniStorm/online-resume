@@ -13,6 +13,7 @@ export type SectionsByRegion = Record<Region, TemplateSectionDto[]>;
 
 export type ResumeTemplateLayoutProps = {
   data: ResumePreviewData;
+  photoUrl?: string | null;
   sectionsByRegion: SectionsByRegion;
   sectionState?: Array<Pick<ResumeSectionDto, 'type' | 'sortOrder' | 'isVisible'>>;
   theme: TemplateThemeDto;

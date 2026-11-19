@@ -6,6 +6,7 @@ import styles from '../ResumeTemplatePreview.module.css';
 
 export function WideHeaderLayout({
   data,
+  photoUrl,
   sectionsByRegion,
   theme,
   template,
@@ -14,17 +15,17 @@ export function WideHeaderLayout({
     <div className={styles.wideHeaderLayout}>
       <header className={styles.header}>
         {template.photoPlacement === 'HEADER_START' ? (
-          <ResumePhoto data={data} shape={template.photoShape} />
+          <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
         ) : null}
         <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
         {template.photoPlacement === 'HEADER_END' ? (
-          <ResumePhoto data={data} shape={template.photoShape} />
+          <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
         ) : null}
       </header>
       <div className={styles.columns}>
         <main className={styles.main}>
           {template.photoPlacement === 'MAIN_TOP' ? (
-            <ResumePhoto data={data} shape={template.photoShape} />
+            <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
           ) : null}
           {sectionsByRegion.MAIN.map((section) => (
             <ResumeSection key={section.id} section={section} data={data} theme={theme} />
@@ -32,7 +33,7 @@ export function WideHeaderLayout({
         </main>
         <aside className={styles.sidebar}>
           {template.photoPlacement === 'SIDEBAR_TOP' ? (
-            <ResumePhoto data={data} shape={template.photoShape} />
+            <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
           ) : null}
           {sectionsByRegion.SIDEBAR.map((section) => (
             <ResumeSection key={section.id} section={section} data={data} theme={theme} />

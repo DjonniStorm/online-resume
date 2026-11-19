@@ -20,7 +20,11 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { match } from 'ts-pattern';
 
 import { StoreKey, useStores } from '@/app/store';
-import { type ResumeEditorValues, resumeToEditorValues } from '@/entities/resume';
+import {
+  type ResumeEditorValues,
+  resumeToEditorValues,
+  useResumePhotoUrl,
+} from '@/entities/resume';
 import { TemplateCard } from '@/entities/template';
 import { ResumeEditorForm, type SaveState } from '@/features/resume-edit';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
@@ -52,6 +56,7 @@ export const ResumeEditPage = observer(() => {
   const [templateModalOpened, setTemplateModalOpened] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('saved');
+  const photoUrl = useResumePhotoUrl(resumes, id ?? '', resume?.photoPath ?? null);
 
   useHead({ title: resume ? `Редактор · ${resume.title}` : 'Редактор резюме — Online Resume' });
 
@@ -90,6 +95,28 @@ export const ResumeEditPage = observer(() => {
     },
     [id, resumes],
   );
+
+  const uploadPhoto = async (file: File) => {
+    if (!id) {
+      return null;
+    }
+    const value = await resumes.uploadPhoto(id, file);
+    if (value) {
+      setResume(value);
+    }
+    return value;
+  };
+
+  const deletePhoto = async () => {
+    if (!id) {
+      return null;
+    }
+    const value = await resumes.deletePhoto(id);
+    if (value) {
+      setResume(value);
+    }
+    return value;
+  };
 
   const openPreview = useCallback(() => {
     if (id) {
@@ -142,6 +169,9 @@ export const ResumeEditPage = observer(() => {
   const loadRequest = requests.latest('resumes.get');
   const loadError = errors.forOperation('resumes.get');
   const saveError = errors.forOperation('resumes.update');
+  const photoBusy =
+    requests.latest('resumes.uploadPhoto')?.status === 'pending' ||
+    requests.latest('resumes.deletePhoto')?.status === 'pending';
 
   if (loadRequest?.status === 'pending' || (!resume && !loadError)) {
     return (
@@ -217,7 +247,15 @@ export const ResumeEditPage = observer(() => {
               key={`${resume.id}:${resume.template.id}`}
               resume={resume}
               saveError={saveError}
-              paused={templateModalOpened}
+              paused={templateModalOpened || photoBusy}
+              photoUrl={photoUrl}
+              photoBusy={photoBusy || saveState === 'saving'}
+              photoError={
+                errors.forOperation('resumes.uploadPhoto') ??
+                errors.forOperation('resumes.deletePhoto')
+              }
+              onPhotoUpload={uploadPhoto}
+              onPhotoDelete={deletePhoto}
               onSave={save}
               onOpenPreview={openPreview}
               onSaveStateChange={setSaveState}
@@ -233,6 +271,7 @@ export const ResumeEditPage = observer(() => {
                 <ResumeTemplatePreview
                   template={resume.template}
                   data={previewData ?? resumeToPreviewData(resume)}
+                  photoUrl={photoUrl}
                   sectionState={previewSections.map((section, index) => ({
                     ...section,
                     sortOrder: index,
@@ -275,6 +314,7 @@ export const ResumeEditPage = observer(() => {
                     <ResumeTemplatePreview
                       template={template}
                       data={previewData ?? resumeToPreviewData(resume)}
+                      photoUrl={photoUrl}
                       sectionState={previewSections.map((section, index) => ({
                         ...section,
                         sortOrder: index,

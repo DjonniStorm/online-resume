@@ -3,20 +3,28 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
   Patch,
   Post,
   Query,
+  StreamableFile,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiProduces,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -24,6 +32,7 @@ import {
 import { CurrentUser } from '../auth/common/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/common/types';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { MAX_PHOTO_SIZE, type UploadedPhoto } from './common/photo';
 import { ChangeResumeTemplateDto } from './dto/change-resume-template.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
@@ -62,6 +71,47 @@ export class ResumesController {
   @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.resumes.findOne(user.id, id);
+  }
+
+  @Get(':id/photo')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ operationId: 'resumePhotoGet' })
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp')
+  @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
+  @ApiNotFoundResponse({ description: 'Фотография не найдена.' })
+  async getPhoto(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const photo = await this.resumes.getPhoto(user.id, id);
+    return new StreamableFile(photo.data, { type: photo.type });
+  }
+
+  @Post(':id/photo')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_PHOTO_SIZE, files: 1 } }))
+  @ApiOperation({ operationId: 'resumePhotoUpload' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  uploadPhoto(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @UploadedFile() file: UploadedPhoto | undefined,
+  ) {
+    return this.resumes.uploadPhoto(user.id, id, file);
+  }
+
+  @Delete(':id/photo')
+  @ApiOperation({ operationId: 'resumePhotoDelete' })
+  @ApiOkResponse({ type: ResumeDto })
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  removePhoto(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.removePhoto(user.id, id);
   }
 
   @Patch(':id')

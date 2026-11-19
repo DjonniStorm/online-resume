@@ -7,6 +7,9 @@ import {
   resumeDelete,
   resumeGet,
   resumeList,
+  resumePhotoDelete,
+  resumePhotoGet,
+  resumePhotoUpload,
   resumePublish,
   resumeTemplateChange,
   resumeUnpublish,
@@ -36,6 +39,9 @@ export class ResumeStore {
       getPublic: publicResumeGet,
       get: resumeGet,
       list: resumeList,
+      deletePhoto: resumePhotoDelete,
+      getPhoto: resumePhotoGet,
+      uploadPhoto: resumePhotoUpload,
       remove: resumeDelete,
       publish: resumePublish,
       unpublish: resumeUnpublish,
@@ -95,6 +101,36 @@ export class ResumeStore {
 
   async getPublic(slug: string): Promise<ResumeDto | null> {
     const task = this.operations.getPublic({ path: { slug } }, { retryOnUnauthorized: false });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async getPhoto(id: string): Promise<Blob | null> {
+    const task = this.operations.getPhoto({ path: { id }, parseAs: 'blob' });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async uploadPhoto(id: string, file: File): Promise<ResumeDto | null> {
+    const task = this.operations.uploadPhoto({ path: { id }, body: { file } });
+    try {
+      const result = await task.promise;
+      return result.data ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async deletePhoto(id: string): Promise<ResumeDto | null> {
+    const task = this.operations.deletePhoto({ path: { id } });
     try {
       const result = await task.promise;
       return result.data ?? null;
