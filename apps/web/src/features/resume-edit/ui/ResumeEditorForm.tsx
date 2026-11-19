@@ -82,7 +82,17 @@ export function ResumeEditorForm({
           onUpload={onPhotoUpload}
           onDelete={onPhotoDelete}
         />
-        <BasicInformationFields form={form} />
+        <BasicInformationFields
+          form={form}
+          fields={
+            new Set([
+              ...resume.template.fields.map((field) => field.field),
+              ...(resume.template.sections.some((section) => section.type === 'ABOUT')
+                ? ['ABOUT']
+                : []),
+            ])
+          }
+        />
         <ResumeSections form={form} resume={resume} />
         {saveError ? (
           <Alert color="red" title="Не удалось сохранить резюме">
