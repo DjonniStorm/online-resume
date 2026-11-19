@@ -32,6 +32,8 @@ COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/packages/shared/package.json ./packages/shared/package.json
 
+RUN mkdir -p /app/apps/api/uploads/resumes && chown -R node:node /app/apps/api/uploads
+
 WORKDIR /app/apps/api
 USER node
 EXPOSE 3000

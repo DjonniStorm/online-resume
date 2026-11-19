@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  Card,
   Container,
   Group,
   Modal,
@@ -38,10 +39,19 @@ export const TemplatesPage = observer(() => {
   const [pageSize, setPageSize] = useState(4);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [createModalOpened, setCreateModalOpened] = useState(false);
+  const [loadedHere, setLoadedHere] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    void templates.load();
+    let active = true;
+    void templates.load().finally(() => {
+      if (active) {
+        setLoadedHere(true);
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [templates]);
 
   const normalizedQuery = query.trim().toLocaleLowerCase('ru');
@@ -52,6 +62,8 @@ export const TemplatesPage = observer(() => {
   const visibleTemplates = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
   const listRequest = requests.latest('templates.list');
   const listError = errors.forOperation('templates.list');
+  const loading = !loadedHere || listRequest?.status === 'pending';
+  const ready = loadedHere && listRequest?.status === 'success';
 
   const openCreateModal = () => {
     if (!session.user) {
@@ -84,26 +96,30 @@ export const TemplatesPage = observer(() => {
             />
           </Group>
 
-          {listRequest?.status === 'pending' ? (
+          {loading ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
-              <Skeleton height={360} />
-              <Skeleton height={360} />
+              {Array.from({ length: pageSize }, (_, index) => (
+                <Card key={index} withBorder radius="md" padding="md">
+                  <Skeleton height={330} />
+                  <Skeleton height={24} width="70%" mt="md" />
+                </Card>
+              ))}
             </SimpleGrid>
           ) : null}
-          {listError ? (
+          {!loading && listError ? (
             <Alert color="red" title="Не удалось загрузить шаблоны">
               <Button variant="light" color="red" mt="sm" onClick={() => void templates.reload()}>
                 Повторить
               </Button>
             </Alert>
           ) : null}
-          {listRequest?.status === 'success' && filteredTemplates.length === 0 ? (
+          {ready && filteredTemplates.length === 0 ? (
             <Alert title={query ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
               {query ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
             </Alert>
           ) : null}
 
-          {visibleTemplates.length > 0 ? (
+          {ready && visibleTemplates.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
               {visibleTemplates.map((template) => (
                 <TemplateCard
@@ -116,7 +132,7 @@ export const TemplatesPage = observer(() => {
             </SimpleGrid>
           ) : null}
 
-          {filteredTemplates.length > 0 ? (
+          {ready && filteredTemplates.length > 0 ? (
             <Group justify="space-between" wrap="wrap" gap="md">
               <Group gap="xs">
                 <Text size="sm" c="dimmed">

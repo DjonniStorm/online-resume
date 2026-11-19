@@ -1,0 +1,127 @@
+.preview {
+  position: relative;
+  flex: none;
+  width: 140px;
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-gray-3);
+  background: var(--preview-page);
+  color: var(--preview-primary);
+  box-shadow: var(--mantine-shadow-xs);
+}
+
+.sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 32%;
+  padding: 14px 7px;
+  background: var(--preview-sidebar);
+}
+
+.initials {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--preview-primary);
+  color: var(--preview-page);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.document {
+  margin-left: 32%;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px 9px 12px;
+  overflow: hidden;
+}
+
+.header strong {
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+.header span {
+  font-size: 5px;
+  line-height: 1.2;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 9px;
+}
+
+.line,
+.shortLine,
+.sectionLine {
+  display: block;
+  height: 3px;
+  background: color-mix(in srgb, var(--preview-primary) 24%, transparent);
+}
+
+.shortLine {
+  width: 65%;
+}
+
+.sectionLine {
+  width: 52%;
+  height: 4px;
+  margin-top: 8px;
+  background: var(--preview-primary);
+}
+
+.preview[data-layout='SIDEBAR_RIGHT'] .sidebar {
+  right: 0;
+  left: auto;
+}
+
+.preview[data-layout='SIDEBAR_RIGHT'] .document {
+  margin-right: 32%;
+  margin-left: 0;
+}
+
+.preview[data-layout='SINGLE_COLUMN'] .sidebar {
+  display: none;
+}
+
+.preview[data-layout='SINGLE_COLUMN'] .document {
+  margin-left: 0;
+}
+
+.preview[data-layout='WIDE_HEADER'] .sidebar {
+  top: 27%;
+}
+
+.preview[data-layout='WIDE_HEADER'] .header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 27%;
+  background: var(--preview-header);
+  color: var(--preview-page);
+}
+
+.preview[data-layout='WIDE_HEADER'] .content {
+  margin-top: 59px;
+}
+
+@media (max-width: 480px) {
+  .preview {
+    width: 108px;
+  }
+
+  .preview[data-layout='WIDE_HEADER'] .content {
+    margin-top: 45px;
+  }
+}

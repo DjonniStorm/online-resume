@@ -117,6 +117,7 @@ export class ResumesService {
           title: true,
           firstName: true,
           lastName: true,
+          headline: true,
           isPublished: true,
           createdAt: true,
           updatedAt: true,
@@ -125,6 +126,15 @@ export class ResumesService {
               id: true,
               slug: true,
               name: true,
+              layout: true,
+              theme: {
+                select: {
+                  primaryColor: true,
+                  pageColor: true,
+                  headerColor: true,
+                  sidebarColor: true,
+                },
+              },
             },
           },
         },
