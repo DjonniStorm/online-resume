@@ -24,6 +24,9 @@ export class ResumeSummaryDto {
   @ApiProperty()
   lastName!: string;
 
+  @ApiProperty()
+  isPublished!: boolean;
+
   @ApiProperty({ type: ResumeTemplateSummaryDto })
   template!: ResumeTemplateSummaryDto;
 

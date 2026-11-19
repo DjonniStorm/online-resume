@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, PublicResumeGetData, PublicResumeGetErrors, PublicResumeGetResponses, PublicResumePhotoGetData, PublicResumePhotoGetErrors, PublicResumePhotoGetResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, ResumePhotoDeleteData, ResumePhotoDeleteErrors, ResumePhotoDeleteResponses, ResumePhotoGetData, ResumePhotoGetErrors, ResumePhotoGetResponses, ResumePhotoUploadData, ResumePhotoUploadErrors, ResumePhotoUploadResponses, ResumePublishData, ResumePublishErrors, ResumePublishResponses, ResumeTemplateChangeData, ResumeTemplateChangeErrors, ResumeTemplateChangeResponses, ResumeUnpublishData, ResumeUnpublishErrors, ResumeUnpublishResponses, ResumeUpdateData, ResumeUpdateErrors, ResumeUpdateResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutErrors, AuthLogoutResponses, AuthMeData, AuthMeErrors, AuthMeResponses, AuthRefreshData, AuthRefreshErrors, AuthRefreshResponses, AuthRegisterData, AuthRegisterErrors, AuthRegisterResponses, AuthUpdateProfileData, AuthUpdateProfileErrors, AuthUpdateProfileResponses, HealthControllerCheckData, HealthControllerCheckResponses, PublicResumeGetData, PublicResumeGetErrors, PublicResumeGetResponses, PublicResumePhotoGetData, PublicResumePhotoGetErrors, PublicResumePhotoGetResponses, ResumeCreateData, ResumeCreateErrors, ResumeCreateResponses, ResumeDeleteData, ResumeDeleteErrors, ResumeDeleteResponses, ResumeDeletionNoticesData, ResumeDeletionNoticesDismissData, ResumeDeletionNoticesDismissErrors, ResumeDeletionNoticesDismissResponses, ResumeDeletionNoticesErrors, ResumeDeletionNoticesResponses, ResumeGetData, ResumeGetErrors, ResumeGetResponses, ResumeListData, ResumeListErrors, ResumeListResponses, ResumePhotoDeleteData, ResumePhotoDeleteErrors, ResumePhotoDeleteResponses, ResumePhotoGetData, ResumePhotoGetErrors, ResumePhotoGetResponses, ResumePhotoUploadData, ResumePhotoUploadErrors, ResumePhotoUploadResponses, ResumePublishData, ResumePublishErrors, ResumePublishResponses, ResumeTemplateChangeData, ResumeTemplateChangeErrors, ResumeTemplateChangeResponses, ResumeUnpublishData, ResumeUnpublishErrors, ResumeUnpublishResponses, ResumeUpdateData, ResumeUpdateErrors, ResumeUpdateResponses, TemplateGetData, TemplateGetErrors, TemplateGetResponses, TemplateListData, TemplateListResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -72,6 +72,18 @@ export const resumeCreate = <ThrowOnError extends boolean = false>(options: Opti
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+export const resumeDeletionNotices = <ThrowOnError extends boolean = false>(options?: Options<ResumeDeletionNoticesData, ThrowOnError>): RequestResult<ResumeDeletionNoticesResponses, ResumeDeletionNoticesErrors, ThrowOnError> => (options?.client ?? client).get<ResumeDeletionNoticesResponses, ResumeDeletionNoticesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/deletions/notices',
+    ...options
+});
+
+export const resumeDeletionNoticesDismiss = <ThrowOnError extends boolean = false>(options?: Options<ResumeDeletionNoticesDismissData, ThrowOnError>): RequestResult<ResumeDeletionNoticesDismissResponses, ResumeDeletionNoticesDismissErrors, ThrowOnError> => (options?.client ?? client).post<ResumeDeletionNoticesDismissResponses, ResumeDeletionNoticesDismissErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/resumes/deletions/notices/dismiss',
+    ...options
 });
 
 export const resumeDelete = <ThrowOnError extends boolean = false>(options: Options<ResumeDeleteData, ThrowOnError>): RequestResult<ResumeDeleteResponses, ResumeDeleteErrors, ThrowOnError> => (options.client ?? client).delete<ResumeDeleteResponses, ResumeDeleteErrors, ThrowOnError>({

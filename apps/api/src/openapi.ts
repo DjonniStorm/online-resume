@@ -8,6 +8,7 @@ import 'reflect-metadata';
 import { AppModule } from './app.module';
 
 async function generateOpenApi() {
+  process.env.RESUME_CLEANUP_DISABLED = 'true';
   process.env.DATABASE_URL ||= 'postgresql://openapi:openapi@localhost:5432/openapi';
   process.env.JWT_ACCESS_SECRET ||= 'openapi-generation-access-secret-placeholder';
   process.env.JWT_REFRESH_SECRET ||= 'openapi-generation-refresh-secret-placeholder';

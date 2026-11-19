@@ -5,6 +5,8 @@ import {
   publicResumeGet,
   resumeCreate,
   resumeDelete,
+  resumeDeletionNotices,
+  resumeDeletionNoticesDismiss,
   resumeGet,
   resumeList,
   resumePhotoDelete,
@@ -18,6 +20,7 @@ import {
 import type {
   ChangeResumeTemplateDto,
   CreateResumeDto,
+  ResumeDeletionNoticeDto,
   ResumeDto,
   ResumeSummaryDto,
   UpdateResumeDto,
@@ -25,6 +28,7 @@ import type {
 
 export class ResumeStore {
   resumes: ResumeSummaryDto[] = [];
+  deletionNotices: ResumeDeletionNoticeDto[] = [];
   total = 0;
   page = 1;
   limit = 10;
@@ -32,6 +36,7 @@ export class ResumeStore {
 
   private readonly operations;
   private loadSequence = 0;
+  private deletionNoticesSequence = 0;
 
   constructor(api: BaseApi) {
     this.operations = api.bind({
@@ -43,6 +48,8 @@ export class ResumeStore {
       getPhoto: resumePhotoGet,
       uploadPhoto: resumePhotoUpload,
       remove: resumeDelete,
+      deletionNotices: resumeDeletionNotices,
+      dismissDeletionNotices: resumeDeletionNoticesDismiss,
       publish: resumePublish,
       unpublish: resumeUnpublish,
       changeTemplate: resumeTemplateChange,
@@ -50,6 +57,7 @@ export class ResumeStore {
     });
     makeObservable(this, {
       resumes: observable,
+      deletionNotices: observable,
       total: observable,
       page: observable,
       limit: observable,
@@ -193,10 +201,48 @@ export class ResumeStore {
       if (this.resumes.length === 0 && this.page > 1) {
         await this.load(this.page - 1);
       }
+      await this.loadDeletionNotices();
       return true;
     } catch {
       return false;
     }
+  }
+
+  async loadDeletionNotices(): Promise<void> {
+    const sequence = ++this.deletionNoticesSequence;
+    const task = this.operations.deletionNotices({}, { clearOnUnmount: false });
+    try {
+      const result = await task.promise;
+      if (result.data && sequence === this.deletionNoticesSequence) {
+        runInAction(() => {
+          this.deletionNotices = result.data ?? [];
+        });
+      }
+    } catch {
+      // ErrorStore reads the failed request from RequestStore.
+    }
+  }
+
+  async dismissDeletionNotices(): Promise<void> {
+    const task = this.operations.dismissDeletionNotices({}, { clearOnUnmount: false });
+    try {
+      const result = await task.promise;
+      if (result.response?.status === 204) {
+        this.deletionNoticesSequence += 1;
+        runInAction(() => {
+          this.deletionNotices = [];
+        });
+      }
+    } catch {
+      // ErrorStore reads the failed request from RequestStore.
+    }
+  }
+
+  clearDeletionNotices(): void {
+    this.deletionNoticesSequence += 1;
+    runInAction(() => {
+      this.deletionNotices = [];
+    });
   }
 
   reload(): Promise<void> {

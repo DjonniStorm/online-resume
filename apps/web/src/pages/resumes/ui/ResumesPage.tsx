@@ -8,6 +8,7 @@ import {
   Group,
   Loader,
   Menu,
+  Modal,
   Pagination,
   Select,
   SimpleGrid,
@@ -22,6 +23,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
+import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 export const ResumesPage = observer(() => {
   useHead({ title: 'Мои резюме — Online Resume' });
@@ -33,6 +35,13 @@ export const ResumesPage = observer(() => {
   );
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
+
+  const removeSelected = async () => {
+    if (selectedForDeletion && (await resumes.remove(selectedForDeletion.id))) {
+      setSelectedForDeletion(null);
+    }
+  };
 
   useEffect(() => {
     if (session.ready && !session.user) {
@@ -168,7 +177,7 @@ export const ResumesPage = observer(() => {
                         <Menu.Item
                           color="red"
                           disabled={requests.latest('resumes.remove')?.status === 'pending'}
-                          onClick={() => void removeResume(resume.id, (id) => resumes.remove(id))}
+                          onClick={() => setSelectedForDeletion(resume)}
                         >
                           Удалить
                         </Menu.Item>
@@ -207,20 +216,44 @@ export const ResumesPage = observer(() => {
             ) : null}
           </Group>
         ) : null}
-        {errors.forOperation('resumes.remove') ? (
-          <Alert color="red">Не удалось удалить резюме. Попробуйте ещё раз.</Alert>
-        ) : null}
+        <Modal
+          opened={selectedForDeletion !== null}
+          onClose={() => setSelectedForDeletion(null)}
+          title="Удалить резюме?"
+          centered
+        >
+          <Stack gap="md">
+            <Text size="sm">
+              «{selectedForDeletion?.title}» исчезнет из списка и будет окончательно удалено через
+              30 дней.
+            </Text>
+            {selectedForDeletion?.isPublished ? (
+              <Alert color="yellow">
+                Публичная ссылка перестанет работать сразу. Если вы разместили её на других сайтах,
+                замените или удалите её там.
+              </Alert>
+            ) : null}
+            {errors.forOperation('resumes.remove') ? (
+              <Alert color="red">Не удалось удалить резюме. Попробуйте ещё раз.</Alert>
+            ) : null}
+            <Group justify="flex-end">
+              <Button variant="subtle" onClick={() => setSelectedForDeletion(null)}>
+                Отмена
+              </Button>
+              <Button
+                color="red"
+                loading={requests.latest('resumes.remove')?.status === 'pending'}
+                onClick={() => void removeSelected()}
+              >
+                Удалить резюме
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
       </Stack>
     </Container>
   );
 });
-
-async function removeResume(id: string, remove: (id: string) => Promise<boolean>) {
-  if (!window.confirm('Удалить это резюме?')) {
-    return;
-  }
-  await remove(id);
-}
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat('ru-RU', {

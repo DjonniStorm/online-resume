@@ -137,7 +137,7 @@ export const ResumePreviewPage = observer(() => {
           <div className={styles.controls}>
             <ResumePublication
               id={id}
-              publicSlug={resume.publicSlug}
+              publicSlug={resume.isPublished ? resume.publicSlug : null}
               onChange={(publicSlug) =>
                 setLoaded({
                   id,

@@ -293,11 +293,22 @@ model Resume {
   projects           ResumeProject[]
   certificates       ResumeCertificate[]
   views              ResumeView[]
+  deletion           ResumeDeletion?
 
   @@index([ownerId, updatedAt])
   @@index([ownerId, deletedAt, updatedAt])
   @@index([templateId])
   @@index([isPublished, publicSlug])
+}
+
+model ResumeDeletion {
+  resumeId          String   @id
+  deleteAfter       DateTime @db.Timestamptz(3)
+  wasPublished      Boolean
+  noticeDismissedAt DateTime? @db.Timestamptz(3)
+  resume            Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([deleteAfter])
 }
 
 /// Порядок и видимость раздела в конкретном резюме.

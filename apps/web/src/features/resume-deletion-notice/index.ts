@@ -1,0 +1,1 @@
+export { ResumeDeletionNotice } from './ui';

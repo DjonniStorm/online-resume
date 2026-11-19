@@ -282,6 +282,7 @@ export const zResumeSummaryDto = z.object({
     title: z.string(),
     firstName: z.string(),
     lastName: z.string(),
+    isPublished: z.boolean(),
     template: zResumeTemplateSummaryDto,
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime()
@@ -292,6 +293,12 @@ export const zResumeListDto = z.object({
     total: z.number(),
     page: z.number(),
     limit: z.number()
+});
+
+export const zResumeDeletionNoticeDto = z.object({
+    resumeId: z.string(),
+    title: z.string(),
+    deleteAfter: z.iso.datetime()
 });
 
 export const zUpdateResumeSectionDto = z.object({
@@ -416,6 +423,10 @@ export const zResumeListResponse = zResumeListDto;
 export const zResumeCreateBody = zCreateResumeDto;
 
 export const zResumeCreateResponse = zResumeDto;
+
+export const zResumeDeletionNoticesResponse = z.array(zResumeDeletionNoticeDto);
+
+export const zResumeDeletionNoticesDismissResponse = z.void();
 
 export const zResumeDeletePath = z.object({
     id: z.string()

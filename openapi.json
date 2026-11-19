@@ -299,6 +299,58 @@
         "tags": ["resumes"]
       }
     },
+    "/api/resumes/deletions/notices": {
+      "get": {
+        "operationId": "resumeDeletionNotices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResumeDeletionNoticeDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
+    "/api/resumes/deletions/notices/dismiss": {
+      "post": {
+        "operationId": "resumeDeletionNoticesDismiss",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
     "/api/resumes/{id}": {
       "get": {
         "operationId": "resumeGet",
@@ -1721,6 +1773,9 @@
           "lastName": {
             "type": "string"
           },
+          "isPublished": {
+            "type": "boolean"
+          },
           "template": {
             "$ref": "#/components/schemas/ResumeTemplateSummaryDto"
           },
@@ -1733,7 +1788,16 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "title", "firstName", "lastName", "template", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "title",
+          "firstName",
+          "lastName",
+          "isPublished",
+          "template",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "ResumeListDto": {
         "type": "object",
@@ -1755,6 +1819,22 @@
           }
         },
         "required": ["items", "total", "page", "limit"]
+      },
+      "ResumeDeletionNoticeDto": {
+        "type": "object",
+        "properties": {
+          "resumeId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "deleteAfter": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["resumeId", "title", "deleteAfter"]
       },
       "UpdateResumeSectionDto": {
         "type": "object",
