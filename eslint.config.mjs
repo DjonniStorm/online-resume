@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/reports/**',
       'apps/api/src/generated/**',
+      'apps/web/src/shared/api/generated/**',
     ],
   },
   eslint.configs.recommended,
