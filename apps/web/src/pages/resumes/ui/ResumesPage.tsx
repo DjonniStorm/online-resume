@@ -36,7 +36,7 @@ export const ResumesPage = observer(() => {
     StoreKey.Resumes,
   );
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(resumes.search);
   const [listLoaded, setListLoaded] = useState(false);
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
 

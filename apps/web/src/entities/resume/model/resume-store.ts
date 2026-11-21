@@ -9,6 +9,7 @@ import {
   resumeDeletionNoticesDismiss,
   resumeGet,
   resumeList,
+  resumeOverview,
   resumePhotoDelete,
   resumePhotoGet,
   resumePhotoUpload,
@@ -22,12 +23,14 @@ import type {
   CreateResumeDto,
   ResumeDeletionNoticeDto,
   ResumeDto,
+  ResumeOverviewDto,
   ResumeSummaryDto,
   UpdateResumeDto,
 } from '@/shared/api/generated/types.gen';
 
 export class ResumeStore {
   resumes: ResumeSummaryDto[] = [];
+  overview: ResumeOverviewDto | null = null;
   deletionNotices: ResumeDeletionNoticeDto[] = [];
   total = 0;
   page = 1;
@@ -37,6 +40,7 @@ export class ResumeStore {
   private readonly operations;
   private loadSequence = 0;
   private deletionNoticesSequence = 0;
+  private overviewSequence = 0;
 
   constructor(api: BaseApi) {
     this.operations = api.bind({
@@ -44,6 +48,7 @@ export class ResumeStore {
       getPublic: publicResumeGet,
       get: resumeGet,
       list: resumeList,
+      overview: resumeOverview,
       deletePhoto: resumePhotoDelete,
       getPhoto: resumePhotoGet,
       uploadPhoto: resumePhotoUpload,
@@ -57,6 +62,7 @@ export class ResumeStore {
     });
     makeObservable(this, {
       resumes: observable,
+      overview: observable,
       deletionNotices: observable,
       total: observable,
       page: observable,
@@ -81,6 +87,21 @@ export class ResumeStore {
         this.total = result.data.total;
         this.page = result.data.page;
       });
+    } catch {
+      // ErrorStore reads the failed request from RequestStore.
+    }
+  }
+
+  async loadOverview(): Promise<void> {
+    const sequence = ++this.overviewSequence;
+    const task = this.operations.overview({}, { showLoader: false });
+    try {
+      const result = await task.promise;
+      if (result.data && sequence === this.overviewSequence) {
+        runInAction(() => {
+          this.overview = result.data;
+        });
+      }
     } catch {
       // ErrorStore reads the failed request from RequestStore.
     }
@@ -197,13 +218,7 @@ export class ResumeStore {
       if (result.response?.status !== 204) {
         return false;
       }
-      runInAction(() => {
-        this.resumes = this.resumes.filter((resume) => resume.id !== id);
-        this.total = Math.max(0, this.total - 1);
-      });
-      if (this.resumes.length === 0 && this.page > 1) {
-        await this.load(this.page - 1);
-      }
+      await this.load();
       await this.loadDeletionNotices();
       return true;
     } catch {

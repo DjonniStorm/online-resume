@@ -251,6 +251,13 @@ export type ResumeDeletionNoticeDto = {
     deleteAfter: string;
 };
 
+export type ResumeOverviewDto = {
+    total: number;
+    publishedCount: number;
+    templateCount: number;
+    latestResume: ResumeSummaryDto | null;
+};
+
 export type UpdateResumeSectionDto = {
     type: 'PROFILE' | 'ABOUT' | 'CONTACTS' | 'EXPERIENCE' | 'EDUCATION' | 'SKILLS' | 'LANGUAGES' | 'PROJECTS' | 'CERTIFICATES';
     isVisible: boolean;
@@ -332,6 +339,13 @@ export type ChangeResumeTemplateDto = {
 
 export type ResumePublicationDto = {
     publicSlug: string;
+};
+
+export type TemplateListDto = {
+    items: Array<TemplateDto>;
+    total: number;
+    page: number;
+    limit: number;
 };
 
 export type HealthControllerCheckData = {
@@ -546,6 +560,23 @@ export type ResumeDeletionNoticesDismissResponses = {
 };
 
 export type ResumeDeletionNoticesDismissResponse = ResumeDeletionNoticesDismissResponses[keyof ResumeDeletionNoticesDismissResponses];
+
+export type ResumeOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/resumes/overview';
+};
+
+export type ResumeOverviewErrors = {
+    401: unknown;
+};
+
+export type ResumeOverviewResponses = {
+    200: ResumeOverviewDto;
+};
+
+export type ResumeOverviewResponse = ResumeOverviewResponses[keyof ResumeOverviewResponses];
 
 export type ResumeDeleteData = {
     body?: never;
@@ -803,12 +834,16 @@ export type PublicResumePhotoGetResponse = PublicResumePhotoGetResponses[keyof P
 export type TemplateListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+    };
     url: '/api/templates';
 };
 
 export type TemplateListResponses = {
-    200: Array<TemplateDto>;
+    200: TemplateListDto;
 };
 
 export type TemplateListResponse = TemplateListResponses[keyof TemplateListResponses];

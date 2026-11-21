@@ -38,6 +38,7 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeDeletionNoticeDto } from './dto/resume-deletion-notice.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import { ResumeOverviewDto } from './dto/resume-overview.dto';
 import { ResumePublicationDto } from './dto/resume-publication.dto';
 import { ResumeListDto } from './dto/resume-summary.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -79,6 +80,13 @@ export class ResumesController {
   @ApiNoContentResponse()
   dismissDeletionNotices(@CurrentUser() user: AuthenticatedUser) {
     return this.resumes.dismissDeletionNotices(user.id);
+  }
+
+  @Get('overview')
+  @ApiOperation({ operationId: 'resumeOverview' })
+  @ApiOkResponse({ type: ResumeOverviewDto })
+  overview(@CurrentUser() user: AuthenticatedUser) {
+    return this.resumes.overview(user.id);
   }
 
   @Get(':id')

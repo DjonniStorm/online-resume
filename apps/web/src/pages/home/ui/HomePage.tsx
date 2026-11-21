@@ -20,7 +20,7 @@ export const HomePage = observer(() => {
 
   useEffect(() => {
     if (sessionStore.ready && sessionStore.user) {
-      void resumes.load();
+      void resumes.loadOverview();
     }
   }, [resumes, sessionStore.ready, sessionStore.user]);
 
@@ -34,10 +34,9 @@ export const HomePage = observer(() => {
         </section>
       ) : sessionStore.user ? (
         <HomeOverview
-          error={errors.forOperation('resumes.list') ? 'Не удалось загрузить резюме.' : null}
-          loading={requests.latest('resumes.list')?.status === 'pending'}
-          resumes={resumes.resumes}
-          total={resumes.total}
+          error={errors.forOperation('resumes.overview') ? 'Не удалось загрузить резюме.' : null}
+          loading={!resumes.overview || requests.latest('resumes.overview')?.status === 'pending'}
+          overview={resumes.overview}
         />
       ) : (
         <LandingContent />

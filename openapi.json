@@ -351,6 +351,34 @@
         "tags": ["resumes"]
       }
     },
+    "/api/resumes/overview": {
+      "get": {
+        "operationId": "resumeOverview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeOverviewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": ["resumes"]
+      }
+    },
     "/api/resumes/{id}": {
       "get": {
         "operationId": "resumeGet",
@@ -817,17 +845,45 @@
     "/api/templates": {
       "get": {
         "operationId": "templateList",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 4,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TemplateDto"
-                  }
+                  "$ref": "#/components/schemas/TemplateListDto"
                 }
               }
             }
@@ -1874,6 +1930,30 @@
         },
         "required": ["resumeId", "title", "deleteAfter"]
       },
+      "ResumeOverviewDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "publishedCount": {
+            "type": "number"
+          },
+          "templateCount": {
+            "type": "number"
+          },
+          "latestResume": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResumeSummaryDto"
+              }
+            ]
+          }
+        },
+        "required": ["total", "publishedCount", "templateCount", "latestResume"]
+      },
       "UpdateResumeSectionDto": {
         "type": "object",
         "properties": {
@@ -2216,6 +2296,27 @@
           }
         },
         "required": ["publicSlug"]
+      },
+      "TemplateListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "limit"]
       }
     }
   }

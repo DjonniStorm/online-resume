@@ -34,9 +34,7 @@ export const TemplatesPage = observer(() => {
     StoreKey.Templates,
     StoreKey.Session,
   );
-  const [query, setQuery] = useState('');
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(4);
+  const [query, setQuery] = useState(templates.search);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const [loadedHere, setLoadedHere] = useState(false);
@@ -54,12 +52,7 @@ export const TemplatesPage = observer(() => {
     };
   }, [templates]);
 
-  const normalizedQuery = query.trim().toLocaleLowerCase('ru');
-  const filteredTemplates = templates.templates.filter((template) =>
-    `${template.name} ${template.description}`.toLocaleLowerCase('ru').includes(normalizedQuery),
-  );
-  const pageCount = Math.ceil(filteredTemplates.length / pageSize);
-  const visibleTemplates = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
+  const pageCount = Math.ceil(templates.total / templates.limit);
   const listRequest = requests.latest('templates.list');
   const listError = errors.forOperation('templates.list');
   const loading = !loadedHere || listRequest?.status === 'pending';
@@ -89,16 +82,19 @@ export const TemplatesPage = observer(() => {
               aria-label="Поиск шаблонов"
               placeholder="Поиск шаблонов"
               value={query}
-              onChange={(event) => {
-                setQuery(event.currentTarget.value);
-                setPage(1);
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') void templates.searchFor(query.trim());
               }}
             />
+            <Button variant="light" onClick={() => void templates.searchFor(query.trim())}>
+              Найти
+            </Button>
           </Group>
 
           {loading ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
-              {Array.from({ length: pageSize }, (_, index) => (
+              {Array.from({ length: templates.limit }, (_, index) => (
                 <Card key={index} withBorder radius="md" padding="md">
                   <Skeleton height={330} />
                   <Skeleton height={24} width="70%" mt="md" />
@@ -113,15 +109,15 @@ export const TemplatesPage = observer(() => {
               </Button>
             </Alert>
           ) : null}
-          {ready && filteredTemplates.length === 0 ? (
+          {ready && templates.total === 0 ? (
             <Alert title={query ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
               {query ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
             </Alert>
           ) : null}
 
-          {ready && visibleTemplates.length > 0 ? (
+          {ready && templates.templates.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
-              {visibleTemplates.map((template) => (
+              {templates.templates.map((template) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
@@ -132,7 +128,7 @@ export const TemplatesPage = observer(() => {
             </SimpleGrid>
           ) : null}
 
-          {ready && filteredTemplates.length > 0 ? (
+          {ready && templates.total > 0 ? (
             <Group justify="space-between" wrap="wrap" gap="md">
               <Group gap="xs">
                 <Text size="sm" c="dimmed">
@@ -143,18 +139,19 @@ export const TemplatesPage = observer(() => {
                   size="xs"
                   w={75}
                   data={['2', '4', '8', '10']}
-                  value={String(pageSize)}
-                  onChange={(value) => {
-                    setPageSize(Number(value ?? 4));
-                    setPage(1);
-                  }}
+                  value={String(templates.limit)}
+                  onChange={(value) => void templates.setPageSize(Number(value ?? 4))}
                 />
                 <Text size="sm" c="dimmed">
-                  из {filteredTemplates.length}
+                  из {templates.total}
                 </Text>
               </Group>
               {pageCount > 1 ? (
-                <Pagination total={pageCount} value={page} onChange={setPage} />
+                <Pagination
+                  total={pageCount}
+                  value={templates.page}
+                  onChange={(page) => void templates.load(page)}
+                />
               ) : null}
             </Group>
           ) : null}
