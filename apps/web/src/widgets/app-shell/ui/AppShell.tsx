@@ -1,27 +1,27 @@
 import { Alert, Button, Container, Group } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
-import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 
-import { StoreKey, useStore } from '@/app/store';
+import { StoreKey, useStores } from '@/app/store';
 import { ResumeDeletionNotice } from '@/features/resume-deletion-notice';
 
 import styles from './AppShell.module.css';
 
 export const AppShell = observer(() => {
-  const session = useStore(StoreKey.Session);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [logoutError, setLogoutError] = useState(false);
+  const { errors, requests, session } = useStores(
+    StoreKey.Errors,
+    StoreKey.Requests,
+    StoreKey.Session,
+  );
+  const loggingOut = requests.latest('session.logout')?.status === 'pending';
+  const logoutError = errors.forOperation('session.logout');
 
   const logout = async () => {
-    setLoggingOut(true);
-    setLogoutError(false);
     try {
       await session.logout();
+      window.location.reload();
     } catch {
-      setLogoutError(true);
-    } finally {
-      setLoggingOut(false);
+      return;
     }
   };
 
