@@ -1,9 +1,11 @@
 import { Loader } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { StoreKey, useStore, useStores } from '@/app/store';
+import { ResumeDeleteDialog } from '@/features/resume-delete';
+import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 import { HomeOverview } from './HomeOverview';
 import classes from './HomePage.module.css';
@@ -17,6 +19,7 @@ export const HomePage = observer(() => {
     StoreKey.Requests,
     StoreKey.Resumes,
   );
+  const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
 
   useEffect(() => {
     if (sessionStore.ready && sessionStore.user) {
@@ -37,10 +40,17 @@ export const HomePage = observer(() => {
           error={errors.forOperation('resumes.overview') ? 'Не удалось загрузить резюме.' : null}
           loading={!resumes.overview || requests.latest('resumes.overview')?.status === 'pending'}
           overview={resumes.overview}
+          onDelete={setSelectedForDeletion}
+          deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
         />
       ) : (
         <LandingContent />
       )}
+      <ResumeDeleteDialog
+        resume={selectedForDeletion}
+        onClose={() => setSelectedForDeletion(null)}
+        onDeleted={() => void resumes.loadOverview()}
+      />
     </main>
   );
 });

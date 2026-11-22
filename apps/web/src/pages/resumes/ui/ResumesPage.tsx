@@ -1,21 +1,16 @@
 import {
-  ActionIcon,
   Alert,
-  Badge,
   Button,
   Card,
   Container,
   Group,
   Loader,
-  Menu,
-  Modal,
   Pagination,
   Select,
   SimpleGrid,
   Skeleton,
   Stack,
   Text,
-  TextInput,
   Title,
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
@@ -24,8 +19,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
-import { ResumeCardPreview } from '@/entities/resume';
+import { ResumeCard } from '@/entities/resume';
+import { ResumeDeleteDialog } from '@/features/resume-delete';
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
+import { SearchForm } from '@/shared/ui/SearchForm';
 
 export const ResumesPage = observer(() => {
   useHead({ title: 'Мои резюме — Online Resume' });
@@ -39,12 +36,6 @@ export const ResumesPage = observer(() => {
   const [search, setSearch] = useState(resumes.search);
   const [listLoaded, setListLoaded] = useState(false);
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
-
-  const removeSelected = async () => {
-    if (selectedForDeletion && (await resumes.remove(selectedForDeletion.id))) {
-      setSelectedForDeletion(null);
-    }
-  };
 
   useEffect(() => {
     if (session.ready && !session.user) {
@@ -84,7 +75,9 @@ export const ResumesPage = observer(() => {
       <Stack gap="xl">
         <Group justify="space-between" align="flex-end" gap="md">
           <Stack gap={2}>
-            <Title order={1}>Мои резюме</Title>
+            <Title order={1} size="h2">
+              Мои резюме
+            </Title>
             {listReady ? (
               <Text size="sm" c="dimmed">
                 Всего: {resumes.total}
@@ -96,26 +89,13 @@ export const ResumesPage = observer(() => {
           </Button>
         </Group>
 
-        <Group
-          component="form"
-          gap="xs"
-          maw={480}
-          onSubmit={(event) => {
-            event.preventDefault();
-            void resumes.searchFor(search);
-          }}
-        >
-          <TextInput
-            style={{ flex: 1 }}
-            aria-label="Поиск резюме"
-            placeholder="Поиск по названию и имени"
-            value={search}
-            onChange={(event) => setSearch(event.currentTarget.value)}
-          />
-          <Button type="submit" variant="light">
-            Найти
-          </Button>
-        </Group>
+        <SearchForm
+          label="Поиск резюме"
+          placeholder="Поиск по названию и имени"
+          value={search}
+          onChange={setSearch}
+          onSearch={(value) => void resumes.searchFor(value)}
+        />
 
         {listLoading ? (
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -151,71 +131,12 @@ export const ResumesPage = observer(() => {
         {listReady && resumes.resumes.length > 0 ? (
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
             {resumes.resumes.map((resume) => (
-              <Card
+              <ResumeCard
                 key={resume.id}
-                withBorder
-                shadow="sm"
-                radius="md"
-                style={{ position: 'relative' }}
-              >
-                <Link
-                  to={`/resumes/${resume.id}/edit`}
-                  aria-label={`Открыть резюме ${resume.title}`}
-                  style={{ position: 'absolute', inset: 0, zIndex: 1 }}
-                />
-                <Group align="stretch" wrap="nowrap" gap="lg">
-                  <ResumeCardPreview resume={resume} />
-                  <Stack gap={6} style={{ flex: 1, minWidth: 0, paddingRight: 28 }}>
-                    <Title order={3} size="h4" style={{ overflowWrap: 'anywhere' }}>
-                      {resume.title}
-                    </Title>
-                    <Text size="sm" c="dimmed">
-                      {resume.firstName} {resume.lastName}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {resume.template.name}
-                    </Text>
-                    {resume.isPublished ? (
-                      <Badge variant="light" size="sm" w="fit-content">
-                        Опубликовано
-                      </Badge>
-                    ) : null}
-                    <Text size="xs" c="dimmed" mt="auto">
-                      Обновлено: {formatDate(resume.updatedAt)}
-                    </Text>
-                  </Stack>
-                </Group>
-                <Menu position="bottom-end" withinPortal>
-                  <Menu.Target>
-                    <ActionIcon
-                      variant="subtle"
-                      aria-label={`Действия с резюме ${resume.title}`}
-                      style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}
-                    >
-                      ⋯
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item component={Link} to={`/resumes/${resume.id}/edit`}>
-                      Открыть
-                    </Menu.Item>
-                    <Menu.Item component={Link} to={`/resumes/${resume.id}/preview`}>
-                      Предпросмотр
-                    </Menu.Item>
-                    <Menu.Item component={Link} to={`/resumes/${resume.id}/preview?print=1`}>
-                      Сохранить как PDF
-                    </Menu.Item>
-                    <Menu.Divider />
-                    <Menu.Item
-                      color="red"
-                      disabled={requests.latest('resumes.remove')?.status === 'pending'}
-                      onClick={() => setSelectedForDeletion(resume)}
-                    >
-                      Удалить
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </Card>
+                resume={resume}
+                onDelete={setSelectedForDeletion}
+                deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
+              />
             ))}
           </SimpleGrid>
         ) : null}
@@ -246,47 +167,11 @@ export const ResumesPage = observer(() => {
             ) : null}
           </Group>
         ) : null}
-        <Modal
-          opened={selectedForDeletion !== null}
+        <ResumeDeleteDialog
+          resume={selectedForDeletion}
           onClose={() => setSelectedForDeletion(null)}
-          title="Удалить резюме?"
-          centered
-        >
-          <Stack gap="md">
-            <Text size="sm">
-              «{selectedForDeletion?.title}» исчезнет из списка и будет окончательно удалено через
-              30 дней.
-            </Text>
-            {selectedForDeletion?.isPublished ? (
-              <Alert color="yellow">
-                Публичная ссылка перестанет работать сразу. Если вы разместили её на других сайтах,
-                замените или удалите её там.
-              </Alert>
-            ) : null}
-            {errors.forOperation('resumes.remove') ? (
-              <Alert color="red">Не удалось удалить резюме. Попробуйте ещё раз.</Alert>
-            ) : null}
-            <Group justify="flex-end">
-              <Button variant="subtle" onClick={() => setSelectedForDeletion(null)}>
-                Отмена
-              </Button>
-              <Button
-                color="red"
-                loading={requests.latest('resumes.remove')?.status === 'pending'}
-                onClick={() => void removeSelected()}
-              >
-                Удалить резюме
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+        />
       </Stack>
     </Container>
   );
 });
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'medium',
-  }).format(new Date(value));
-}

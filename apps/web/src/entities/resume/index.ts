@@ -1,3 +1,3 @@
 export * from './model';
 export { useResumePhotoUrl } from './model';
-export { ResumeCardPreview } from './ui';
+export { ResumeCard, ResumeCardPreview } from './ui';

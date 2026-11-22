@@ -8,11 +8,9 @@ import {
   Modal,
   Pagination,
   Select,
-  SimpleGrid,
   Skeleton,
   Stack,
   Text,
-  TextInput,
   Title,
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
@@ -24,7 +22,10 @@ import { StoreKey, useStores } from '@/app/store';
 import { TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
+import { SearchForm } from '@/shared/ui/SearchForm';
 import { ResumeTemplatePreview } from '@/widgets/resume-template-preview';
+
+import classes from './TemplatesPage.module.css';
 
 export const TemplatesPage = observer(() => {
   useHead({ title: 'Шаблоны — Online Resume' });
@@ -72,35 +73,33 @@ export const TemplatesPage = observer(() => {
         <Stack gap="lg">
           <Group justify="space-between" align="flex-end" gap="md">
             <div>
-              <Title order={1}>Шаблоны</Title>
+              <Title order={1} size="h2">
+                Шаблоны
+              </Title>
               <Text c="dimmed" size="sm">
                 Выберите оформление для резюме
               </Text>
             </div>
-            <TextInput
-              w={{ base: '100%', sm: 320 }}
-              aria-label="Поиск шаблонов"
-              placeholder="Поиск шаблонов"
-              value={query}
-              onChange={(event) => setQuery(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') void templates.searchFor(query.trim());
-              }}
-            />
-            <Button variant="light" onClick={() => void templates.searchFor(query.trim())}>
-              Найти
-            </Button>
+            <Box w={{ base: '100%', sm: 420 }}>
+              <SearchForm
+                label="Поиск шаблонов"
+                placeholder="Поиск шаблонов"
+                value={query}
+                onChange={setQuery}
+                onSearch={(value) => void templates.searchFor(value)}
+              />
+            </Box>
           </Group>
 
           {loading ? (
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+            <div className={classes.grid}>
               {Array.from({ length: templates.limit }, (_, index) => (
                 <Card key={index} withBorder radius="md" padding="md">
                   <Skeleton height={330} />
                   <Skeleton height={24} width="70%" mt="md" />
                 </Card>
               ))}
-            </SimpleGrid>
+            </div>
           ) : null}
           {!loading && listError ? (
             <Alert color="red" title="Не удалось загрузить шаблоны">
@@ -116,7 +115,7 @@ export const TemplatesPage = observer(() => {
           ) : null}
 
           {ready && templates.templates.length > 0 ? (
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+            <div className={classes.grid}>
               {templates.templates.map((template) => (
                 <TemplateCard
                   key={template.id}
@@ -125,7 +124,7 @@ export const TemplatesPage = observer(() => {
                   onSelect={setSelectedTemplate}
                 />
               ))}
-            </SimpleGrid>
+            </div>
           ) : null}
 
           {ready && templates.total > 0 ? (

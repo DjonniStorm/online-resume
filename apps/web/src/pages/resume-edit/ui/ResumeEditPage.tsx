@@ -13,7 +13,6 @@ import {
   SimpleGrid,
   Stack,
   Text,
-  TextInput,
   Title,
   Tooltip,
 } from '@mantine/core';
@@ -33,6 +32,7 @@ import {
 import { TemplateCard } from '@/entities/template';
 import { ResumeEditorForm, type SaveState } from '@/features/resume-edit';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
+import { SearchForm } from '@/shared/ui/SearchForm';
 import {
   ResumeTemplatePreview,
   editorValuesToPreviewData,
@@ -320,20 +320,13 @@ export const ResumeEditPage = observer(() => {
             При применении другого шаблона несохранённые изменения формы будут потеряны. Сначала
             сохраните резюме, если хотите их оставить.
           </Alert>
-          <Group align="flex-end">
-            <TextInput
-              aria-label="Поиск шаблонов"
-              placeholder="Поиск шаблонов"
-              value={templateSearch}
-              onChange={(event) => setTemplateSearch(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') void templates.searchFor(templateSearch.trim());
-              }}
-            />
-            <Button variant="light" onClick={() => void templates.searchFor(templateSearch.trim())}>
-              Найти
-            </Button>
-          </Group>
+          <SearchForm
+            label="Поиск шаблонов"
+            placeholder="Поиск шаблонов"
+            value={templateSearch}
+            onChange={setTemplateSearch}
+            onSearch={(value) => void templates.searchFor(value)}
+          />
           {requests.latest('templates.list')?.status === 'pending' ? (
             <Group justify="center">
               <Loader size="sm" />

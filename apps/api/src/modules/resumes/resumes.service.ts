@@ -18,6 +18,7 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import type { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumePhotoStorageService } from './resume-photo-storage.service';
+import { ResumeViewsService } from './resume-views.service';
 
 const resumeDetailInclude = {
   template: {
@@ -70,6 +71,7 @@ export class ResumesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly photos: ResumePhotoStorageService,
+    private readonly views: ResumeViewsService,
   ) {}
 
   async create(ownerId: string, input: CreateResumeDto) {
@@ -148,17 +150,19 @@ export class ResumesService {
 
   async overview(ownerId: string) {
     const where: Prisma.ResumeWhereInput = { ownerId, deletedAt: null };
-    const [total, publishedCount, templates, latestResume] = await this.prisma.$transaction([
-      this.prisma.resume.count({ where }),
-      this.prisma.resume.count({ where: { ...where, isPublished: true } }),
-      this.prisma.resume.groupBy({ by: ['templateId'], where }),
-      this.prisma.resume.findFirst({
-        where,
-        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
-        select: resumeSummarySelect,
-      }),
+    const [[total, publishedCount, latestResume], viewSummary] = await Promise.all([
+      this.prisma.$transaction([
+        this.prisma.resume.count({ where }),
+        this.prisma.resume.count({ where: { ...where, isPublished: true } }),
+        this.prisma.resume.findFirst({
+          where,
+          orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+          select: resumeSummarySelect,
+        }),
+      ]),
+      this.views.summary(ownerId),
     ]);
-    return { total, publishedCount, templateCount: templates.length, latestResume };
+    return { total, publishedCount, latestResume, ...viewSummary };
   }
 
   async findOne(ownerId: string, id: string) {
