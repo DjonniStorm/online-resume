@@ -1,4 +1,5 @@
-import { Alert, Button, Container, Group, Loader, Stack } from '@mantine/core';
+import { ActionIcon, Alert, Button, Container, Group, Loader, Tooltip } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
 import { useHead } from '@unhead/react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
@@ -55,21 +56,32 @@ export function PublicResumePage() {
   return (
     <main>
       <Container size={900} py={{ base: 'lg', sm: 'xl' }} className={styles.container}>
-        <Stack gap="lg">
-          <Group justify="flex-end" className={styles.controls}>
-            <Button onClick={() => window.print()}>Сохранить как PDF</Button>
-          </Group>
-          <ResumeTemplatePreview
-            template={resume.template}
-            data={resumeToPreviewData(resume)}
-            photoUrl={
-              resume.photoPath && slug
-                ? `/api/public/resumes/${encodeURIComponent(slug)}/photo`
-                : null
-            }
-            sectionState={resume.sections}
-          />
-        </Stack>
+        <div className={styles.controls}>
+          <Tooltip label="Сохранить как PDF">
+            <ActionIcon
+              className={styles.desktopAction}
+              aria-label="Сохранить как PDF"
+              size="xl"
+              variant="light"
+              onClick={() => window.print()}
+            >
+              <IconDownload size={22} aria-hidden="true" />
+            </ActionIcon>
+          </Tooltip>
+          <Button className={styles.mobileAction} onClick={() => window.print()}>
+            Сохранить как PDF
+          </Button>
+        </div>
+        <ResumeTemplatePreview
+          template={resume.template}
+          data={resumeToPreviewData(resume)}
+          photoUrl={
+            resume.photoPath && slug
+              ? `/api/public/resumes/${encodeURIComponent(slug)}/photo`
+              : null
+          }
+          sectionState={resume.sections}
+        />
       </Container>
     </main>
   );

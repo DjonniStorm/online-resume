@@ -1,4 +1,5 @@
 import { ActionIcon, Badge, Card, Group, Menu, Stack, Text, Title } from '@mantine/core';
+import { IconEye } from '@tabler/icons-react';
 import { Link } from 'react-router';
 
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
@@ -37,7 +38,13 @@ export function ResumeCard({ resume, onDelete, deleteDisabled = false }: ResumeC
               Опубликовано
             </Badge>
           ) : null}
-          <Text size="xs" c="dimmed" mt="auto">
+          <Group gap={4} mt="auto">
+            <IconEye size={15} color="var(--mantine-color-dimmed)" aria-hidden="true" />
+            <Text size="xs" c="dimmed">
+              Просмотры за 7 дней: {resume.viewsLast7Days}
+            </Text>
+          </Group>
+          <Text size="xs" c="dimmed">
             Обновлено: {formatDate(resume.updatedAt)}
           </Text>
         </Stack>
@@ -58,6 +65,9 @@ export function ResumeCard({ resume, onDelete, deleteDisabled = false }: ResumeC
           </Menu.Item>
           <Menu.Item component={Link} to={`/resumes/${resume.id}/preview`}>
             Предпросмотр
+          </Menu.Item>
+          <Menu.Item component={Link} to={`/?resumeId=${encodeURIComponent(resume.id)}`}>
+            Статистика
           </Menu.Item>
           <Menu.Item component={Link} to={`/resumes/${resume.id}/preview?print=1`}>
             Сохранить как PDF

@@ -354,7 +354,18 @@
     "/api/resumes/overview": {
       "get": {
         "operationId": "resumeOverview",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "resumeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -368,6 +379,9 @@
           },
           "401": {
             "description": ""
+          },
+          "404": {
+            "description": "Резюме не найдено."
           }
         },
         "security": [
@@ -1869,6 +1883,9 @@
           "isPublished": {
             "type": "boolean"
           },
+          "viewsLast7Days": {
+            "type": "number"
+          },
           "template": {
             "$ref": "#/components/schemas/ResumeTemplateSummaryDto"
           },
@@ -1888,6 +1905,7 @@
           "lastName",
           "headline",
           "isPublished",
+          "viewsLast7Days",
           "template",
           "createdAt",
           "updatedAt"
@@ -1943,6 +1961,18 @@
         },
         "required": ["date", "count"]
       },
+      "SelectedResumeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title"]
+      },
       "ResumeOverviewDto": {
         "type": "object",
         "properties": {
@@ -1964,6 +1994,15 @@
               "$ref": "#/components/schemas/ResumeDailyViewsDto"
             }
           },
+          "selectedResume": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SelectedResumeDto"
+              }
+            ]
+          },
           "latestResume": {
             "nullable": true,
             "type": "object",
@@ -1980,6 +2019,7 @@
           "viewsTotal",
           "viewsLast7Days",
           "dailyViews",
+          "selectedResume",
           "latestResume"
         ]
       },

@@ -38,6 +38,7 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeDeletionNoticeDto } from './dto/resume-deletion-notice.dto';
 import { ResumeDto } from './dto/resume-detail.dto';
 import { ResumeListQueryDto } from './dto/resume-list-query.dto';
+import { ResumeOverviewQueryDto } from './dto/resume-overview-query.dto';
 import { ResumeOverviewDto } from './dto/resume-overview.dto';
 import { ResumePublicationDto } from './dto/resume-publication.dto';
 import { ResumeListDto } from './dto/resume-summary.dto';
@@ -85,8 +86,9 @@ export class ResumesController {
   @Get('overview')
   @ApiOperation({ operationId: 'resumeOverview' })
   @ApiOkResponse({ type: ResumeOverviewDto })
-  overview(@CurrentUser() user: AuthenticatedUser) {
-    return this.resumes.overview(user.id);
+  @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
+  overview(@CurrentUser() user: AuthenticatedUser, @Query() query: ResumeOverviewQueryDto) {
+    return this.resumes.overview(user.id, query.resumeId);
   }
 
   @Get(':id')

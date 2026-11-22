@@ -233,6 +233,7 @@ export type ResumeSummaryDto = {
     lastName: string;
     headline: string | null;
     isPublished: boolean;
+    viewsLast7Days: number;
     template: ResumeTemplateSummaryDto;
     createdAt: string;
     updatedAt: string;
@@ -256,12 +257,18 @@ export type ResumeDailyViewsDto = {
     count: number;
 };
 
+export type SelectedResumeDto = {
+    id: string;
+    title: string;
+};
+
 export type ResumeOverviewDto = {
     total: number;
     publishedCount: number;
     viewsTotal: number;
     viewsLast7Days: number;
     dailyViews: Array<ResumeDailyViewsDto>;
+    selectedResume: SelectedResumeDto | null;
     latestResume: ResumeSummaryDto | null;
 };
 
@@ -571,12 +578,18 @@ export type ResumeDeletionNoticesDismissResponse = ResumeDeletionNoticesDismissR
 export type ResumeOverviewData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        resumeId?: string;
+    };
     url: '/api/resumes/overview';
 };
 
 export type ResumeOverviewErrors = {
     401: unknown;
+    /**
+     * Резюме не найдено.
+     */
+    404: unknown;
 };
 
 export type ResumeOverviewResponses = {
