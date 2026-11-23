@@ -18,6 +18,7 @@ export function resumeToPreviewData(resume: ResumeDto): ResumePreviewData {
     experience: resume.experiences.map((item) => ({
       company: item.company,
       role: item.position,
+      location: item.location ?? '',
       period: formatPeriod(item.startDate, item.endDate, item.isCurrent),
       description: item.description ?? '',
     })),
@@ -25,6 +26,8 @@ export function resumeToPreviewData(resume: ResumeDto): ResumePreviewData {
       institution: item.institution,
       degree: [item.degree, item.fieldOfStudy].filter(Boolean).join(' · '),
       period: formatPeriod(item.startDate, item.endDate),
+      location: item.location ?? '',
+      description: item.description ?? '',
     })),
     skills: resume.skills.map((item) => ({
       name: item.name,
@@ -36,12 +39,17 @@ export function resumeToPreviewData(resume: ResumeDto): ResumePreviewData {
     })),
     projects: resume.projects.map((item) => ({
       name: item.name,
+      role: item.role ?? '',
+      period: formatPeriod(item.startDate, item.endDate),
+      url: item.url ?? '',
       description: item.description ?? '',
     })),
     certificates: resume.certificates.map((item) => ({
       name: item.name,
       issuer: item.issuer ?? '',
       year: item.issuedAt ? new Date(item.issuedAt).getFullYear().toString() : '',
+      expiresAt: item.expiresAt ? formatMonth(item.expiresAt) : '',
+      credentialUrl: item.credentialUrl ?? '',
     })),
   };
 }
@@ -61,6 +69,7 @@ export function editorValuesToPreviewData(values: ResumeEditorValues): ResumePre
     experience: values.experiences.map((item) => ({
       company: item.company,
       role: item.position,
+      location: item.location,
       period: formatPeriod(item.startDate, item.endDate, item.isCurrent),
       description: item.description,
     })),
@@ -68,6 +77,8 @@ export function editorValuesToPreviewData(values: ResumeEditorValues): ResumePre
       institution: item.institution,
       degree: [item.degree, item.fieldOfStudy].filter(Boolean).join(' · '),
       period: formatPeriod(item.startDate, item.endDate),
+      location: item.location,
+      description: item.description,
     })),
     skills: values.skills.map((item) => ({
       name: item.name,
@@ -77,11 +88,19 @@ export function editorValuesToPreviewData(values: ResumeEditorValues): ResumePre
       name: item.name,
       level: item.proficiency,
     })),
-    projects: values.projects.map((item) => ({ name: item.name, description: item.description })),
+    projects: values.projects.map((item) => ({
+      name: item.name,
+      role: item.role,
+      period: formatPeriod(item.startDate, item.endDate),
+      url: item.url,
+      description: item.description,
+    })),
     certificates: values.certificates.map((item) => ({
       name: item.name,
       issuer: item.issuer,
       year: item.issuedAt ? new Date(item.issuedAt).getFullYear().toString() : '',
+      expiresAt: item.expiresAt ? formatMonth(item.expiresAt) : '',
+      credentialUrl: item.credentialUrl,
     })),
   };
 }

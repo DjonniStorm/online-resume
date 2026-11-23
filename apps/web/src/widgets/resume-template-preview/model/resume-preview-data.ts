@@ -12,6 +12,7 @@ export type ResumePreviewData = {
   experience: Array<{
     company: string;
     role: string;
+    location: string;
     period: string;
     description: string;
   }>;
@@ -19,9 +20,17 @@ export type ResumePreviewData = {
     institution: string;
     degree: string;
     period: string;
+    location: string;
+    description: string;
   }>;
   skills: Array<{ name: string; level: 'Базовый' | 'Уверенный' | 'Продвинутый' }>;
   languages: Array<{ name: string; level: string }>;
-  projects: Array<{ name: string; description: string }>;
-  certificates: Array<{ name: string; issuer: string; year: string }>;
+  projects: Array<{ name: string; role: string; period: string; url: string; description: string }>;
+  certificates: Array<{
+    name: string;
+    issuer: string;
+    year: string;
+    expiresAt: string;
+    credentialUrl: string;
+  }>;
 };

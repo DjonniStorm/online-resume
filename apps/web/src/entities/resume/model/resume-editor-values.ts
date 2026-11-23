@@ -129,9 +129,9 @@ export function editorValuesToUpdateInput(
     email: optionalValue(values.email),
     phone: optionalValue(values.phone),
     location: optionalValue(values.location),
-    githubUrl: optionalValue(values.githubUrl),
+    githubUrl: normalizeGitHub(values.githubUrl),
     telegramHandle: optionalValue(values.telegramHandle),
-    websiteUrl: optionalValue(values.websiteUrl),
+    websiteUrl: normalizeWebsite(values.websiteUrl),
     about: optionalValue(values.about),
     sections: values.sections.map((section) => ({ ...section })),
     experiences: values.experiences.filter(hasAnyValue).map((item) => ({
@@ -185,6 +185,25 @@ function dateToInput(value?: string | null): string {
 function optionalValue(value: string): string | undefined {
   const normalized = value.trim();
   return normalized ? normalized : undefined;
+}
+
+function normalizeGitHub(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/^http:\/\//i, 'https://');
+  }
+  return `https://github.com/${trimmed.replace(/^(?:www\.)?github\.com\//i, '')}`;
+}
+
+function normalizeWebsite(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
 function hasAnyValue(value: Record<string, unknown>): boolean {

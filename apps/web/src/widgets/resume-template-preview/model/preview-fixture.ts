@@ -16,6 +16,7 @@ export const previewFixture: ResumePreviewData = {
     {
       company: 'North Star Studio',
       role: 'Senior Frontend Developer',
+      location: '',
       period: '2023 — сейчас',
       description:
         'Развиваю библиотеку компонентов и отвечаю за клиентскую часть SaaS-продукта. Запустила новую навигацию и сократила время первого полезного действия.',
@@ -23,6 +24,7 @@ export const previewFixture: ResumePreviewData = {
     {
       company: 'Forma Digital',
       role: 'Frontend Developer',
+      location: '',
       period: '2020 — 2023',
       description:
         'Собирала личные кабинеты, внутренние инструменты и посадочные страницы. Работала вместе с дизайнерами над системой визуальных решений.',
@@ -33,6 +35,8 @@ export const previewFixture: ResumePreviewData = {
       institution: 'Московский политехнический университет',
       degree: 'Информационные системы и технологии',
       period: '2016 — 2020',
+      location: '',
+      description: '',
     },
   ],
   skills: [
@@ -49,15 +53,33 @@ export const previewFixture: ResumePreviewData = {
   projects: [
     {
       name: 'Design system starter',
+      role: '',
+      period: '',
+      url: '',
       description: 'Набор компонентов и документация для трёх продуктовых команд.',
     },
     {
       name: 'Research dashboard',
+      role: '',
+      period: '',
+      url: '',
       description: 'Панель для анализа обратной связи и поиска повторяющихся проблем.',
     },
   ],
   certificates: [
-    { name: 'Accessibility fundamentals', issuer: 'W3C', year: '2024' },
-    { name: 'Product analytics', issuer: 'Product School', year: '2023' },
+    {
+      name: 'Accessibility fundamentals',
+      issuer: 'W3C',
+      year: '2024',
+      expiresAt: '',
+      credentialUrl: '',
+    },
+    {
+      name: 'Product analytics',
+      issuer: 'Product School',
+      year: '2023',
+      expiresAt: '',
+      credentialUrl: '',
+    },
   ],
 };

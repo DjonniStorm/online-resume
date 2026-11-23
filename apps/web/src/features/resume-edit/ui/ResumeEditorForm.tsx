@@ -84,14 +84,7 @@ export function ResumeEditorForm({
         />
         <BasicInformationFields
           form={form}
-          fields={
-            new Set([
-              ...resume.template.fields.map((field) => field.field),
-              ...(resume.template.sections.some((section) => section.type === 'ABOUT')
-                ? ['ABOUT']
-                : []),
-            ])
-          }
+          fields={new Set(resume.template.fields.map((field) => field.field))}
         />
         <ResumeSections form={form} resume={resume} />
         {saveError ? (

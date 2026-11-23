@@ -449,8 +449,11 @@
     -webkit-print-color-adjust: exact;
   }
 
-  .section,
   .entry {
     break-inside: avoid;
+  }
+
+  .sectionHeading {
+    break-after: avoid;
   }
 }
