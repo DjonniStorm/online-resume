@@ -9,9 +9,12 @@ import { AppModule } from '../app.module';
 import { ResumeCleanupService } from '../modules/resumes/resume-cleanup.service';
 import { getTestDatabaseUrl } from './create-database-testing-module';
 
-export async function createHttpTestingApp() {
+type HttpTestingAppOptions = { photoDirectory?: string };
+
+export async function createHttpTestingApp(options: HttpTestingAppOptions = {}) {
   const config = new ConfigService({
     databaseUrl: getTestDatabaseUrl(),
+    resumePhotoDirectory: options.photoDirectory,
     jwtAccessSecret: randomBytes(32).toString('hex'),
     jwtRefreshSecret: randomBytes(32).toString('hex'),
   });

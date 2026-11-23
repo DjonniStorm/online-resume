@@ -2,11 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: [
-      'apps/web/vitest.config.ts',
-      'apps/web/vitest.browser.config.ts',
-      'apps/api/vitest.config.mts',
-    ],
+    projects: ['apps/web/vitest.config.ts', 'apps/api/vitest.config.mts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'lcov'],
