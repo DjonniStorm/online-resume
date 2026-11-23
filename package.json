@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @online-resume/api db:generate",
     "db:push": "pnpm --filter @online-resume/api db:push",
-    "prepare": "lefthook install"
+    "db:seed": "pnpm --filter @online-resume/api db:seed",
+    "prepare": "node -e \"if (require('node:fs').existsSync('.git')) require('node:child_process').execSync('lefthook install', { stdio: 'inherit' })\""
   },
   "engines": {
     "node": ">=22"

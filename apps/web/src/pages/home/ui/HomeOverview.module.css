@@ -1,0 +1,38 @@
+.analytics {
+  min-height: 270px;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: auto;
+}
+
+.day {
+  min-width: 0;
+}
+
+.barArea {
+  display: flex;
+  align-items: flex-end;
+  height: 120px;
+  margin-bottom: 8px;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--mantine-primary-color-5);
+}
+
+.emptyViews {
+  margin-top: auto;
+}
+
+@media (max-width: 480px) {
+  .chart {
+    gap: 6px;
+  }
+}

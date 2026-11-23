@@ -8,13 +8,18 @@
     "start": "node dist/main.js",
     "db:generate": "prisma generate --config ../../prisma.config.ts",
     "db:push": "prisma db push --config ../../prisma.config.ts",
+    "db:seed": "pnpm run build && node dist/seed.js",
+    "db:migrate": "prisma migrate deploy --config ../../prisma.config.ts",
+    "openapi:generate": "pnpm run build && node dist/openapi.js",
     "test": "vitest run --config vitest.config.mts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.4",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.0.4",
+    "@nestjs/jwt": "^12.0.5",
     "@nestjs/platform-express": "^12.0.4",
+    "@nestjs/swagger": "^12.1.2",
     "@online-resume/shared": "workspace:*",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "^7.10.0",
@@ -27,6 +32,7 @@
   "devDependencies": {
     "@nestjs/cli": "^12.0.5",
     "@nestjs/schematics": "^12.0.4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
     "prisma": "7.10.0",

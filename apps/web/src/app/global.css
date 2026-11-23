@@ -1,0 +1,9 @@
+html {
+  scrollbar-gutter: stable;
+}
+
+@media print {
+  html {
+    scrollbar-gutter: auto;
+  }
+}

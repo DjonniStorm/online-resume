@@ -1,10 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { defineConfig, env } from 'prisma/config';
-
 const rootDir = dirname(fileURLToPath(import.meta.url));
+const requireFromApi = createRequire(resolve(rootDir, 'apps/api/package.json'));
+const { defineConfig, env } = requireFromApi('prisma/config');
 const envPath = resolve(rootDir, '.env');
 
 if (existsSync(envPath)) {

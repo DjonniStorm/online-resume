@@ -1,0 +1,1 @@
+export { ResumeEditPage } from './ResumeEditPage';
