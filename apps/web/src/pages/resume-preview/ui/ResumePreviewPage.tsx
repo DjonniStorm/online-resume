@@ -148,10 +148,11 @@ export const ResumePreviewPage = observer(() => {
             <ResumePublication
               id={id}
               publicSlug={resume.isPublished ? resume.publicSlug : null}
-              onChange={(publicSlug) =>
+              unpublishAt={resume.unpublishAt}
+              onChange={(publicSlug, unpublishAt) =>
                 setLoaded({
                   id,
-                  resume: { ...resume, publicSlug, isPublished: publicSlug !== null },
+                  resume: { ...resume, publicSlug, unpublishAt, isPublished: publicSlug !== null },
                 })
               }
             />

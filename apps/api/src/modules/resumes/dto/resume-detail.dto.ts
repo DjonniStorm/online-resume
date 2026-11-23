@@ -159,6 +159,12 @@ export class ResumeDto {
   @ApiProperty()
   isPublished!: boolean;
 
+  @ApiProperty({ format: 'date-time', nullable: true })
+  unpublishAt!: Date | null;
+
+  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  deletionScheduledAt?: Date | null;
+
   @ApiProperty({ nullable: true })
   publicSlug!: string | null;
 

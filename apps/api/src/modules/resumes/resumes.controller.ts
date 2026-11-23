@@ -41,6 +41,7 @@ import { ResumeListQueryDto } from './dto/resume-list-query.dto';
 import { ResumeOverviewQueryDto } from './dto/resume-overview-query.dto';
 import { ResumeOverviewDto } from './dto/resume-overview.dto';
 import { ResumePublicationDto } from './dto/resume-publication.dto';
+import { ResumeScheduleDto } from './dto/resume-schedule.dto';
 import { ResumeListDto } from './dto/resume-summary.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumesService } from './resumes.service';
@@ -180,6 +181,36 @@ export class ResumesController {
   @ApiNotFoundResponse({ description: 'Резюме не найдено.' })
   unpublish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.resumes.unpublish(user.id, id);
+  }
+
+  @Post(':id/unpublish-schedule')
+  @ApiOperation({ operationId: 'resumeScheduleUnpublish' })
+  @ApiOkResponse({ type: ResumeScheduleDto })
+  scheduleUnpublish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.scheduleUnpublish(user.id, id);
+  }
+
+  @Delete(':id/unpublish-schedule')
+  @HttpCode(204)
+  @ApiOperation({ operationId: 'resumeCancelUnpublish' })
+  @ApiNoContentResponse()
+  cancelUnpublish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.cancelUnpublish(user.id, id);
+  }
+
+  @Post(':id/deletion-schedule')
+  @ApiOperation({ operationId: 'resumeScheduleDelete' })
+  @ApiOkResponse({ type: ResumeScheduleDto })
+  scheduleDelete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.scheduleRemove(user.id, id);
+  }
+
+  @Delete(':id/deletion-schedule')
+  @HttpCode(204)
+  @ApiOperation({ operationId: 'resumeCancelDelete' })
+  @ApiNoContentResponse()
+  cancelDelete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.resumes.cancelRemove(user.id, id);
   }
 
   @Delete(':id')

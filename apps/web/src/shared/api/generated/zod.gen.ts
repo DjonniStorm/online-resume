@@ -245,6 +245,8 @@ export const zResumeCertificateDto = z.object({
 export const zResumeDto = z.object({
     id: z.string(),
     isPublished: z.boolean(),
+    unpublishAt: z.iso.datetime().nullable(),
+    deletionScheduledAt: z.iso.datetime().nullish(),
     publicSlug: z.string().nullable(),
     revision: z.number(),
     title: z.string(),
@@ -298,6 +300,8 @@ export const zResumeSummaryDto = z.object({
     lastName: z.string(),
     headline: z.string().nullable(),
     isPublished: z.boolean(),
+    unpublishAt: z.iso.datetime().nullable(),
+    deletionScheduledAt: z.iso.datetime().nullable(),
     viewsLast7Days: z.number(),
     template: zResumeTemplateSummaryDto,
     createdAt: z.iso.datetime(),
@@ -327,6 +331,13 @@ export const zSelectedResumeDto = z.object({
     title: z.string()
 });
 
+export const zResumeScheduledLinkDto = z.object({
+    id: z.string(),
+    title: z.string(),
+    kind: z.enum(['unpublish', 'delete']),
+    scheduledFor: z.iso.datetime()
+});
+
 export const zResumeOverviewDto = z.object({
     total: z.number(),
     publishedCount: z.number(),
@@ -334,7 +345,8 @@ export const zResumeOverviewDto = z.object({
     viewsLast7Days: z.number(),
     dailyViews: z.array(zResumeDailyViewsDto),
     selectedResume: zSelectedResumeDto.nullable(),
-    latestResume: zResumeSummaryDto.nullable()
+    latestResume: zResumeSummaryDto.nullable(),
+    scheduledLinks: z.array(zResumeScheduledLinkDto)
 });
 
 export const zUpdateResumeSectionDto = z.object({
@@ -428,6 +440,10 @@ export const zChangeResumeTemplateDto = z.object({
 
 export const zResumePublicationDto = z.object({
     publicSlug: z.string()
+});
+
+export const zResumeScheduleDto = z.object({
+    scheduledFor: z.iso.datetime()
 });
 
 export const zTemplateListDto = z.object({
@@ -538,6 +554,30 @@ export const zResumePublishPath = z.object({
 });
 
 export const zResumePublishResponse = zResumePublicationDto;
+
+export const zResumeCancelUnpublishPath = z.object({
+    id: z.string()
+});
+
+export const zResumeCancelUnpublishResponse = z.void();
+
+export const zResumeScheduleUnpublishPath = z.object({
+    id: z.string()
+});
+
+export const zResumeScheduleUnpublishResponse = zResumeScheduleDto;
+
+export const zResumeCancelDeletePath = z.object({
+    id: z.string()
+});
+
+export const zResumeCancelDeleteResponse = z.void();
+
+export const zResumeScheduleDeletePath = z.object({
+    id: z.string()
+});
+
+export const zResumeScheduleDeleteResponse = zResumeScheduleDto;
 
 export const zPublicResumeGetPath = z.object({
     slug: z.string()

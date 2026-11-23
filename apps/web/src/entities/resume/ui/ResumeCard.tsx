@@ -38,6 +38,11 @@ export function ResumeCard({ resume, onDelete, deleteDisabled = false }: ResumeC
               Опубликовано
             </Badge>
           ) : null}
+          {resume.deletionScheduledAt ? (
+            <Badge variant="light" color="orange" size="sm" w="fit-content">
+              Удаление запланировано
+            </Badge>
+          ) : null}
           <Group justify="space-between" align="flex-end" gap="xs" mt="auto" wrap="wrap">
             <Group gap={4} wrap="nowrap">
               <IconEye size={15} color="var(--mantine-color-dimmed)" aria-hidden="true" />
@@ -76,7 +81,7 @@ export function ResumeCard({ resume, onDelete, deleteDisabled = false }: ResumeC
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item color="red" disabled={deleteDisabled} onClick={() => onDelete(resume)}>
-            Удалить
+            {resume.deletionScheduledAt ? 'Управлять удалением' : 'Удалить'}
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>

@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router';
 
 import { StoreKey, useStore, useStores } from '@/app/store';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
-import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
+import type { ResumeOverviewDto, ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 import { HomeOverview } from './HomeOverview';
 import classes from './HomePage.module.css';
@@ -21,8 +21,26 @@ export const HomePage = observer(() => {
     StoreKey.Resumes,
   );
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
+  const [scheduleError, setScheduleError] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedResumeId = searchParams.get('resumeId');
+  const refreshOverview = () => void resumes.loadOverview(selectedResumeId);
+  const cancelSchedule = async (item: ResumeOverviewDto['scheduledLinks'][number]) => {
+    const changed =
+      item.kind === 'unpublish'
+        ? await resumes.cancelUnpublish(item.id)
+        : await resumes.cancelDelete(item.id);
+    if (changed) {
+      setScheduleError(false);
+      refreshOverview();
+    } else setScheduleError(true);
+  };
+  const revokeLink = async (item: ResumeOverviewDto['scheduledLinks'][number]) => {
+    if (await resumes.unpublish(item.id)) {
+      setScheduleError(false);
+      refreshOverview();
+    } else setScheduleError(true);
+  };
 
   const selectResume = (resumeId: string | null) => {
     setSearchParams((previous) => {
@@ -59,6 +77,9 @@ export const HomePage = observer(() => {
           onSelectResume={selectResume}
           onDelete={setSelectedForDeletion}
           deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
+          onCancelSchedule={(item) => void cancelSchedule(item)}
+          onRevokeLink={(item) => void revokeLink(item)}
+          scheduleError={scheduleError}
         />
       ) : (
         <LandingContent />
@@ -66,8 +87,8 @@ export const HomePage = observer(() => {
       <ResumeDeleteDialog
         resume={selectedForDeletion}
         onClose={() => setSelectedForDeletion(null)}
-        onDeleted={() => {
-          if (selectedForDeletion?.id === selectedResumeId) {
+        onDeleted={(immediate) => {
+          if (immediate && selectedForDeletion?.id === selectedResumeId) {
             selectResume(null);
           } else {
             void resumes.loadOverview(selectedResumeId);
