@@ -4,10 +4,12 @@ import { NestFactory } from '@nestjs/core';
 import 'reflect-metadata';
 
 import { AppModule } from './app.module';
+import { rateLimit } from './rate-limit.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+  app.use(rateLimit);
   app.enableShutdownHooks();
   app.useGlobalPipes(
     new ValidationPipe({

@@ -14,8 +14,35 @@ export function PublicResumePage() {
   const { slug } = useParams();
   const resumes = useStore(StoreKey.Resumes);
   const [loaded, setLoaded] = useState<{ slug: string; resume: ResumeDto | null } | null>(null);
+  const currentResume = loaded && loaded.slug === slug ? loaded.resume : null;
 
-  useHead({ title: loaded?.resume ? `${loaded.resume.title} — резюме` : 'Публичное резюме' });
+  const resumeName = currentResume
+    ? `${currentResume.firstName} ${currentResume.lastName}`.trim()
+    : null;
+  const title = currentResume ? `${currentResume.title} — ${resumeName}` : 'Публичное резюме';
+  const description = currentResume
+    ? [currentResume.headline, `Резюме ${resumeName} в Online Resume.`].filter(Boolean).join(' ')
+    : 'Создавайте и публикуйте резюме с удобными шаблонами.';
+  const image =
+    currentResume?.photoPath && slug
+      ? `${window.location.origin}/api/public/resumes/${encodeURIComponent(slug)}/photo`
+      : `${window.location.origin}/og-preview.png`;
+
+  useHead({
+    title,
+    meta: [
+      { name: 'description', content: description },
+      { property: 'og:type', content: 'profile' },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:url', content: window.location.href },
+      { property: 'og:image', content: image },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: image },
+    ],
+  });
 
   useEffect(() => {
     if (!slug) {
@@ -42,7 +69,7 @@ export function PublicResumePage() {
     );
   }
 
-  if (!loaded?.resume) {
+  if (!currentResume) {
     return (
       <Container size="lg" py="xl">
         <Alert title="Резюме недоступно">
@@ -52,7 +79,7 @@ export function PublicResumePage() {
     );
   }
 
-  const resume = loaded.resume;
+  const resume = currentResume;
   return (
     <main>
       <Container size={900} py={{ base: 'lg', sm: 'xl' }} className={styles.container}>
