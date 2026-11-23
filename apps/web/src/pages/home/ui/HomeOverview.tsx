@@ -119,7 +119,7 @@ function OverviewContent({
     <Stack gap="xl">
       <Group justify="space-between" align="flex-end" gap="md">
         <div>
-          <Title order={1} size="h2">
+          <Title order={1} size="h3" fw={600}>
             Ваши резюме
           </Title>
           <Text c="dimmed" size="sm">
@@ -135,33 +135,6 @@ function OverviewContent({
         <Alert color="red">Не удалось изменить срок. Попробуйте ещё раз.</Alert>
       ) : null}
 
-      {overview.scheduledLinks.length > 0 ? (
-        <Alert color="yellow" title="Публичные ссылки скоро отключатся">
-          <Stack gap="xs">
-            {overview.scheduledLinks.map((item) => (
-              <Group key={item.id} justify="space-between" gap="sm" wrap="wrap">
-                <Text size="sm">
-                  {item.title}: {item.kind === 'delete' ? 'удаление' : 'снятие с публикации'}{' '}
-                  {new Intl.DateTimeFormat('ru-RU', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  }).format(new Date(item.scheduledFor))}{' '}
-                  ({remainingTime(item.scheduledFor)})
-                </Text>
-                <Group gap="xs">
-                  <Button size="xs" variant="light" onClick={() => onCancelSchedule(item)}>
-                    Отменить
-                  </Button>
-                  <Button size="xs" variant="subtle" color="red" onClick={() => onRevokeLink(item)}>
-                    Снять ссылку сейчас
-                  </Button>
-                </Group>
-              </Group>
-            ))}
-          </Stack>
-        </Alert>
-      ) : null}
-
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
         <Card withBorder radius="md" className={styles.analytics}>
           <Stack gap="lg">
@@ -175,9 +148,9 @@ function OverviewContent({
                 />
               </Group>
               <Group align="baseline" gap="lg">
-                <Title order={2} size="h1">
+                <Text fw={600} fz={32} lh={1.2}>
                   {viewsLast7Days}
-                </Title>
+                </Text>
                 <Text size="sm" c="dimmed">
                   За всё время: {viewsTotal}
                 </Text>
@@ -222,8 +195,47 @@ function OverviewContent({
           </Stack>
         </Card>
 
+        {overview.scheduledLinks.length > 0 ? (
+          <Card withBorder radius="md" className={styles.scheduled}>
+            <Stack gap="md" h="100%">
+              <Text fw={600}>Отключение публичных ссылок</Text>
+              <Stack gap="sm" className={styles.scheduledList}>
+                {overview.scheduledLinks.map((item) => (
+                  <div key={item.id} className={styles.scheduledItem}>
+                    <Text fw={600} size="sm" lineClamp={1}>
+                      {item.title}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                      {item.kind === 'delete' ? 'Удаление' : 'Снятие с публикации'}{' '}
+                      {new Intl.DateTimeFormat('ru-RU', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      }).format(new Date(item.scheduledFor))}
+                      {' · '}
+                      {remainingTime(item.scheduledFor)}
+                    </Text>
+                    <Group gap="xs" mt="xs">
+                      <Button size="xs" variant="light" onClick={() => onCancelSchedule(item)}>
+                        Отменить
+                      </Button>
+                      <Button
+                        size="xs"
+                        variant="subtle"
+                        color="red"
+                        onClick={() => onRevokeLink(item)}
+                      >
+                        Снять ссылку сейчас
+                      </Button>
+                    </Group>
+                  </div>
+                ))}
+              </Stack>
+            </Stack>
+          </Card>
+        ) : null}
+
         <Stack gap="sm">
-          <Title order={2} size="h4">
+          <Title order={2} size="h3" fw={600}>
             Недавно обновлено
           </Title>
           {match(latestResume)

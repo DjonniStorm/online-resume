@@ -1,5 +1,19 @@
 .analytics {
-  min-height: 270px;
+  height: 300px;
+}
+
+.scheduled {
+  height: 300px;
+}
+
+.scheduledList {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.scheduledItem + .scheduledItem {
+  padding-top: 12px;
+  border-top: 1px solid var(--mantine-color-gray-3);
 }
 
 .chart {

@@ -216,7 +216,7 @@ export const ResumeEditPage = observer(() => {
                 </Anchor>
                 <span>{resume.template.slug}</span>
               </Breadcrumbs>
-              <Title order={1} size="h3">
+              <Title order={1} size="h3" fw={600}>
                 {resume.title}
               </Title>
             </Stack>
@@ -289,7 +289,7 @@ export const ResumeEditPage = observer(() => {
             />
             <Paper withBorder p="md" className={styles.previewPanel}>
               <div className={styles.previewHeader}>
-                <Title order={2} size="h4">
+                <Title order={2} size="h3" fw={600}>
                   Предпросмотр
                 </Title>
               </div>

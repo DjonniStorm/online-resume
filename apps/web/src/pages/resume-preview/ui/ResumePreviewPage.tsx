@@ -124,7 +124,7 @@ export const ResumePreviewPage = observer(() => {
                 </Anchor>
                 <span>{resume.title}</span>
               </Breadcrumbs>
-              <Title order={1} size="h2">
+              <Title order={1} size="h3" fw={600}>
                 {resume.title}
               </Title>
             </Stack>
