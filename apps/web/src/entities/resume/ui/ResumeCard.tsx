@@ -38,15 +38,17 @@ export function ResumeCard({ resume, onDelete, deleteDisabled = false }: ResumeC
               Опубликовано
             </Badge>
           ) : null}
-          <Group gap={4} mt="auto">
-            <IconEye size={15} color="var(--mantine-color-dimmed)" aria-hidden="true" />
+          <Group justify="space-between" align="flex-end" gap="xs" mt="auto" wrap="wrap">
+            <Group gap={4} wrap="nowrap">
+              <IconEye size={15} color="var(--mantine-color-dimmed)" aria-hidden="true" />
+              <Text size="xs" c="dimmed">
+                Просмотры за 7 дней: {resume.viewsLast7Days}
+              </Text>
+            </Group>
             <Text size="xs" c="dimmed">
-              Просмотры за 7 дней: {resume.viewsLast7Days}
+              Обновлено: {formatDate(resume.updatedAt)}
             </Text>
           </Group>
-          <Text size="xs" c="dimmed">
-            Обновлено: {formatDate(resume.updatedAt)}
-          </Text>
         </Stack>
       </Group>
       <Menu position="bottom-end" withinPortal>
