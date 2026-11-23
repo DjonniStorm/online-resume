@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
-import { TemplateCard } from '@/entities/template';
+import { TEMPLATE_PAGE_SIZES, TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import { SearchForm } from '@/shared/ui/SearchForm';
@@ -38,26 +38,17 @@ export const TemplatesPage = observer(() => {
   const [query, setQuery] = useState(templates.search);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [createModalOpened, setCreateModalOpened] = useState(false);
-  const [loadedHere, setLoadedHere] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    let active = true;
-    void templates.load().finally(() => {
-      if (active) {
-        setLoadedHere(true);
-      }
-    });
-    return () => {
-      active = false;
-    };
+    void templates.load();
   }, [templates]);
 
   const pageCount = Math.ceil(templates.total / templates.limit);
   const listRequest = requests.latest('templates.list');
   const listError = errors.forOperation('templates.list');
-  const loading = !loadedHere || listRequest?.status === 'pending';
-  const ready = loadedHere && listRequest?.status === 'success';
+  const loading = !listRequest || listRequest.status === 'pending';
+  const ready = listRequest?.status === 'success';
 
   const openCreateModal = () => {
     if (!session.user) {
@@ -91,16 +82,6 @@ export const TemplatesPage = observer(() => {
             </Box>
           </Group>
 
-          {loading ? (
-            <div className={classes.grid}>
-              {Array.from({ length: templates.limit }, (_, index) => (
-                <Card key={index} withBorder radius="md" padding="md">
-                  <Skeleton height={330} />
-                  <Skeleton height={24} width="70%" mt="md" />
-                </Card>
-              ))}
-            </div>
-          ) : null}
           {!loading && listError ? (
             <Alert color="red" title="Не удалось загрузить шаблоны">
               <Button variant="light" color="red" mt="sm" onClick={() => void templates.reload()}>
@@ -108,26 +89,36 @@ export const TemplatesPage = observer(() => {
               </Button>
             </Alert>
           ) : null}
-          {ready && templates.total === 0 ? (
+          {ready && !loading && templates.total === 0 ? (
             <Alert title={query ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
               {query ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
             </Alert>
           ) : null}
 
-          {ready && templates.templates.length > 0 ? (
-            <div className={classes.grid}>
-              {templates.templates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  preview={<ResumeTemplatePreview template={template} />}
-                  onSelect={setSelectedTemplate}
-                />
-              ))}
+          {loading || (ready && templates.templates.length > 0) ? (
+            <div className={classes.grid} aria-busy={loading}>
+              {loading
+                ? Array.from(
+                    { length: Math.min(templates.limit, templates.total || templates.limit) },
+                    (_, index) => (
+                      <Card key={index} withBorder radius="md" padding="md">
+                        <Skeleton height={320} />
+                        <Skeleton height={24} width="70%" mt="md" />
+                      </Card>
+                    ),
+                  )
+                : templates.templates.map((template) => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      preview={<ResumeTemplatePreview template={template} />}
+                      onSelect={setSelectedTemplate}
+                    />
+                  ))}
             </div>
           ) : null}
 
-          {ready && templates.total > 0 ? (
+          {templates.total > 0 ? (
             <Group justify="space-between" wrap="wrap" gap="md">
               <Group gap="xs">
                 <Text size="sm" c="dimmed">
@@ -137,9 +128,10 @@ export const TemplatesPage = observer(() => {
                   aria-label="Шаблонов на странице"
                   size="xs"
                   w={75}
-                  data={['2', '4', '8', '10']}
+                  data={TEMPLATE_PAGE_SIZES.map(String)}
                   value={String(templates.limit)}
-                  onChange={(value) => void templates.setPageSize(Number(value ?? 4))}
+                  disabled={loading}
+                  onChange={(value) => void templates.setPageSize(Number(value ?? templates.limit))}
                 />
                 <Text size="sm" c="dimmed">
                   из {templates.total}
@@ -149,6 +141,7 @@ export const TemplatesPage = observer(() => {
                 <Pagination
                   total={pageCount}
                   value={templates.page}
+                  disabled={loading}
                   onChange={(page) => void templates.load(page)}
                 />
               ) : null}

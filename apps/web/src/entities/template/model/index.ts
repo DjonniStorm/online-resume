@@ -1,1 +1,1 @@
-export { TemplateStore } from './template-store';
+export { TemplateStore, TEMPLATE_PAGE_SIZES } from './template-store';
