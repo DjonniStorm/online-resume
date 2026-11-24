@@ -1,7 +1,7 @@
 import { type Page, expect, test } from 'playwright/test';
 
-import type { ResumeDto, UpdateResumeDto } from '../../src/shared/api/generated/types.gen';
-import { editorResume, editorResumeId, session } from './fixtures/editor';
+import type { ResumeDto, UpdateResumeDto } from '../../../src/shared/api/generated/types.gen';
+import { editorResume, editorResumeId, session } from '../fixtures/editor';
 
 async function openEditor(page: Page, failSave = false) {
   let savedResume: ResumeDto = structuredClone(editorResume);
