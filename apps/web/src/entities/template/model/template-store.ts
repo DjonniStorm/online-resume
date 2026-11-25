@@ -3,15 +3,21 @@ import { makeObservable, observable, runInAction } from 'mobx';
 import { ApiOperation, type BaseApi } from '@/shared/api';
 import { templateList } from '@/shared/api/generated/sdk.gen';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
+import { readPageSize, savePageSize } from '@/shared/lib/page-size-storage';
 
 export const TEMPLATE_PAGE_SIZES = [3, 6, 9, 12] as const;
 const DEFAULT_TEMPLATE_PAGE_SIZE = TEMPLATE_PAGE_SIZES[0];
+const TEMPLATE_PAGE_SIZE_STORAGE_KEY = 'online-resume.templates.page-size.v1';
 
 export class TemplateStore {
   templates: TemplateDto[] = [];
   total = 0;
   page = 1;
-  limit: number = DEFAULT_TEMPLATE_PAGE_SIZE;
+  limit = readPageSize(
+    TEMPLATE_PAGE_SIZE_STORAGE_KEY,
+    TEMPLATE_PAGE_SIZES,
+    DEFAULT_TEMPLATE_PAGE_SIZE,
+  );
   search = '';
 
   private readonly operations;
@@ -61,16 +67,19 @@ export class TemplateStore {
   }
 
   setPageSize(value: number): Promise<void> {
+    if (!TEMPLATE_PAGE_SIZES.some((size) => size === value)) {
+      return Promise.resolve();
+    }
     runInAction(() => {
       this.limit = value;
     });
+    savePageSize(TEMPLATE_PAGE_SIZE_STORAGE_KEY, value);
     return this.load(1);
   }
 
   openSelection(): Promise<void> {
     runInAction(() => {
       this.search = '';
-      this.limit = DEFAULT_TEMPLATE_PAGE_SIZE;
     });
     return this.load(1);
   }

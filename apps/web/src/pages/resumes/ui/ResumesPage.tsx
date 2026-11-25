@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
-import { ResumeCard } from '@/entities/resume';
+import { RESUME_PAGE_SIZES, ResumeCard } from '@/entities/resume';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
 import { ApiOperation } from '@/shared/api';
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
@@ -135,10 +135,10 @@ export const ResumesPage = observer(() => {
                 aria-label="Резюме на странице"
                 size="xs"
                 w={75}
-                data={['2', '4', '8', '10']}
+                data={RESUME_PAGE_SIZES.map(String)}
                 value={String(resumes.limit)}
                 disabled={listLoading}
-                onChange={(value) => void resumes.setPageSize(Number(value ?? 10))}
+                onChange={(value) => void resumes.setPageSize(Number(value ?? resumes.limit))}
               />
               <Text size="sm" c="dimmed">
                 Показано {resumes.resumes.length} из {resumes.total}

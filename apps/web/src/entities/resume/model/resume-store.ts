@@ -31,6 +31,11 @@ import type {
   ResumeSummaryDto,
   UpdateResumeDto,
 } from '@/shared/api/generated/types.gen';
+import { readPageSize, savePageSize } from '@/shared/lib/page-size-storage';
+
+export const RESUME_PAGE_SIZES = [2, 4, 8, 10] as const;
+const DEFAULT_RESUME_PAGE_SIZE = 10;
+const RESUME_PAGE_SIZE_STORAGE_KEY = 'online-resume.resumes.page-size.v1';
 
 export class ResumeStore {
   resumes: ResumeSummaryDto[] = [];
@@ -38,7 +43,7 @@ export class ResumeStore {
   deletionNotices: ResumeDeletionNoticeDto[] = [];
   total = 0;
   page = 1;
-  limit = 10;
+  limit = readPageSize(RESUME_PAGE_SIZE_STORAGE_KEY, RESUME_PAGE_SIZES, DEFAULT_RESUME_PAGE_SIZE);
   search = '';
 
   private readonly operations;
@@ -351,9 +356,13 @@ export class ResumeStore {
   }
 
   setPageSize(value: number): Promise<void> {
+    if (!RESUME_PAGE_SIZES.some((size) => size === value)) {
+      return Promise.resolve();
+    }
     runInAction(() => {
       this.limit = value;
     });
+    savePageSize(RESUME_PAGE_SIZE_STORAGE_KEY, value);
     return this.load(1);
   }
 }
