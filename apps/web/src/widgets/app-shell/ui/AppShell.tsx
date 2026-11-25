@@ -56,7 +56,13 @@ export const AppShell = observer(() => {
               </Button>
             ) : (
               <>
-                <Button component={Link} to="/auth/login" variant="subtle" size="sm">
+                <Button
+                  component={Link}
+                  to="/auth/login"
+                  variant="subtle"
+                  size="sm"
+                  className={styles.login}
+                >
                   Войти
                 </Button>
                 <Button component={Link} to="/auth/register" size="sm">

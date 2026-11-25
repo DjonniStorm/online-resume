@@ -3,7 +3,9 @@ import { makeAutoObservable } from 'mobx';
 import type { ApiOperation, ApiRequest, UUID } from '@/shared/api';
 
 export class RequestStore {
+  // Последний запрос для каждой операции; предыдущий активный отменяется.
   readonly byOperation = new Map<ApiOperation, ApiRequest>();
+  // Привязка запросов к странице для отмены при уходе с неё.
   private readonly requestPages = new Map<UUID, UUID>();
   private currentPage: UUID | null = null;
 
