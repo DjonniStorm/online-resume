@@ -52,7 +52,7 @@ async function openLogin(page: Page) {
     throw new Error(`Неожиданный запрос API: ${route.request().method()} ${path}`);
   });
   await page.goto('/auth/login');
-  await expect(page.getByRole('heading', { name: 'С возвращением' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Вход' })).toBeVisible();
   return requests;
 }
 

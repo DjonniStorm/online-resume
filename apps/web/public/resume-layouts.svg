@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 410" fill="none">
+  <g transform="rotate(-2 112 205)">
   <rect x="28" y="64" width="168" height="282" rx="3" fill="#fff" stroke="#D9D3DE"/>
   <path d="M48 87h24" stroke="#B56D4F" stroke-width="3"/>
   <rect x="48" y="104" width="83" height="9" rx="2" fill="#24313B"/>
@@ -16,6 +17,7 @@
     <rect x="48" y="242" width="126" height="4" rx="2"/>
     <rect x="48" y="252" width="97" height="4" rx="2"/>
     <rect x="48" y="306" width="116" height="4" rx="2"/>
+  </g>
   </g>
 
   <g transform="translate(0 25)">
@@ -51,6 +53,7 @@
   </g>
   </g>
 
+  <g transform="rotate(2 488 205)">
   <rect x="404" y="64" width="168" height="282" rx="3" fill="#fff" stroke="#D9D3DE"/>
   <path d="M405 65h166v71H405z" fill="#233B41"/>
   <rect x="421" y="84" width="81" height="9" rx="2" fill="#fff"/>
@@ -74,5 +77,6 @@
     <rect x="525" y="184" width="24" height="4" rx="2"/>
     <rect x="525" y="247" width="30" height="4" rx="2"/>
     <rect x="525" y="257" width="25" height="4" rx="2"/>
+  </g>
   </g>
 </svg>
