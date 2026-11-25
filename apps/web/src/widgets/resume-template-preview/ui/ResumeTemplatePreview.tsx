@@ -80,6 +80,12 @@ export function ResumeTemplatePreview({
         <article
           ref={pageRef}
           className={styles.page}
+          data-layout={template.layout}
+          data-header-band={
+            template.layout === 'SINGLE_COLUMN' &&
+            theme.headerColor &&
+            theme.headerColor !== theme.pageColor
+          }
           data-spacing={theme.spacing}
           style={{
             ...getPageStyle(theme, template),
@@ -98,7 +104,7 @@ export function ResumeTemplatePreview({
           {match(template.layout)
             .with('SIDEBAR_LEFT', 'SIDEBAR_RIGHT', () => <SidebarLayout {...layoutProps} />)
             .with('WIDE_HEADER', () => <WideHeaderLayout {...layoutProps} />)
-            .with('SINGLE_COLUMN', () => <SingleColumnLayout {...layoutProps} />)
+            .with('SINGLE_COLUMN', 'CLASSIC_COLUMN', () => <SingleColumnLayout {...layoutProps} />)
             .exhaustive()}
           {sectionsByRegion.FOOTER.length > 0 ? (
             <footer className={styles.footerRegion}>
@@ -152,6 +158,9 @@ function getPageStyle(theme: TemplateThemeDto, template: TemplateDto): CSSProper
         ? theme.primaryColor
         : (theme.headerColor ?? theme.primaryColor),
     '--resume-sidebar': theme.sidebarColor ?? theme.pageColor,
+    '--resume-sidebar-text': theme.sidebarColor
+      ? contrastTextColor(theme.sidebarColor, theme.textColor)
+      : theme.textColor,
     '--resume-title-size': `${theme.titleSizePt}pt`,
     '--resume-section-size': `${theme.sectionTitleSizePt}pt`,
     '--resume-body-size': `${theme.bodySizePt}pt`,
@@ -159,4 +168,26 @@ function getPageStyle(theme: TemplateThemeDto, template: TemplateDto): CSSProper
     '--resume-sidebar-width': `${template.sidebarWidthPercent ?? 30}%`,
     fontFamily: `${theme.bodyFontFamily}, Arial, sans-serif`,
   } as CSSProperties;
+}
+
+function contrastTextColor(background: string, darkText: string): string {
+  const luminance = (color: string) => {
+    const channels = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(color);
+    if (!channels) {
+      return 0;
+    }
+    const channel = (index: number) => {
+      const value = Number.parseInt(channels[index] ?? '00', 16) / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    return channel(1) * 0.2126 + channel(2) * 0.7152 + channel(3) * 0.0722;
+  };
+
+  const backgroundLuminance = luminance(background);
+  const textLuminance = luminance(darkText);
+  const whiteContrast = 1.05 / (backgroundLuminance + 0.05);
+  const darkContrast =
+    (Math.max(backgroundLuminance, textLuminance) + 0.05) /
+    (Math.min(backgroundLuminance, textLuminance) + 0.05);
+  return whiteContrast >= darkContrast ? '#FFFFFF' : darkText;
 }

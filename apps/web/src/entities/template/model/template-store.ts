@@ -1,24 +1,30 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 
-import type { BaseApi } from '@/shared/api';
+import { ApiOperation, type BaseApi } from '@/shared/api';
 import { templateList } from '@/shared/api/generated/sdk.gen';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
+import { readPageSize, savePageSize } from '@/shared/lib/page-size-storage';
 
 export const TEMPLATE_PAGE_SIZES = [3, 6, 9, 12] as const;
 const DEFAULT_TEMPLATE_PAGE_SIZE = TEMPLATE_PAGE_SIZES[0];
+const TEMPLATE_PAGE_SIZE_STORAGE_KEY = 'online-resume.templates.page-size.v1';
 
 export class TemplateStore {
   templates: TemplateDto[] = [];
   total = 0;
   page = 1;
-  limit: number = DEFAULT_TEMPLATE_PAGE_SIZE;
+  limit = readPageSize(
+    TEMPLATE_PAGE_SIZE_STORAGE_KEY,
+    TEMPLATE_PAGE_SIZES,
+    DEFAULT_TEMPLATE_PAGE_SIZE,
+  );
   search = '';
 
   private readonly operations;
   private loadSequence = 0;
 
   constructor(api: BaseApi) {
-    this.operations = api.bind({ list: templateList });
+    this.operations = api.bind({ [ApiOperation.TemplatesList]: templateList });
     makeObservable(this, {
       templates: observable,
       total: observable,
@@ -28,10 +34,18 @@ export class TemplateStore {
     });
   }
 
-  async load(page = this.page): Promise<void> {
+  async load(
+    page = this.page,
+    search = this.search,
+    onPage?: (page: number) => void,
+  ): Promise<void> {
     const sequence = ++this.loadSequence;
-    const task = this.operations.list(
-      { query: { page, limit: this.limit, search: this.search } },
+    runInAction(() => {
+      this.search = search;
+      this.page = page;
+    });
+    const task = this.operations[ApiOperation.TemplatesList](
+      { query: { page, limit: this.limit, search } },
       { showLoader: false },
     );
     try {
@@ -44,6 +58,7 @@ export class TemplateStore {
         this.total = result.data.total;
         this.page = result.data.page;
       });
+      onPage?.(result.data.page);
     } catch {
       // Ошибка запроса отображается через ErrorStore.
     }
@@ -60,17 +75,19 @@ export class TemplateStore {
     return this.load(1);
   }
 
-  setPageSize(value: number): Promise<void> {
+  setPageSize(value: number): void {
+    if (!TEMPLATE_PAGE_SIZES.some((size) => size === value)) {
+      return;
+    }
     runInAction(() => {
       this.limit = value;
     });
-    return this.load(1);
+    savePageSize(TEMPLATE_PAGE_SIZE_STORAGE_KEY, value);
   }
 
   openSelection(): Promise<void> {
     runInAction(() => {
       this.search = '';
-      this.limit = DEFAULT_TEMPLATE_PAGE_SIZE;
     });
     return this.load(1);
   }

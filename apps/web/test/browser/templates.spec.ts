@@ -44,6 +44,12 @@ test.describe('Ожидаемое поведение страницы шабло
 
     // Assert
     await request;
+    await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('Clear Focus');
+    await expect(page.getByRole('button', { name: 'Посмотреть шаблон Второй шаблон' })).toHaveCount(
+      0,
+    );
+    await page.reload();
+    await expect(page.getByRole('textbox', { name: 'Поиск шаблонов' })).toHaveValue('Clear Focus');
     await expect(page.getByRole('button', { name: 'Посмотреть шаблон Второй шаблон' })).toHaveCount(
       0,
     );

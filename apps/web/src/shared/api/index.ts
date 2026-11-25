@@ -1,3 +1,4 @@
+export { ApiOperation } from './api-operation';
 export { BaseApi } from './base-api';
 export type {
   ApiAuth,

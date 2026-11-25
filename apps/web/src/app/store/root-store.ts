@@ -6,7 +6,7 @@ import { createApi } from '@/shared/api';
 import { ErrorStore } from './error-store';
 import { LoaderStore } from './loader-store';
 import { RequestStore } from './request-store';
-import { StoreKey } from './store-key';
+import type { StoreKey } from './store-key';
 
 export class RootStore {
   readonly requests = new RequestStore();
@@ -18,13 +18,9 @@ export class RootStore {
     logging: import.meta.env.DEV,
     observers: [this.requests.track],
   });
-  readonly session = new SessionStore(
-    this.api.forStore(StoreKey.Session),
-    this.requests,
-    this.errors,
-  );
-  readonly templates = new TemplateStore(this.api.forStore(StoreKey.Templates));
-  readonly resumes = new ResumeStore(this.api.forStore(StoreKey.Resumes));
+  readonly session = new SessionStore(this.api, this.requests, this.errors);
+  readonly templates = new TemplateStore(this.api);
+  readonly resumes = new ResumeStore(this.api);
 
   constructor() {
     this.api.setAuth({

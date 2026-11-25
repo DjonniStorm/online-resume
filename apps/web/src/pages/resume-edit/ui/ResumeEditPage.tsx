@@ -31,6 +31,7 @@ import {
 } from '@/entities/resume';
 import { TemplateCard } from '@/entities/template';
 import { ResumeEditorForm, type SaveState } from '@/features/resume-edit';
+import { ApiOperation } from '@/shared/api';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import { SearchForm } from '@/shared/ui/SearchForm';
 import {
@@ -137,7 +138,7 @@ export const ResumeEditPage = observer(() => {
   };
 
   const closeTemplateModal = () => {
-    if (requests.latest('resumes.changeTemplate')?.status === 'pending') {
+    if (requests.latest(ApiOperation.ResumesChangeTemplate)?.status === 'pending') {
       return;
     }
     setTemplateModalOpened(false);
@@ -172,12 +173,12 @@ export const ResumeEditPage = observer(() => {
     );
   }
 
-  const loadRequest = requests.latest('resumes.get');
-  const loadError = errors.forOperation('resumes.get');
-  const saveError = errors.forOperation('resumes.update');
+  const loadRequest = requests.latest(ApiOperation.ResumesGet);
+  const loadError = errors.forOperation(ApiOperation.ResumesGet);
+  const saveError = errors.forOperation(ApiOperation.ResumesUpdate);
   const photoBusy =
-    requests.latest('resumes.uploadPhoto')?.status === 'pending' ||
-    requests.latest('resumes.deletePhoto')?.status === 'pending';
+    requests.latest(ApiOperation.ResumesUploadPhoto)?.status === 'pending' ||
+    requests.latest(ApiOperation.ResumesDeletePhoto)?.status === 'pending';
 
   if (loadRequest?.status === 'pending' || (!resume && !loadError)) {
     return (
@@ -277,8 +278,8 @@ export const ResumeEditPage = observer(() => {
               photoUrl={photoUrl}
               photoBusy={photoBusy || saveState === 'saving'}
               photoError={
-                errors.forOperation('resumes.uploadPhoto') ??
-                errors.forOperation('resumes.deletePhoto')
+                errors.forOperation(ApiOperation.ResumesUploadPhoto) ??
+                errors.forOperation(ApiOperation.ResumesDeletePhoto)
               }
               onPhotoUpload={uploadPhoto}
               onPhotoDelete={deletePhoto}
@@ -327,20 +328,21 @@ export const ResumeEditPage = observer(() => {
             onChange={setTemplateSearch}
             onSearch={(value) => void templates.searchFor(value)}
           />
-          {requests.latest('templates.list')?.status === 'pending' ? (
+          {requests.latest(ApiOperation.TemplatesList)?.status === 'pending' ? (
             <Group justify="center">
               <Loader size="sm" />
             </Group>
           ) : null}
-          {errors.forOperation('templates.list') ? (
+          {errors.forOperation(ApiOperation.TemplatesList) ? (
             <Alert color="red" title="Не удалось загрузить шаблоны">
               Попробуйте закрыть окно и открыть его снова.
             </Alert>
           ) : null}
-          {requests.latest('templates.list')?.status === 'success' && templates.total === 0 ? (
+          {requests.latest(ApiOperation.TemplatesList)?.status === 'success' &&
+          templates.total === 0 ? (
             <Alert title="Ничего не найдено">Попробуйте другой запрос.</Alert>
           ) : null}
-          {requests.latest('templates.list')?.status === 'success' &&
+          {requests.latest(ApiOperation.TemplatesList)?.status === 'success' &&
           templates.templates.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
               {templates.templates.map((template) => (
@@ -363,7 +365,7 @@ export const ResumeEditPage = observer(() => {
               ))}
             </SimpleGrid>
           ) : null}
-          {requests.latest('templates.list')?.status === 'success' &&
+          {requests.latest(ApiOperation.TemplatesList)?.status === 'success' &&
           templates.total > templates.limit ? (
             <Pagination
               total={Math.ceil(templates.total / templates.limit)}
@@ -371,9 +373,9 @@ export const ResumeEditPage = observer(() => {
               onChange={(page) => void templates.load(page)}
             />
           ) : null}
-          {errors.forOperation('resumes.changeTemplate') ? (
+          {errors.forOperation(ApiOperation.ResumesChangeTemplate) ? (
             <Alert color="red" title="Не удалось изменить шаблон">
-              {errors.forOperation('resumes.changeTemplate')?.status === 409
+              {errors.forOperation(ApiOperation.ResumesChangeTemplate)?.status === 409
                 ? 'Резюме изменилось в другой вкладке. Обновите страницу.'
                 : 'Шаблон больше недоступен или не поддерживает разделы этого резюме.'}
             </Alert>
@@ -387,7 +389,7 @@ export const ResumeEditPage = observer(() => {
                 Отмена
               </Button>
               <Button
-                loading={requests.latest('resumes.changeTemplate')?.status === 'pending'}
+                loading={requests.latest(ApiOperation.ResumesChangeTemplate)?.status === 'pending'}
                 disabled={!selectedTemplate || selectedTemplate.id === resume.template.id}
                 onClick={() => void changeTemplate()}
               >

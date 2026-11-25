@@ -1,6 +1,6 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 
-import type { BaseApi } from '@/shared/api';
+import { ApiOperation, type BaseApi } from '@/shared/api';
 import {
   publicResumeGet,
   resumeCancelDelete,
@@ -31,6 +31,11 @@ import type {
   ResumeSummaryDto,
   UpdateResumeDto,
 } from '@/shared/api/generated/types.gen';
+import { readPageSize, savePageSize } from '@/shared/lib/page-size-storage';
+
+export const RESUME_PAGE_SIZES = [2, 4, 8, 10] as const;
+const DEFAULT_RESUME_PAGE_SIZE = 10;
+const RESUME_PAGE_SIZE_STORAGE_KEY = 'online-resume.resumes.page-size.v1';
 
 export class ResumeStore {
   resumes: ResumeSummaryDto[] = [];
@@ -38,7 +43,7 @@ export class ResumeStore {
   deletionNotices: ResumeDeletionNoticeDto[] = [];
   total = 0;
   page = 1;
-  limit = 10;
+  limit = readPageSize(RESUME_PAGE_SIZE_STORAGE_KEY, RESUME_PAGE_SIZES, DEFAULT_RESUME_PAGE_SIZE);
   search = '';
 
   private readonly operations;
@@ -48,26 +53,26 @@ export class ResumeStore {
 
   constructor(api: BaseApi) {
     this.operations = api.bind({
-      create: resumeCreate,
-      getPublic: publicResumeGet,
-      get: resumeGet,
-      list: resumeList,
-      analyticsOptions: resumeList,
-      overview: resumeOverview,
-      deletePhoto: resumePhotoDelete,
-      getPhoto: resumePhotoGet,
-      uploadPhoto: resumePhotoUpload,
-      remove: resumeDelete,
-      deletionNotices: resumeDeletionNotices,
-      dismissDeletionNotices: resumeDeletionNoticesDismiss,
-      publish: resumePublish,
-      scheduleUnpublish: resumeScheduleUnpublish,
-      cancelUnpublish: resumeCancelUnpublish,
-      scheduleDelete: resumeScheduleDelete,
-      cancelDelete: resumeCancelDelete,
-      unpublish: resumeUnpublish,
-      changeTemplate: resumeTemplateChange,
-      update: resumeUpdate,
+      [ApiOperation.ResumesCreate]: resumeCreate,
+      [ApiOperation.ResumesGetPublic]: publicResumeGet,
+      [ApiOperation.ResumesGet]: resumeGet,
+      [ApiOperation.ResumesList]: resumeList,
+      [ApiOperation.ResumesAnalyticsOptions]: resumeList,
+      [ApiOperation.ResumesOverview]: resumeOverview,
+      [ApiOperation.ResumesDeletePhoto]: resumePhotoDelete,
+      [ApiOperation.ResumesGetPhoto]: resumePhotoGet,
+      [ApiOperation.ResumesUploadPhoto]: resumePhotoUpload,
+      [ApiOperation.ResumesRemove]: resumeDelete,
+      [ApiOperation.ResumesDeletionNotices]: resumeDeletionNotices,
+      [ApiOperation.ResumesDismissDeletionNotices]: resumeDeletionNoticesDismiss,
+      [ApiOperation.ResumesPublish]: resumePublish,
+      [ApiOperation.ResumesScheduleUnpublish]: resumeScheduleUnpublish,
+      [ApiOperation.ResumesCancelUnpublish]: resumeCancelUnpublish,
+      [ApiOperation.ResumesScheduleDelete]: resumeScheduleDelete,
+      [ApiOperation.ResumesCancelDelete]: resumeCancelDelete,
+      [ApiOperation.ResumesUnpublish]: resumeUnpublish,
+      [ApiOperation.ResumesChangeTemplate]: resumeTemplateChange,
+      [ApiOperation.ResumesUpdate]: resumeUpdate,
     });
     makeObservable(this, {
       resumes: observable,
@@ -80,10 +85,18 @@ export class ResumeStore {
     });
   }
 
-  async load(page = this.page): Promise<void> {
+  async load(
+    page = this.page,
+    search = this.search,
+    onPage?: (page: number) => void,
+  ): Promise<void> {
     const sequence = ++this.loadSequence;
-    const task = this.operations.list(
-      { query: { page, limit: this.limit, search: this.search } },
+    runInAction(() => {
+      this.search = search;
+      this.page = page;
+    });
+    const task = this.operations[ApiOperation.ResumesList](
+      { query: { page, limit: this.limit, search } },
       { showLoader: false },
     );
     try {
@@ -96,6 +109,7 @@ export class ResumeStore {
         this.total = result.data.total;
         this.page = result.data.page;
       });
+      onPage?.(result.data.page);
     } catch {
       // ErrorStore reads the failed request from RequestStore.
     }
@@ -103,7 +117,7 @@ export class ResumeStore {
 
   async loadOverview(resumeId?: string | null): Promise<void> {
     const sequence = ++this.overviewSequence;
-    const task = this.operations.overview(
+    const task = this.operations[ApiOperation.ResumesOverview](
       { query: resumeId ? { resumeId } : undefined },
       { showLoader: false },
     );
@@ -120,7 +134,7 @@ export class ResumeStore {
   }
 
   async searchAnalyticsOptions(search: string): Promise<ResumeSummaryDto[]> {
-    const task = this.operations.analyticsOptions(
+    const task = this.operations[ApiOperation.ResumesAnalyticsOptions](
       { query: { page: 1, limit: 10, search } },
       { showLoader: false },
     );
@@ -133,7 +147,7 @@ export class ResumeStore {
   }
 
   async create(input: CreateResumeDto): Promise<boolean> {
-    const task = this.operations.create({ body: input });
+    const task = this.operations[ApiOperation.ResumesCreate]({ body: input });
     try {
       const result = await task.promise;
       if (result.response?.status !== 201) {
@@ -147,7 +161,7 @@ export class ResumeStore {
   }
 
   async get(id: string): Promise<ResumeDto | null> {
-    const task = this.operations.get({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesGet]({ path: { id } });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -157,7 +171,10 @@ export class ResumeStore {
   }
 
   async getPublic(slug: string): Promise<ResumeDto | null> {
-    const task = this.operations.getPublic({ path: { slug } }, { retryOnUnauthorized: false });
+    const task = this.operations[ApiOperation.ResumesGetPublic](
+      { path: { slug } },
+      { retryOnUnauthorized: false },
+    );
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -167,7 +184,7 @@ export class ResumeStore {
   }
 
   async getPhoto(id: string): Promise<Blob | null> {
-    const task = this.operations.getPhoto({ path: { id }, parseAs: 'blob' });
+    const task = this.operations[ApiOperation.ResumesGetPhoto]({ path: { id }, parseAs: 'blob' });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -177,7 +194,7 @@ export class ResumeStore {
   }
 
   async uploadPhoto(id: string, file: File): Promise<ResumeDto | null> {
-    const task = this.operations.uploadPhoto({ path: { id }, body: { file } });
+    const task = this.operations[ApiOperation.ResumesUploadPhoto]({ path: { id }, body: { file } });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -187,7 +204,7 @@ export class ResumeStore {
   }
 
   async deletePhoto(id: string): Promise<ResumeDto | null> {
-    const task = this.operations.deletePhoto({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesDeletePhoto]({ path: { id } });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -197,7 +214,7 @@ export class ResumeStore {
   }
 
   async publish(id: string): Promise<string | null> {
-    const task = this.operations.publish({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesPublish]({ path: { id } });
     try {
       const result = await task.promise;
       return result.data?.publicSlug ?? null;
@@ -207,7 +224,7 @@ export class ResumeStore {
   }
 
   async unpublish(id: string): Promise<boolean> {
-    const task = this.operations.unpublish({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesUnpublish]({ path: { id } });
     try {
       const result = await task.promise;
       return result.response?.status === 204;
@@ -217,7 +234,7 @@ export class ResumeStore {
   }
 
   async scheduleUnpublish(id: string): Promise<string | null> {
-    const task = this.operations.scheduleUnpublish({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesScheduleUnpublish]({ path: { id } });
     try {
       const result = await task.promise;
       return result.data?.scheduledFor ?? null;
@@ -227,7 +244,7 @@ export class ResumeStore {
   }
 
   async cancelUnpublish(id: string): Promise<boolean> {
-    const task = this.operations.cancelUnpublish({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesCancelUnpublish]({ path: { id } });
     try {
       return (await task.promise).response?.status === 204;
     } catch {
@@ -236,7 +253,7 @@ export class ResumeStore {
   }
 
   async scheduleDelete(id: string): Promise<boolean> {
-    const task = this.operations.scheduleDelete({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesScheduleDelete]({ path: { id } });
     try {
       const result = await task.promise;
       if (!result.data) return false;
@@ -248,7 +265,7 @@ export class ResumeStore {
   }
 
   async cancelDelete(id: string): Promise<boolean> {
-    const task = this.operations.cancelDelete({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesCancelDelete]({ path: { id } });
     try {
       if ((await task.promise).response?.status !== 204) return false;
       await this.load();
@@ -259,7 +276,7 @@ export class ResumeStore {
   }
 
   async update(id: string, input: UpdateResumeDto): Promise<ResumeDto | null> {
-    const task = this.operations.update({ path: { id }, body: input });
+    const task = this.operations[ApiOperation.ResumesUpdate]({ path: { id }, body: input });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -269,7 +286,7 @@ export class ResumeStore {
   }
 
   async changeTemplate(id: string, input: ChangeResumeTemplateDto): Promise<ResumeDto | null> {
-    const task = this.operations.changeTemplate({ path: { id }, body: input });
+    const task = this.operations[ApiOperation.ResumesChangeTemplate]({ path: { id }, body: input });
     try {
       const result = await task.promise;
       return result.data ?? null;
@@ -279,7 +296,7 @@ export class ResumeStore {
   }
 
   async remove(id: string): Promise<boolean> {
-    const task = this.operations.remove({ path: { id } });
+    const task = this.operations[ApiOperation.ResumesRemove]({ path: { id } });
     try {
       const result = await task.promise;
       if (result.response?.status !== 204) {
@@ -295,7 +312,10 @@ export class ResumeStore {
 
   async loadDeletionNotices(): Promise<void> {
     const sequence = ++this.deletionNoticesSequence;
-    const task = this.operations.deletionNotices({}, { clearOnUnmount: false });
+    const task = this.operations[ApiOperation.ResumesDeletionNotices](
+      {},
+      { clearOnUnmount: false },
+    );
     try {
       const result = await task.promise;
       if (result.data && sequence === this.deletionNoticesSequence) {
@@ -309,7 +329,10 @@ export class ResumeStore {
   }
 
   async dismissDeletionNotices(): Promise<void> {
-    const task = this.operations.dismissDeletionNotices({}, { clearOnUnmount: false });
+    const task = this.operations[ApiOperation.ResumesDismissDeletionNotices](
+      {},
+      { clearOnUnmount: false },
+    );
     try {
       const result = await task.promise;
       if (result.response?.status === 204) {
@@ -334,17 +357,13 @@ export class ResumeStore {
     return this.load();
   }
 
-  searchFor(value: string): Promise<void> {
-    runInAction(() => {
-      this.search = value;
-    });
-    return this.load(1);
-  }
-
-  setPageSize(value: number): Promise<void> {
+  setPageSize(value: number): void {
+    if (!RESUME_PAGE_SIZES.some((size) => size === value)) {
+      return;
+    }
     runInAction(() => {
       this.limit = value;
     });
-    return this.load(1);
+    savePageSize(RESUME_PAGE_SIZE_STORAGE_KEY, value);
   }
 }

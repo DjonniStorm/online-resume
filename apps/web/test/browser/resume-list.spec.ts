@@ -74,14 +74,33 @@ test.describe('Ожидаемое поведение списка резюме',
     await page.getByRole('button', { name: '2', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Открыть резюме Резюме 12' })).toBeVisible();
     await expect(page.getByText('Показано 2 из 12')).toBeVisible();
+    await expect(page).toHaveURL(/page=2/);
     await page.getByRole('textbox', { name: 'Поиск резюме' }).fill('  Резюме 12  ');
     await page.getByRole('button', { name: 'Найти' }).click();
 
     // Assert
+    await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('Резюме 12');
+    await expect(page).not.toHaveURL(/page=/);
     await expect(page.getByText('Показано 1 из 1')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Открыть резюме Резюме 01' })).toHaveCount(0);
     expect(listQueries).toContainEqual({ page: 2, limit: 10, search: '' });
     expect(listQueries).toContainEqual({ page: 1, limit: 10, search: 'Резюме 12' });
+    await page.reload();
+    await expect(page.getByRole('textbox', { name: 'Поиск резюме' })).toHaveValue('Резюме 12');
+    await expect(page.getByText('Показано 1 из 1')).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(/page=2/);
+    await expect(page.getByRole('textbox', { name: 'Поиск резюме' })).toHaveValue('');
+    await expect(page.getByText('Показано 2 из 12')).toBeVisible();
+    await page.getByRole('combobox', { name: 'Резюме на странице' }).click();
+    await page.getByRole('option', { name: '4', exact: true }).click();
+    await expect(page).not.toHaveURL(/page=/);
+    await expect(page.getByText('Показано 4 из 12')).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('combobox', { name: 'Резюме на странице' })).toHaveValue('4');
+    await page.getByRole('button', { name: '3', exact: true }).click();
+    await expect(page).toHaveURL(/page=3/);
+    await expect(page.getByRole('link', { name: 'Открыть резюме Резюме 12' })).toBeVisible();
     await page.getByRole('link', { name: 'Открыть резюме Резюме 12' }).click();
     await expect(page).toHaveURL('/resumes/resume-12/edit');
     await expect(page.getByRole('textbox', { name: 'Название резюме' })).toHaveValue('Резюме 12');

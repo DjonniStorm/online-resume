@@ -2,6 +2,7 @@ import { Alert, Button, Group, Modal, Stack, Text } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
 import { StoreKey, useStores } from '@/app/store';
+import { ApiOperation } from '@/shared/api';
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 type ResumeDeleteDialogProps = {
@@ -18,9 +19,9 @@ export const ResumeDeleteDialog = observer(
       StoreKey.Resumes,
     );
     const pending =
-      requests.latest('resumes.remove')?.status === 'pending' ||
-      requests.latest('resumes.scheduleDelete')?.status === 'pending' ||
-      requests.latest('resumes.cancelDelete')?.status === 'pending';
+      requests.latest(ApiOperation.ResumesRemove)?.status === 'pending' ||
+      requests.latest(ApiOperation.ResumesScheduleDelete)?.status === 'pending' ||
+      requests.latest(ApiOperation.ResumesCancelDelete)?.status === 'pending';
 
     const remove = async () => {
       if (resume && (await resumes.remove(resume.id))) {
@@ -56,9 +57,9 @@ export const ResumeDeleteDialog = observer(
               Вы можете заменить ссылку на внешних сайтах в течение 3 дней или отключить её сразу.
             </Alert>
           ) : null}
-          {errors.forOperation('resumes.remove') ||
-          errors.forOperation('resumes.scheduleDelete') ||
-          errors.forOperation('resumes.cancelDelete') ? (
+          {errors.forOperation(ApiOperation.ResumesRemove) ||
+          errors.forOperation(ApiOperation.ResumesScheduleDelete) ||
+          errors.forOperation(ApiOperation.ResumesCancelDelete) ? (
             <Alert color="red">Не удалось удалить резюме. Попробуйте ещё раз.</Alert>
           ) : null}
           <Group justify="flex-end">

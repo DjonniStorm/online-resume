@@ -37,6 +37,7 @@ enum TemplateStatus {
 /// Поддерживаемая композиция страницы.
 enum TemplateLayout {
   SINGLE_COLUMN
+  CLASSIC_COLUMN
   SIDEBAR_LEFT
   SIDEBAR_RIGHT
   WIDE_HEADER

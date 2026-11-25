@@ -1497,7 +1497,13 @@
             "nullable": true
           },
           "layout": {
-            "enum": ["SINGLE_COLUMN", "SIDEBAR_LEFT", "SIDEBAR_RIGHT", "WIDE_HEADER"],
+            "enum": [
+              "SINGLE_COLUMN",
+              "CLASSIC_COLUMN",
+              "SIDEBAR_LEFT",
+              "SIDEBAR_RIGHT",
+              "WIDE_HEADER"
+            ],
             "type": "string"
           },
           "pageWidthMm": {
@@ -1987,7 +1993,13 @@
             "type": "string"
           },
           "layout": {
-            "enum": ["SINGLE_COLUMN", "SIDEBAR_LEFT", "SIDEBAR_RIGHT", "WIDE_HEADER"],
+            "enum": [
+              "SINGLE_COLUMN",
+              "CLASSIC_COLUMN",
+              "SIDEBAR_LEFT",
+              "SIDEBAR_RIGHT",
+              "WIDE_HEADER"
+            ],
             "type": "string"
           },
           "theme": {

@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 
 import { StoreKey, useStores } from '@/app/store';
+import { ApiOperation } from '@/shared/api';
 
 import styles from './ResumePublication.module.css';
 
@@ -34,12 +35,12 @@ export const ResumePublication = observer(
     );
     const [copyError, setCopyError] = useState(false);
     const publicUrl = publicSlug ? `${window.location.origin}/r/${publicSlug}` : null;
-    const publishing = requests.latest('resumes.publish')?.status === 'pending';
-    const unpublishing = requests.latest('resumes.unpublish')?.status === 'pending';
+    const publishing = requests.latest(ApiOperation.ResumesPublish)?.status === 'pending';
+    const unpublishing = requests.latest(ApiOperation.ResumesUnpublish)?.status === 'pending';
     const changing =
       unpublishing ||
-      requests.latest('resumes.scheduleUnpublish')?.status === 'pending' ||
-      requests.latest('resumes.cancelUnpublish')?.status === 'pending';
+      requests.latest(ApiOperation.ResumesScheduleUnpublish)?.status === 'pending' ||
+      requests.latest(ApiOperation.ResumesCancelUnpublish)?.status === 'pending';
 
     const publish = async () => {
       const slug = await resumes.publish(id);
@@ -156,10 +157,10 @@ export const ResumePublication = observer(
             .
           </Text>
         ) : null}
-        {errors.forOperation('resumes.publish') ||
-        errors.forOperation('resumes.unpublish') ||
-        errors.forOperation('resumes.scheduleUnpublish') ||
-        errors.forOperation('resumes.cancelUnpublish') ? (
+        {errors.forOperation(ApiOperation.ResumesPublish) ||
+        errors.forOperation(ApiOperation.ResumesUnpublish) ||
+        errors.forOperation(ApiOperation.ResumesScheduleUnpublish) ||
+        errors.forOperation(ApiOperation.ResumesCancelUnpublish) ? (
           <Alert color="red">Не удалось изменить публикацию. Попробуйте ещё раз.</Alert>
         ) : null}
         {copyError ? <Alert color="red">Не удалось скопировать ссылку.</Alert> : null}

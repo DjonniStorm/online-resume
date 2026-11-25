@@ -46,7 +46,7 @@ export const LoginForm = observer(({ sessionStore }: { sessionStore: SessionStor
 
   return (
     <>
-      <h1 className={classes.heading}>С возвращением</h1>
+      <h1 className={classes.heading}>Вход</h1>
       <p className={classes.subtitle}>Войдите, чтобы продолжить работу над резюме.</p>
 
       <form className={classes.form} onSubmit={form.onSubmit(onSubmit)} noValidate>

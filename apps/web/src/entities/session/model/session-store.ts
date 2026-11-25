@@ -1,6 +1,6 @@
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 
-import type { BaseApi, UUID } from '@/shared/api';
+import { ApiOperation, type BaseApi, type UUID } from '@/shared/api';
 import { authLogin, authLogout, authRefresh, authRegister } from '@/shared/api/generated/sdk.gen';
 import type {
   AuthResultDto,
@@ -10,12 +10,12 @@ import type {
 } from '@/shared/api/generated/types.gen';
 
 type RequestReader = {
-  isLatest: (operation: string, id: UUID) => boolean;
-  latest: (operation: string) => { status: 'pending' | 'success' | 'error' } | undefined;
+  isLatest: (operation: ApiOperation, id: UUID) => boolean;
+  latest: (operation: ApiOperation) => { status: 'pending' | 'success' | 'error' } | undefined;
 };
 
 type ErrorReader = {
-  forOperation: (operation: string) => { error: unknown; status?: number } | undefined;
+  forOperation: (operation: ApiOperation) => { error: unknown; status?: number } | undefined;
 };
 
 export class SessionStore {
@@ -35,10 +35,10 @@ export class SessionStore {
     private readonly errors: ErrorReader,
   ) {
     this.operations = api.bind({
-      login: authLogin,
-      register: authRegister,
-      refresh: authRefresh,
-      logout: authLogout,
+      [ApiOperation.SessionLogin]: authLogin,
+      [ApiOperation.SessionRegister]: authRegister,
+      [ApiOperation.SessionRefresh]: authRefresh,
+      [ApiOperation.SessionLogout]: authLogout,
     });
     makeObservable(this, {
       accessToken: observable,
@@ -54,7 +54,7 @@ export class SessionStore {
   }
 
   get loginError(): string | null {
-    const failure = this.errors.forOperation('session.login');
+    const failure = this.errors.forOperation(ApiOperation.SessionLogin);
     if (!failure) {
       return null;
     }
@@ -64,11 +64,11 @@ export class SessionStore {
   }
 
   get loginLoading(): boolean {
-    return this.requests.latest('session.login')?.status === 'pending';
+    return this.requests.latest(ApiOperation.SessionLogin)?.status === 'pending';
   }
 
   get registerError(): string | null {
-    const failure = this.errors.forOperation('session.register');
+    const failure = this.errors.forOperation(ApiOperation.SessionRegister);
     if (!failure) {
       return null;
     }
@@ -76,11 +76,11 @@ export class SessionStore {
   }
 
   get registerLoading(): boolean {
-    return this.requests.latest('session.register')?.status === 'pending';
+    return this.requests.latest(ApiOperation.SessionRegister)?.status === 'pending';
   }
 
   get registerStatus(): number | undefined {
-    return this.errors.forOperation('session.register')?.status;
+    return this.errors.forOperation(ApiOperation.SessionRegister)?.status;
   }
 
   restore(): Promise<void> {
@@ -98,7 +98,7 @@ export class SessionStore {
     await this.restore();
     return this.enqueue(async () => {
       const revision = ++this.sessionRevision;
-      const task = this.operations.login({ body });
+      const task = this.operations[ApiOperation.SessionLogin]({ body });
       try {
         const result = await task.promise;
         if (
@@ -120,7 +120,7 @@ export class SessionStore {
     await this.restore();
     return this.enqueue(async () => {
       const revision = ++this.sessionRevision;
-      const task = this.operations.register({ body });
+      const task = this.operations[ApiOperation.SessionRegister]({ body });
       try {
         const result = await task.promise;
         if (
@@ -142,7 +142,7 @@ export class SessionStore {
     await this.restore();
     return this.enqueue(async () => {
       const revision = ++this.sessionRevision;
-      const task = this.operations.logout({});
+      const task = this.operations[ApiOperation.SessionLogout]({});
       const result = await task.promise;
       if (result.response?.status !== 204) {
         throw new Error('Не удалось выйти из аккаунта');
@@ -176,7 +176,10 @@ export class SessionStore {
   }
 
   private async requestRefresh(): Promise<boolean> {
-    const task = this.operations.refresh({}, { showLoader: false, clearOnUnmount: false });
+    const task = this.operations[ApiOperation.SessionRefresh](
+      {},
+      { showLoader: false, clearOnUnmount: false },
+    );
     try {
       const result = await task.promise;
       if (!result.data || !this.requests.isLatest(task.operation, task.id)) {

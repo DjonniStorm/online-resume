@@ -11,11 +11,24 @@ export function SidebarLayout({
   theme,
   template,
 }: ResumeTemplateLayoutProps) {
+  const header = (
+    <header className={styles.header}>
+      {template.photoPlacement === 'HEADER_START' ? (
+        <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
+      ) : null}
+      <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
+      {template.photoPlacement === 'HEADER_END' ? (
+        <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
+      ) : null}
+    </header>
+  );
+
   return (
     <div
       className={styles.sidebarLayout}
       data-side={template.layout === 'SIDEBAR_RIGHT' ? 'right' : 'left'}
     >
+      {template.layout === 'SIDEBAR_RIGHT' ? header : null}
       <div className={styles.columns}>
         <aside className={styles.sidebar}>
           {template.photoPlacement === 'SIDEBAR_TOP' ? (
@@ -26,15 +39,7 @@ export function SidebarLayout({
           ))}
         </aside>
         <div className={styles.mainArea}>
-          <header className={styles.header}>
-            {template.photoPlacement === 'HEADER_START' ? (
-              <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
-            ) : null}
-            <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
-            {template.photoPlacement === 'HEADER_END' ? (
-              <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
-            ) : null}
-          </header>
+          {template.layout === 'SIDEBAR_LEFT' ? header : null}
           <main className={styles.main}>
             {template.photoPlacement === 'MAIN_TOP' ? (
               <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
