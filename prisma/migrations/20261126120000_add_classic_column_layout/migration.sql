@@ -1,0 +1,1 @@
+ALTER TYPE "TemplateLayout" ADD VALUE 'CLASSIC_COLUMN';

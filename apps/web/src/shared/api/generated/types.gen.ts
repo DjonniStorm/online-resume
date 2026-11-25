@@ -103,7 +103,7 @@ export type TemplateDto = {
     slug: string;
     name: string;
     description: string | null;
-    layout: 'SINGLE_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
+    layout: 'SINGLE_COLUMN' | 'CLASSIC_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
     pageWidthMm: string;
     pageHeightMm: string;
     sidebarWidthPercent: number | null;
@@ -224,7 +224,7 @@ export type ResumeTemplateSummaryDto = {
     id: string;
     slug: string;
     name: string;
-    layout: 'SINGLE_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
+    layout: 'SINGLE_COLUMN' | 'CLASSIC_COLUMN' | 'SIDEBAR_LEFT' | 'SIDEBAR_RIGHT' | 'WIDE_HEADER';
     theme: ResumeTemplateThemeSummaryDto | null;
 };
 

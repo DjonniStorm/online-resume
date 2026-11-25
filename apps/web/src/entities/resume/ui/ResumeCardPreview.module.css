@@ -92,12 +92,24 @@
   margin-left: 0;
 }
 
-.preview[data-layout='SINGLE_COLUMN'] .sidebar {
+.preview[data-layout='SINGLE_COLUMN'] .sidebar,
+.preview[data-layout='CLASSIC_COLUMN'] .sidebar {
   display: none;
 }
 
-.preview[data-layout='SINGLE_COLUMN'] .document {
+.preview[data-layout='SINGLE_COLUMN'] .document,
+.preview[data-layout='CLASSIC_COLUMN'] .document {
   margin-left: 0;
+}
+
+.preview[data-header-band='true'] .header {
+  background: var(--preview-header);
+}
+
+.preview[data-layout='CLASSIC_COLUMN'] .header {
+  align-items: center;
+  border-bottom: 1px solid var(--preview-primary);
+  text-align: center;
 }
 
 .preview[data-layout='WIDE_HEADER'] .sidebar {

@@ -17,6 +17,10 @@ export function ResumeCardPreview({ resume }: { resume: ResumeSummaryDto }) {
     <div
       className={styles.preview}
       data-layout={resume.template.layout}
+      data-header-band={
+        resume.template.layout === 'SINGLE_COLUMN' &&
+        Boolean(theme?.headerColor && theme.headerColor !== theme.pageColor)
+      }
       style={colors}
       aria-hidden="true"
     >

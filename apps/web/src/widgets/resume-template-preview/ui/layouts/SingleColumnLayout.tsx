@@ -13,11 +13,16 @@ export function SingleColumnLayout({
 }: ResumeTemplateLayoutProps) {
   return (
     <div className={styles.singleColumn}>
-      {template.photoPlacement === 'HEADER_START' ? (
-        <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
-      ) : null}
-      <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
-      {template.photoPlacement === 'HEADER_END' || template.photoPlacement === 'MAIN_TOP' ? (
+      <header className={styles.header}>
+        {template.photoPlacement === 'HEADER_START' ? (
+          <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
+        ) : null}
+        <ResumeHeader data={data} sections={sectionsByRegion.HEADER} theme={theme} />
+        {template.photoPlacement === 'HEADER_END' ? (
+          <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
+        ) : null}
+      </header>
+      {template.photoPlacement === 'MAIN_TOP' ? (
         <ResumePhoto data={data} photoUrl={photoUrl} shape={template.photoShape} />
       ) : null}
       <main className={styles.main}>

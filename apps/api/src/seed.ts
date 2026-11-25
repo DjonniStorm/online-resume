@@ -16,6 +16,7 @@ import {
   TemplateSpacing,
   TemplateStatus,
 } from './generated/prisma/enums';
+import { additionalTemplates } from './seed/additional-templates';
 
 loadEnvironment();
 
@@ -327,7 +328,9 @@ const templates = [
   },
 ] as const;
 
-async function seedTemplate(template: (typeof templates)[number]) {
+const allTemplates = [...templates, ...additionalTemplates] as const;
+
+async function seedTemplate(template: (typeof allTemplates)[number]) {
   await prisma.$transaction(async (transaction) => {
     await transaction.$queryRaw`SELECT pg_advisory_xact_lock(42, hashtext(${template.slug}))::text`;
     const existing = await transaction.resumeTemplate.findUnique({
@@ -426,7 +429,7 @@ async function seedTemplate(template: (typeof templates)[number]) {
 }
 
 async function main() {
-  for (const template of templates) {
+  for (const template of allTemplates) {
     await seedTemplate(template);
   }
 }

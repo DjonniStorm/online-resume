@@ -40,6 +40,35 @@
   padding: 66px 70px 70px;
 }
 
+.page[data-header-band='true'] .singleColumn {
+  padding-top: 0;
+}
+
+.page[data-header-band='true'] .singleColumn > .header {
+  margin: 0 -70px;
+  padding: 42px 70px 30px;
+  background: var(--resume-header);
+}
+
+.page[data-header-band='true'] .singleColumn .profile::before,
+.page[data-layout='CLASSIC_COLUMN'] .singleColumn .profile::before {
+  display: none;
+}
+
+.page[data-layout='CLASSIC_COLUMN'] .singleColumn > .header {
+  padding-bottom: 22px;
+  border-bottom: 2px solid var(--resume-primary);
+  text-align: center;
+}
+
+.page[data-layout='CLASSIC_COLUMN'] .singleColumn .name {
+  color: var(--resume-text);
+}
+
+.page[data-layout='CLASSIC_COLUMN'] .singleColumn .contacts {
+  justify-content: center;
+}
+
 .singleColumn .main {
   margin-top: 38px;
   padding: 0;
@@ -54,6 +83,11 @@
   align-items: center;
   gap: 28px;
   padding: 56px 50px 32px;
+}
+
+.sidebarLayout[data-side='right'] > .header {
+  padding-bottom: 26px;
+  border-bottom: 3px solid var(--resume-primary);
 }
 
 .sidebarLayout,
@@ -137,7 +171,7 @@
 }
 
 .sidebarLayout .sidebar .photo {
-  background: var(--resume-page);
+  background: var(--resume-sidebar-text);
   color: var(--resume-sidebar);
 }
 
@@ -300,35 +334,35 @@
 }
 
 .sidebarLayout .sidebar {
-  color: var(--resume-page);
+  color: var(--resume-sidebar-text);
 }
 
 .sidebarLayout .sidebar .sectionHeading {
-  border-bottom-color: rgb(255 255 255 / 38%);
-  color: var(--resume-page) !important;
+  border-bottom-color: color-mix(in srgb, var(--resume-sidebar-text) 38%, transparent);
+  color: var(--resume-sidebar-text) !important;
   font-size: 8pt;
   letter-spacing: 0.12em;
 }
 
 .sidebarLayout .sidebar .entrySubtitle,
 .sidebarLayout .sidebar .language {
-  color: var(--resume-page);
+  color: var(--resume-sidebar-text);
 }
 
 .sidebarLayout .sidebar .language {
-  border-color: rgb(255 255 255 / 55%);
+  border-color: color-mix(in srgb, var(--resume-sidebar-text) 55%, transparent);
 }
 
 .sidebarLayout .sidebar .skillTrack {
-  background: rgb(255 255 255 / 25%);
+  background: color-mix(in srgb, var(--resume-sidebar-text) 25%, transparent);
 }
 
 .sidebarLayout .sidebar .skillFill {
-  background: var(--resume-page);
+  background: var(--resume-sidebar-text);
 }
 
 .sidebarLayout .sidebar .entryPeriod {
-  color: var(--resume-page);
+  color: var(--resume-sidebar-text);
 }
 
 .sidebarLayout .main .sectionHeading {

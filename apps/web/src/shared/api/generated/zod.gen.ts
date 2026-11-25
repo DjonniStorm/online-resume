@@ -136,6 +136,7 @@ export const zTemplateDto = z.object({
     description: z.string().nullable(),
     layout: z.enum([
         'SINGLE_COLUMN',
+        'CLASSIC_COLUMN',
         'SIDEBAR_LEFT',
         'SIDEBAR_RIGHT',
         'WIDE_HEADER'
@@ -286,6 +287,7 @@ export const zResumeTemplateSummaryDto = z.object({
     name: z.string(),
     layout: z.enum([
         'SINGLE_COLUMN',
+        'CLASSIC_COLUMN',
         'SIDEBAR_LEFT',
         'SIDEBAR_RIGHT',
         'WIDE_HEADER'
