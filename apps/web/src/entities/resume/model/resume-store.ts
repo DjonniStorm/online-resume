@@ -85,10 +85,18 @@ export class ResumeStore {
     });
   }
 
-  async load(page = this.page): Promise<void> {
+  async load(
+    page = this.page,
+    search = this.search,
+    onPage?: (page: number) => void,
+  ): Promise<void> {
     const sequence = ++this.loadSequence;
+    runInAction(() => {
+      this.search = search;
+      this.page = page;
+    });
     const task = this.operations[ApiOperation.ResumesList](
-      { query: { page, limit: this.limit, search: this.search } },
+      { query: { page, limit: this.limit, search } },
       { showLoader: false },
     );
     try {
@@ -101,6 +109,7 @@ export class ResumeStore {
         this.total = result.data.total;
         this.page = result.data.page;
       });
+      onPage?.(result.data.page);
     } catch {
       // ErrorStore reads the failed request from RequestStore.
     }
@@ -348,21 +357,13 @@ export class ResumeStore {
     return this.load();
   }
 
-  searchFor(value: string): Promise<void> {
-    runInAction(() => {
-      this.search = value;
-    });
-    return this.load(1);
-  }
-
-  setPageSize(value: number): Promise<void> {
+  setPageSize(value: number): void {
     if (!RESUME_PAGE_SIZES.some((size) => size === value)) {
-      return Promise.resolve();
+      return;
     }
     runInAction(() => {
       this.limit = value;
     });
     savePageSize(RESUME_PAGE_SIZE_STORAGE_KEY, value);
-    return this.load(1);
   }
 }

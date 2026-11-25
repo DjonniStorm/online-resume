@@ -1,5 +1,6 @@
 import { ActionIcon, TextInput, Tooltip } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
+import { useState } from 'react';
 
 import styles from './SearchForm.module.css';
 
@@ -36,4 +37,13 @@ export function SearchForm({ label, placeholder, value, onChange, onSearch }: Se
       </Tooltip>
     </form>
   );
+}
+
+type SearchFormDraftProps = Omit<SearchFormProps, 'value' | 'onChange'> & {
+  initialValue: string;
+};
+
+export function SearchFormDraft({ initialValue, ...props }: SearchFormDraftProps) {
+  const [value, setValue] = useState(initialValue);
+  return <SearchForm {...props} value={value} onChange={setValue} />;
 }

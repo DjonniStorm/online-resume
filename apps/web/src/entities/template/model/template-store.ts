@@ -34,10 +34,18 @@ export class TemplateStore {
     });
   }
 
-  async load(page = this.page): Promise<void> {
+  async load(
+    page = this.page,
+    search = this.search,
+    onPage?: (page: number) => void,
+  ): Promise<void> {
     const sequence = ++this.loadSequence;
+    runInAction(() => {
+      this.search = search;
+      this.page = page;
+    });
     const task = this.operations[ApiOperation.TemplatesList](
-      { query: { page, limit: this.limit, search: this.search } },
+      { query: { page, limit: this.limit, search } },
       { showLoader: false },
     );
     try {
@@ -50,6 +58,7 @@ export class TemplateStore {
         this.total = result.data.total;
         this.page = result.data.page;
       });
+      onPage?.(result.data.page);
     } catch {
       // Ошибка запроса отображается через ErrorStore.
     }
@@ -66,15 +75,14 @@ export class TemplateStore {
     return this.load(1);
   }
 
-  setPageSize(value: number): Promise<void> {
+  setPageSize(value: number): void {
     if (!TEMPLATE_PAGE_SIZES.some((size) => size === value)) {
-      return Promise.resolve();
+      return;
     }
     runInAction(() => {
       this.limit = value;
     });
     savePageSize(TEMPLATE_PAGE_SIZE_STORAGE_KEY, value);
-    return this.load(1);
   }
 
   openSelection(): Promise<void> {

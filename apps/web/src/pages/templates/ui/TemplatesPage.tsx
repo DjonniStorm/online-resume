@@ -15,6 +15,7 @@ import {
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
+import { useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -23,7 +24,8 @@ import { TEMPLATE_PAGE_SIZES, TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
 import { ApiOperation } from '@/shared/api';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
-import { SearchForm } from '@/shared/ui/SearchForm';
+import { listQueryParsers } from '@/shared/lib/list-query';
+import { SearchFormDraft } from '@/shared/ui/SearchForm';
 import { ResumeTemplatePreview } from '@/widgets/resume-template-preview';
 
 import classes from './TemplatesPage.module.css';
@@ -36,14 +38,19 @@ export const TemplatesPage = observer(() => {
     StoreKey.Templates,
     StoreKey.Session,
   );
-  const [query, setQuery] = useState(templates.search);
+  const [{ q, page }, setListQuery] = useQueryStates(listQueryParsers);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDto | null>(null);
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const navigate = useNavigate();
+  const limit = templates.limit;
 
   useEffect(() => {
-    void templates.load();
-  }, [templates]);
+    void templates.load(Math.max(1, page), q, (resolvedPage) => {
+      if (resolvedPage !== page) {
+        void setListQuery({ page: resolvedPage }, { history: 'replace' });
+      }
+    });
+  }, [templates, q, page, limit, setListQuery]);
 
   const pageCount = Math.ceil(templates.total / templates.limit);
   const listRequest = requests.latest(ApiOperation.TemplatesList);
@@ -73,12 +80,12 @@ export const TemplatesPage = observer(() => {
               </Text>
             </div>
             <Box w={{ base: '100%', sm: 420 }}>
-              <SearchForm
+              <SearchFormDraft
+                key={q}
                 label="Поиск шаблонов"
                 placeholder="Поиск шаблонов"
-                value={query}
-                onChange={setQuery}
-                onSearch={(value) => void templates.searchFor(value)}
+                initialValue={q}
+                onSearch={(value) => void setListQuery({ q: value, page: 1 }, { history: 'push' })}
               />
             </Box>
           </Group>
@@ -91,8 +98,8 @@ export const TemplatesPage = observer(() => {
             </Alert>
           ) : null}
           {ready && !loading && templates.total === 0 ? (
-            <Alert title={query ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
-              {query ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
+            <Alert title={q ? 'Ничего не найдено' : 'Шаблонов пока нет'}>
+              {q ? 'Попробуйте другой запрос.' : 'Активные шаблоны ещё не добавлены.'}
             </Alert>
           ) : null}
 
@@ -132,7 +139,10 @@ export const TemplatesPage = observer(() => {
                   data={TEMPLATE_PAGE_SIZES.map(String)}
                   value={String(templates.limit)}
                   disabled={loading}
-                  onChange={(value) => void templates.setPageSize(Number(value ?? templates.limit))}
+                  onChange={(value) => {
+                    templates.setPageSize(Number(value ?? limit));
+                    void setListQuery({ page: 1 }, { history: 'replace' });
+                  }}
                 />
                 <Text size="sm" c="dimmed">
                   из {templates.total}
@@ -143,7 +153,9 @@ export const TemplatesPage = observer(() => {
                   total={pageCount}
                   value={templates.page}
                   disabled={loading}
-                  onChange={(page) => void templates.load(page)}
+                  onChange={(nextPage) =>
+                    void setListQuery({ page: nextPage }, { history: 'push' })
+                  }
                 />
               ) : null}
             </Group>

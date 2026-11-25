@@ -15,6 +15,7 @@ import {
 } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
+import { useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -23,7 +24,8 @@ import { RESUME_PAGE_SIZES, ResumeCard } from '@/entities/resume';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
 import { ApiOperation } from '@/shared/api';
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
-import { SearchForm } from '@/shared/ui/SearchForm';
+import { listQueryParsers } from '@/shared/lib/list-query';
+import { SearchFormDraft } from '@/shared/ui/SearchForm';
 
 export const ResumesPage = observer(() => {
   useHead({ title: 'Мои резюме — Online Resume' });
@@ -34,8 +36,9 @@ export const ResumesPage = observer(() => {
     StoreKey.Resumes,
   );
   const navigate = useNavigate();
-  const [search, setSearch] = useState(resumes.search);
+  const [{ q, page }, setListQuery] = useQueryStates(listQueryParsers);
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
+  const limit = resumes.limit;
 
   useEffect(() => {
     if (session.ready && !session.user) {
@@ -45,8 +48,12 @@ export const ResumesPage = observer(() => {
     if (!session.user) {
       return;
     }
-    void resumes.load();
-  }, [navigate, resumes, session.ready, session.user]);
+    void resumes.load(Math.max(1, page), q, (resolvedPage) => {
+      if (resolvedPage !== page) {
+        void setListQuery({ page: resolvedPage }, { history: 'replace' });
+      }
+    });
+  }, [navigate, resumes, session.ready, session.user, q, page, limit, setListQuery]);
 
   const listRequest = requests.latest(ApiOperation.ResumesList);
   const listLoading = !listRequest || listRequest.status === 'pending';
@@ -74,12 +81,12 @@ export const ResumesPage = observer(() => {
           </Button>
         </Group>
 
-        <SearchForm
+        <SearchFormDraft
+          key={q}
           label="Поиск резюме"
           placeholder="Поиск по названию и имени"
-          value={search}
-          onChange={setSearch}
-          onSearch={(value) => void resumes.searchFor(value)}
+          initialValue={q}
+          onSearch={(value) => void setListQuery({ q: value, page: 1 }, { history: 'push' })}
         />
 
         {!listLoading && errors.forOperation(ApiOperation.ResumesList) ? (
@@ -138,7 +145,10 @@ export const ResumesPage = observer(() => {
                 data={RESUME_PAGE_SIZES.map(String)}
                 value={String(resumes.limit)}
                 disabled={listLoading}
-                onChange={(value) => void resumes.setPageSize(Number(value ?? resumes.limit))}
+                onChange={(value) => {
+                  resumes.setPageSize(Number(value ?? limit));
+                  void setListQuery({ page: 1 }, { history: 'replace' });
+                }}
               />
               <Text size="sm" c="dimmed">
                 Показано {resumes.resumes.length} из {resumes.total}
@@ -149,7 +159,7 @@ export const ResumesPage = observer(() => {
                 total={Math.ceil(resumes.total / resumes.limit)}
                 value={resumes.page}
                 disabled={listLoading}
-                onChange={(page) => void resumes.load(page)}
+                onChange={(nextPage) => void setListQuery({ page: nextPage }, { history: 'push' })}
               />
             ) : null}
           </Group>

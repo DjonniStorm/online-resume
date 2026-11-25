@@ -1,8 +1,8 @@
 import { Loader } from '@mantine/core';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
+import { useQueryState } from 'nuqs';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
 
 import { StoreKey, useStore, useStores } from '@/app/store';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
@@ -23,8 +23,7 @@ export const HomePage = observer(() => {
   );
   const [selectedForDeletion, setSelectedForDeletion] = useState<ResumeSummaryDto | null>(null);
   const [scheduleError, setScheduleError] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const selectedResumeId = searchParams.get('resumeId');
+  const [selectedResumeId, setSelectedResumeId] = useQueryState('resumeId');
   const refreshOverview = () => void resumes.loadOverview(selectedResumeId);
   const cancelSchedule = async (item: ResumeOverviewDto['scheduledLinks'][number]) => {
     const changed =
@@ -44,15 +43,7 @@ export const HomePage = observer(() => {
   };
 
   const selectResume = (resumeId: string | null) => {
-    setSearchParams((previous) => {
-      const next = new URLSearchParams(previous);
-      if (resumeId) {
-        next.set('resumeId', resumeId);
-      } else {
-        next.delete('resumeId');
-      }
-      return next;
-    });
+    void setSelectedResumeId(resumeId, { history: 'push' });
   };
 
   useEffect(() => {

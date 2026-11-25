@@ -14,8 +14,9 @@ import {
 import { IconDownload } from '@tabler/icons-react';
 import { useHead } from '@unhead/react';
 import { observer } from 'mobx-react-lite';
+import { parseAsStringLiteral, useQueryState } from 'nuqs';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
 import { useResumePhotoUrl } from '@/entities/resume';
@@ -28,8 +29,8 @@ import styles from './ResumePreviewPage.module.css';
 
 export const ResumePreviewPage = observer(() => {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const printOnOpen = searchParams.get('print') === '1';
+  const [print] = useQueryState('print', parseAsStringLiteral(['1']));
+  const printOnOpen = print === '1';
   const navigate = useNavigate();
   const { requests, resumes, session } = useStores(
     StoreKey.Requests,
