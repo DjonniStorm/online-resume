@@ -1,5 +1,7 @@
 import { computed, makeObservable } from 'mobx';
 
+import type { ApiOperation } from '@/shared/api';
+
 import type { RequestStore } from './request-store';
 
 export class LoaderStore {
@@ -15,7 +17,7 @@ export class LoaderStore {
     return this.active.length > 0;
   }
 
-  isLoading(operation: string): boolean {
+  isLoading(operation: ApiOperation): boolean {
     return this.requests.latest(operation)?.status === 'pending';
   }
 }

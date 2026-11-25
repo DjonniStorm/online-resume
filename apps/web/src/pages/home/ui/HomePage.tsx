@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router';
 
 import { StoreKey, useStore, useStores } from '@/app/store';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
+import { ApiOperation } from '@/shared/api';
 import type { ResumeOverviewDto, ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 
 import { HomeOverview } from './HomeOverview';
@@ -70,13 +71,19 @@ export const HomePage = observer(() => {
         </section>
       ) : sessionStore.user ? (
         <HomeOverview
-          error={errors.forOperation('resumes.overview') ? 'Не удалось загрузить резюме.' : null}
-          loading={!resumes.overview || requests.latest('resumes.overview')?.status === 'pending'}
+          error={
+            errors.forOperation(ApiOperation.ResumesOverview)
+              ? 'Не удалось загрузить резюме.'
+              : null
+          }
+          loading={
+            !resumes.overview || requests.latest(ApiOperation.ResumesOverview)?.status === 'pending'
+          }
           overview={resumes.overview}
           selectedResumeId={selectedResumeId}
           onSelectResume={selectResume}
           onDelete={setSelectedForDeletion}
-          deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
+          deleteDisabled={requests.latest(ApiOperation.ResumesRemove)?.status === 'pending'}
           onCancelSchedule={(item) => void cancelSchedule(item)}
           onRevokeLink={(item) => void revokeLink(item)}
           scheduleError={scheduleError}

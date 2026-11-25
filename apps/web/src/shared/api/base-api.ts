@@ -1,10 +1,18 @@
+import { ApiOperation } from './api-operation';
 import type { Client, Config } from './generated/client';
+
+const sessionOperations = new Set<ApiOperation>([
+  ApiOperation.SessionLogin,
+  ApiOperation.SessionRegister,
+  ApiOperation.SessionRefresh,
+  ApiOperation.SessionLogout,
+]);
 
 export type UUID = ReturnType<typeof crypto.randomUUID>;
 
 export type ApiRequest = {
   id: UUID;
-  operation: string;
+  operation: ApiOperation;
   showLoader: boolean;
   clearOnUnmount: boolean;
   startedAt: number;
@@ -23,7 +31,7 @@ export type ApiAuth = {
 
 export type ApiTask<T> = {
   id: UUID;
-  operation: string;
+  operation: ApiOperation;
   promise: Promise<T>;
   abort: () => void;
 };
@@ -67,18 +75,13 @@ export class BaseApi {
   constructor(
     readonly client: Client,
     private readonly options: ApiOptions = {},
-    private readonly storeKey = 'api',
     runtime: { auth?: ApiAuth } = {},
   ) {
     this.runtime = runtime;
   }
 
-  forStore(storeKey: string): BaseApi {
-    return new BaseApi(this.client, this.options, storeKey, this.runtime);
-  }
-
   withTimeout(timeoutMs: number): BaseApi {
-    return new BaseApi(this.client, { ...this.options, timeoutMs }, this.storeKey, this.runtime);
+    return new BaseApi(this.client, { ...this.options, timeoutMs }, this.runtime);
   }
 
   withObserver(observer: ApiObserver): BaseApi {
@@ -88,7 +91,6 @@ export class BaseApi {
         ...this.options,
         observers: [...(this.options.observers ?? []), observer],
       },
-      this.storeKey,
       this.runtime,
     );
   }
@@ -97,7 +99,9 @@ export class BaseApi {
     this.runtime.auth = auth;
   }
 
-  bind<T extends Record<string, unknown>>(operations: T): BoundOperations<T> {
+  bind<T extends Partial<Record<ApiOperation, unknown>>>(
+    operations: T & Record<Exclude<keyof T, ApiOperation>, never>,
+  ): BoundOperations<T> {
     return Object.fromEntries(
       Object.entries(operations).map(([name, endpoint]) => [
         name,
@@ -105,7 +109,7 @@ export class BaseApi {
           this.run(
             endpoint as Endpoint<EndpointOptions, EndpointResult>,
             options,
-            name,
+            name as ApiOperation,
             callOptions,
           ),
       ]),
@@ -115,10 +119,9 @@ export class BaseApi {
   private run<TOptions extends EndpointOptions, TResult extends EndpointResult>(
     endpoint: Endpoint<TOptions, TResult>,
     options: Omit<TOptions, 'client'>,
-    name: string,
+    operation: ApiOperation,
     callOptions: ApiCallOptions = {},
   ): ApiTask<TResult> {
-    const operation = `${this.storeKey}.${name}`;
     const controller = new AbortController();
     const signals = [controller.signal];
     if (options.signal) {
@@ -142,7 +145,7 @@ export class BaseApi {
     this.notify(request);
 
     const promise = Promise.resolve()
-      .then(() => this.execute(endpoint, options, request.id, signal, callOptions))
+      .then(() => this.execute(endpoint, options, request.id, operation, signal, callOptions))
       .then(
         (result) => {
           this.notify({
@@ -166,6 +169,7 @@ export class BaseApi {
     endpoint: Endpoint<TOptions, TResult>,
     options: Omit<TOptions, 'client'>,
     requestId: UUID,
+    operation: ApiOperation,
     signal: AbortSignal,
     callOptions: ApiCallOptions,
   ): Promise<TResult> {
@@ -177,7 +181,7 @@ export class BaseApi {
       signal,
     } as unknown as TOptions);
 
-    const shouldRetry = callOptions.retryOnUnauthorized ?? !this.storeKey.startsWith('session');
+    const shouldRetry = callOptions.retryOnUnauthorized ?? !sessionOperations.has(operation);
     const canRefresh =
       shouldRetry &&
       result.response?.status === 401 &&

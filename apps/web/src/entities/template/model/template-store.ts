@@ -1,6 +1,6 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 
-import type { BaseApi } from '@/shared/api';
+import { ApiOperation, type BaseApi } from '@/shared/api';
 import { templateList } from '@/shared/api/generated/sdk.gen';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 
@@ -18,7 +18,7 @@ export class TemplateStore {
   private loadSequence = 0;
 
   constructor(api: BaseApi) {
-    this.operations = api.bind({ list: templateList });
+    this.operations = api.bind({ [ApiOperation.TemplatesList]: templateList });
     makeObservable(this, {
       templates: observable,
       total: observable,
@@ -30,7 +30,7 @@ export class TemplateStore {
 
   async load(page = this.page): Promise<void> {
     const sequence = ++this.loadSequence;
-    const task = this.operations.list(
+    const task = this.operations[ApiOperation.TemplatesList](
       { query: { page, limit: this.limit, search: this.search } },
       { showLoader: false },
     );

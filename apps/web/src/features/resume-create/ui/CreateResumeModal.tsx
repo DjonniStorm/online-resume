@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { observer } from 'mobx-react-lite';
 
 import { StoreKey, useStores } from '@/app/store';
+import { ApiOperation } from '@/shared/api';
 import type { CreateResumeDto, TemplateDto } from '@/shared/api/generated/types.gen';
 
 type CreateResumeModalProps = {
@@ -19,8 +20,8 @@ export const CreateResumeModal = observer(
       StoreKey.Errors,
       StoreKey.Resumes,
     );
-    const createRequest = requests.latest('resumes.create');
-    const createError = errors.forOperation('resumes.create');
+    const createRequest = requests.latest(ApiOperation.ResumesCreate);
+    const createError = errors.forOperation(ApiOperation.ResumesCreate);
     const form = useForm<CreateResumeDto>({
       mode: 'uncontrolled',
       initialValues: {

@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 
+import { RouteErrorBoundary } from '@/app/RouteErrorBoundary';
 import { useClearRequestsOnUnmount } from '@/app/hooks/use-clear-requests-on-unmount';
 import { AppNuqsProvider } from '@/app/providers';
 import { LoginPage } from '@/pages/auth/login/ui/LoginPage';
@@ -21,6 +22,7 @@ function PageRoute({ children }: PropsWithChildren) {
 const router = createBrowserRouter([
   {
     path: '/r/:slug',
+    ErrorBoundary: RouteErrorBoundary,
     element: (
       <PageRoute key="public-resume">
         <PublicResumePage />
@@ -29,6 +31,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
+    ErrorBoundary: RouteErrorBoundary,
     element: (
       <AppNuqsProvider>
         <AppShell />

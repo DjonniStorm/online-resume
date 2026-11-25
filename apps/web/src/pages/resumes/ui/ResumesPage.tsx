@@ -21,6 +21,7 @@ import { Link, useNavigate } from 'react-router';
 import { StoreKey, useStores } from '@/app/store';
 import { ResumeCard } from '@/entities/resume';
 import { ResumeDeleteDialog } from '@/features/resume-delete';
+import { ApiOperation } from '@/shared/api';
 import type { ResumeSummaryDto } from '@/shared/api/generated/types.gen';
 import { SearchForm } from '@/shared/ui/SearchForm';
 
@@ -47,7 +48,7 @@ export const ResumesPage = observer(() => {
     void resumes.load();
   }, [navigate, resumes, session.ready, session.user]);
 
-  const listRequest = requests.latest('resumes.list');
+  const listRequest = requests.latest(ApiOperation.ResumesList);
   const listLoading = !listRequest || listRequest.status === 'pending';
   const listReady = listRequest?.status === 'success';
 
@@ -81,7 +82,7 @@ export const ResumesPage = observer(() => {
           onSearch={(value) => void resumes.searchFor(value)}
         />
 
-        {!listLoading && errors.forOperation('resumes.list') ? (
+        {!listLoading && errors.forOperation(ApiOperation.ResumesList) ? (
           <Alert color="red" title="Не удалось загрузить резюме">
             <Button variant="light" color="red" mt="sm" onClick={() => void resumes.reload()}>
               Повторить
@@ -119,7 +120,7 @@ export const ResumesPage = observer(() => {
                 key={resume.id}
                 resume={resume}
                 onDelete={setSelectedForDeletion}
-                deleteDisabled={requests.latest('resumes.remove')?.status === 'pending'}
+                deleteDisabled={requests.latest(ApiOperation.ResumesRemove)?.status === 'pending'}
               />
             ))}
           </SimpleGrid>

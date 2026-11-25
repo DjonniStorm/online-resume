@@ -1,9 +1,9 @@
 import { makeAutoObservable } from 'mobx';
 
-import type { ApiRequest, UUID } from '@/shared/api';
+import type { ApiOperation, ApiRequest, UUID } from '@/shared/api';
 
 export class RequestStore {
-  readonly byOperation = new Map<string, ApiRequest>();
+  readonly byOperation = new Map<ApiOperation, ApiRequest>();
   private readonly requestPages = new Map<UUID, UUID>();
   private currentPage: UUID | null = null;
 
@@ -37,11 +37,11 @@ export class RequestStore {
     }
   }
 
-  latest(operation: string): ApiRequest | undefined {
+  latest(operation: ApiOperation): ApiRequest | undefined {
     return this.byOperation.get(operation);
   }
 
-  isLatest(operation: string, id: UUID): boolean {
+  isLatest(operation: ApiOperation, id: UUID): boolean {
     return this.byOperation.get(operation)?.id === id;
   }
 

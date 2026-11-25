@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router';
 import { StoreKey, useStores } from '@/app/store';
 import { TEMPLATE_PAGE_SIZES, TemplateCard } from '@/entities/template';
 import { CreateResumeModal } from '@/features/resume-create';
+import { ApiOperation } from '@/shared/api';
 import type { TemplateDto } from '@/shared/api/generated/types.gen';
 import { SearchForm } from '@/shared/ui/SearchForm';
 import { ResumeTemplatePreview } from '@/widgets/resume-template-preview';
@@ -45,8 +46,8 @@ export const TemplatesPage = observer(() => {
   }, [templates]);
 
   const pageCount = Math.ceil(templates.total / templates.limit);
-  const listRequest = requests.latest('templates.list');
-  const listError = errors.forOperation('templates.list');
+  const listRequest = requests.latest(ApiOperation.TemplatesList);
+  const listError = errors.forOperation(ApiOperation.TemplatesList);
   const loading = !listRequest || listRequest.status === 'pending';
   const ready = listRequest?.status === 'success';
 

@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet } from 'react-router';
 
 import { StoreKey, useStores } from '@/app/store';
 import { ResumeDeletionNotice } from '@/features/resume-deletion-notice';
+import { ApiOperation } from '@/shared/api';
 
 import styles from './AppShell.module.css';
 
@@ -13,8 +14,8 @@ export const AppShell = observer(() => {
     StoreKey.Requests,
     StoreKey.Session,
   );
-  const loggingOut = requests.latest('session.logout')?.status === 'pending';
-  const logoutError = errors.forOperation('session.logout');
+  const loggingOut = requests.latest(ApiOperation.SessionLogout)?.status === 'pending';
+  const logoutError = errors.forOperation(ApiOperation.SessionLogout);
 
   const logout = async () => {
     try {
